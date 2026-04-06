@@ -31,3 +31,33 @@ replay_pid*
 # OS files
 .DS_Store
 Thumbs.db
+
+# LaTeX/TeX
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.run.xml
+*.synctex.gz
+*.toc
+*.pdf
+*.lof
+*.lot
+*.out
+*.app
+*.idx
+*.ilg
+*.ind
+*.glo
+*.gls
+*.ist
+*.nav
+*.snm
+*.vrb
+*.maf
+*.mtc
+*.mtc0
+*.pyg
