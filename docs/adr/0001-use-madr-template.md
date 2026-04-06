@@ -3,8 +3,8 @@
 * Status: accepted
 * Date: 2026-04-06
 * Decision-makers: mateusz.was
-* Consulted: 
-* Informed: 
+* Consulted: -
+* Informed: -
 
 ## Context and Problem Statement
 
