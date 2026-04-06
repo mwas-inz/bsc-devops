@@ -23,7 +23,7 @@ This repository combines Java application development, infrastructure as code, t
 - `gitops/` - GitOps planning and delivery notes
 - `observability/` - monitoring, logging, and tracing notes
 - `thesis/` - thesis text and academic assets
-- `utils/` - shared helper scripts and developer workflow notes
+- `scripts/` - shared helper scripts and developer workflow notes
 
 ## Status
 
