@@ -1,0 +1,68 @@
+\newpage
+\section{Wstęp}
+\subsection{Wprowadzenie}
+Współcześnie coraz częściej używa się terminu \textit{Cyfrowa Gospodarka} i \textit{Gospodarka 4.0} by pokazać wpływ technologii informacyjnych na naszą codzienność. Oprogramowanie wspomaga nas w wielu dziedzinach życia, a pandemia COVID-19 bardzo przyśpieszyła proces cyfrowej transformacji \cite{SledziewskaWloch2021TEoD} \cite{GrandeRuben2024Iiwa}.
+
+\noindent Cyfrowe usługi dostępne są w najróżniejszych gałęziach gospodarki, w tym:
+\begin{itemize}
+    \item \textbf{Przemysł i produkcja:} Automatyzacja, robotyka i Internet Rzeczy (IoT) zmieniają sposób, w jaki produkty są wytwarzane, kontrolowane i monitorowane.
+    \item \textbf{Handel elektroniczny:} Sklepy internetowe, platformy zakupowe i płatności elektroniczne pozwalają na handel bezpośrednio przez internet, przekształcając tradycyjne modele handlu.
+    \item \textbf{Usługi finansowe:} Technologie FinTech, takie jak mobilne aplikacje bankowe, kryptowaluty i rozwiązania oparte na blockchainie, zmieniają sposób, w jaki ludzie zarządzają finansami i inwestują.
+    \item \textbf{Edukacja:} E-learning, platformy online i narzędzia edukacyjne umożliwiają zdalne kształcenie i dostęp do wiedzy na skalę globalną.
+    \item \textbf{Opieka zdrowotna:} Telemedycyna, zdalne monitorowanie pacjentów i analiza danych przyczyniają się do poprawy dostępu do opieki zdrowotnej i skracają czas diagnostyki.
+    \item \textbf{Komunikacja społeczna:} Media społecznościowe i platformy komunikacyjne umożliwiają ludziom interakcję, udostępnianie treści oraz tworzenie społeczności online.
+    \item \textbf{Praca zdalna:} Rozwój narzędzi do pracy zdalnej i współpracy online zmienia tradycyjne modele pracy, umożliwiając elastyczność i globalną współpracę.
+    \item \textbf{Transport i logistyka:} Aplikacje do zamawiania taksówek, dostaw żywności i usług kurierskich rewolucjonizują branżę transportową i logistyczną.
+    \item \textbf{Rozrywka i kultura:} Strumieniowanie muzyki, filmów, gier i treści multimedialnych stało się integralną częścią cyfrowej kultury.
+    \item \textbf{Badania naukowe:} Analiza dużych zbiorów danych, obliczenia rozproszone i symulacje komputerowe przyczyniają się do postępu naukowego w wielu dziedzinach.
+\end{itemize}
+Coraz większe wymagania użytkowników co do usług cyfrowych - ich dostępności, stabilności, rozwoju, jakości i przydatności - sprawiają, że firmy technologiczne muszą szukać sposobów na optymalizację procesu wytwarzania oprogramowania.
+Jako główne cele stawia się, m.in.: elastyczność; skalowalność; szybkość wdrożeń; odporność na awarie; automatyzację; wsparcie dla innowacji; dostępność i globalny dostęp; redukcję kosztów; bezpieczeństwo i ochronę danych; zrównoważony rozwój; łatwą współpracę i udostępnianie treści.
+
+W wyniku coraz większego zapotrzebowania zmieniają się też metodyki wytwarzania oprogramowania. Wśród nich można wyróżnić kilka skupionych na wykorzystaniu skalowalności systemów chmur obliczeniowych:
+
+\subsubsection{The Twelve-Factor App}
+Metodologia Twelve-Factor App to zbiór dwunastu zasad opracowanych przez inżynierów z firmy Heroku, które mają na celu ułatwienie tworzenia nowoczesnych, skalowalnych i łatwych w utrzymaniu aplikacji internetowych. Zasady te koncentrują się na aspektach takich jak zarządzanie kodem źródłowym, jawne deklarowanie zależności, przechowywanie konfiguracji w zmiennych środowiskowych oraz traktowanie usług wspierających jako załączonych zasobów. Ponadto metodologia promuje ścisłe rozdzielenie etapów budowania, wydania i uruchomienia, a także uruchamianie aplikacji jako bezstanowych procesów. Twelve-Factor App podkreśla również znaczenie utrzymania zgodności między środowiskami deweloperskimi i produkcyjnymi oraz traktowanie logów jako strumieni zdarzeń. Stosowanie tych zasad jest szczególnie istotne w kontekście chmury obliczeniowej, gdzie przenośność i skalowalność aplikacji są kluczowe dla sukcesu. Metodologia ta stanowi fundament dla współczesnych praktyk DevOps i jest szeroko akceptowana jako standard w tworzeniu aplikacji cloud-native. \cite{12factor}
+
+\subsubsection{Cloud Native}
+Termin \textit{Cloud Native} odnosi się do podejścia w projektowaniu, tworzeniu i wdrażaniu aplikacji informatycznych, które są zoptymalizowane pod kątem środowisk chmurowych. Chmury obliczeniowe (publiczne, prywatne i hybrydowe) dostarczają elastyczne i skalowalne środowisko, a podejście Cloud Native ma na celu wykorzystanie tych możliwości, poprzez tworzenie aplikacji, które są odporne na awarie, łatwe w zarządzaniu i obserwowalne \cite{CNCF-CloudNativeDef} \cite{Google-CloudNativeDef} \cite{MS-CloudNativeDef}.
+
+Główne cechy architektury Cloud Native obejmują konteneryzację, mikroserwisy oraz deklaratywne interfejsy API, co pozwala na dynamiczne skalowanie aplikacji w odpowiedzi na zmieniające się zapotrzebowanie, a także zapewnia wysoką dostępność i odporność na awarie \cite{OyekunleClaudiusOyeniran2024Acro}. Konteneryzacja umożliwia izolację aplikacji i jej zależności, co ułatwia wdrażanie i zarządzanie aplikacjami w różnych środowiskach chmurowych \cite{CloudNativeApplicationsGannon2017}. Mikroserwisy, z kolei, pozwalają na podział aplikacji na mniejsze, niezależne komponenty, które mogą być rozwijane, wdrażane i skalowane niezależnie od siebie, co zwiększa elastyczność i przyspiesza procesy rozwoju \cite{MigratingToCloudNativeBalalaie2016}.
+
+Architektura Cloud Native jest ściśle związana z automatyzacją procesów zarządzania aplikacjami. Narzędzia takie jak Kubernetes umożliwiają automatyczne zarządzanie i skalowanie aplikacji kontenerowych, co jest kluczowe w kontekście zapewnienia ciągłości działania i efektywności operacyjnej \cite{OyekunleClaudiusOyeniran2024Acro}. Dodatkowo, architektura ta wspiera praktyki DevOps, co pozwala na szybsze wdrażanie zmian i aktualizacji w aplikacjach, a także na lepsze monitorowanie i zarządzanie bezpieczeństwem \cite{DevSecOpsCloudNative2021}.
+
+W kontekście Przemysłu 4.0, architektura Cloud Native staje się fundamentem dla rozwoju nowoczesnych systemów informatycznych, które wymagają dużej skalowalności, niezawodności oraz efektywności wykorzystania zasobów. Wyzwania związane z migracją istniejących aplikacji do architektury Cloud Native obejmują nie tylko aspekty techniczne, ale także zmiany kulturowe w organizacjach, które muszą dostosować swoje procesy do nowego modelu operacyjnego \cite{CloudNativeTransformationZhang2022}. W związku z tym, organizacje muszą zainwestować w odpowiednie szkolenia i rozwój umiejętności, aby w pełni wykorzystać potencjał architektury Cloud Native \cite{CloudNativeTransformationZhang2022}.
+
+\subsubsection{DevOps}
+DevOps jest zbiorem praktyk, które wychodzą na przeciw wymaganiom cyfrowej gospodarki, wzmacniając zdolności techniczne, procesowe i kulturowe firm \cite{DORAcapabilities} \cite{AmaroRicardoManuelDuarte2023CaPi}. Zespoły, które zaadoptowały DevOps wykazują wiele korzyści operacyjnych, technologicznych i biznesowych \cite{AtlassianDevOpsTrends2020} \cite{OffermanTyron2022ASoA} \cite{GoogleROIeOfDevOps} \cite{GoogleStateOfDevOps2022} \cite{alawneh2022expanding}.
+Wśród nich można wyróżnić:
+\begin{itemize}
+    \item szybsze wdrożenia i dostarczanie oprogramowania;
+    \item wyższą jakość kodu; lepszą współpracę między zespołami; rozwój automatyzacji i większą skalowalność;
+    \item lepszy wgląd w stan usług IT poprzez monitorowanie;
+    \item skrócenie czasu reakcji na awarie; poprawę elastyczności i obniżenie kosztów;
+    \item większą innowacyjność i skłonność do eksperymentowania;
+    \item zwiększenie stabilności platformy i zaufania klientów;
+    \item większą konkurencyjność na rynku
+\end{itemize}
+
+Metodologia DevOps to podejście do zarządzania cyklem życia oprogramowania, które łączy jego rozwój (Dev, \textit{ang.} development) i utrzymanie operacyjne (Ops, \textit{ang.} operations) w celu zwiększenia efektywności, szybkości i jakości dostarczania oprogramowania. DevOps jest często postrzegane jako rozwinięcie tradycyjnych metodologii Agile, które koncentrują się na iteracyjnym rozwoju i dostosowywaniu do zmieniających się wymagań klientów \cite{DevOpsSuccessFactotsJayakody2023}. Kluczowym celem DevOps jest zautomatyzowanie procesów związanych z tworzeniem, testowaniem i wdrażaniem oprogramowania, co pozwala na szybsze i bardziej niezawodne dostarczanie produktów \cite{DevOpsBenefitsJamal2022}.
+
+\begin{figure}[!htbp]
+    \label{fig:devops-cycle}
+    \centering \includegraphics[width=0.5\linewidth]{devops-cycle.png}
+    \caption{Etapy rozwoju aplikacji w metodologii DevOps \cite{DynatraceDevOpsEbook}}
+\end{figure}
+Podstawowe zasady DevOps można podsumować za pomocą akronimu CALMS, który odnosi się do kultury (Culture), automatyzacji (Automation), pomiarów (Measurement), współpracy (Collaboration) i bezpieczeństwa (Security) \cite{LeadingDevOpsPracticeMaroukian2020}. Kultura DevOps promuje otwartą komunikację i współpracę między zespołami deweloperskimi a operacyjnymi, co pozwala na szybsze rozwiązywanie problemów i lepsze zrozumienie wymagań biznesowych. Automatyzacja jest kluczowym elementem, który umożliwia eliminację manualnych procesów, co z kolei przyspiesza cykle wydania i redukuje ryzyko błędów \cite{DevOpsConceptsLeite2019}.
+
+DevOps wprowadza także praktyki ciągłej integracji (CI) i ciągłego wdrażania (CD), które pozwalają na regularne wprowadzanie zmian w kodzie i automatyczne testowanie tych zmian w celu zapewnienia ich jakości \cite{ContinuousDeliveryVassalo2016}. Dzięki tym praktykom, organizacje mogą szybciej reagować na zmieniające się potrzeby rynku i dostarczać nowe funkcjonalności w krótszym czasie \cite{DevOpsBenefitsJamal2022}. Warto zauważyć, że wdrożenie DevOps wiąże się z pewnymi wyzwaniami, takimi jak potrzeba zmiany kultury organizacyjnej oraz dostosowanie istniejących procesów do nowego modelu pracy.
+
+Niestety, nie ma jednoznacznej definicji DevOps i jednolitego sposobu na wdrożenie tych praktyk. Wiele zależy od wykorzystywanych technologii, umiejętności dostępnych w zespołach, organizacji firmy, a także jej kultury i wizji kierownictwa. Duża część literatury naukowej o DevOps poświęcona jest usystematyzowaniu tego pojęcia \cite{ErichF.M.A2017Aqso} \cite{azad2022understanding} \cite{DyckDevOpsDefinitions}.
+
+\subsection{Cel i zakres pracy}
+Celem pracy jest prezentacja cech nowoczesnego systemu aplikacyjnego realizującego założenia architektury Cloud Native przez pokazanie kolejnych etapów jego wytwarzania wg. metodologii DevOps i Twelve-Factor App na konkretnych przykładach i narzędziach.
+
+Praca jest zarówno przeglądem tego jak wyglądają nowoczesne systemy usługowe oprogramowania, ale też wskazówką jakie narzędzia lub rodziny narzędzi warto poznać, żeby zwiększać swoje kompetencje i wartość rynku IT.
+Wybór narzędzi został dokonany w dopasowaniu do specyfiki projektu, wybranego języka programowania oraz platformy, na której system będzie funkcjonował i odzwierciedla najnowsze trendy rynkowe \cite{JetbrainsDevEcosystemSurvey} \cite{TiobeIndex}.
+Praca zawiera wiedzę zaczerpniętą z publikacji naukowych, szerokich badań rynku prowadzonych przez firmy technologiczne, z portali tematycznych dostępnych w Internecie, jak i praktyczną wiedzę autora, zgromadzoną w ponad 10 letniej karierze w branży IT.
+Przedstawiony sposób wytwarzania oprogramowania jest uniwersalny i można go zastosować w dowolnej dziedzinie i projekcie. Autor wybrał prosty projekt - portal do tworzenia listy zadań - tak by wyeksponować techniki i narzędzia używane w opisywanych metodologiach, a skupiać się na domenie problemu, na której te narzędzia są używane.

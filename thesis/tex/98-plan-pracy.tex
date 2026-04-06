@@ -1,0 +1,47 @@
+Część teoretyczna (3 rozdziały 10-20 stron max)
+1.	Nowoczesne systemy aplikacyjne
+a.	założenia Cloud Native Computing 
+b.	Krajobraz Cloud Native Computing Foundation 
+c.	architektura Twelve-Factor App 
+2.	DevOps , Platform Engineering   i SRE  – krótkie omówienie nowoczesnych strategii pracy rozwoju i utrzymywania systemów
+3.	Etapy wytwarzania oprogramowania wg. założeń DevOps – pętla ciągłego rozwoju 
+4.	Jak DevOps i Cloud Native się uzupełniają?
+a.	Podsumowanie i najważniejsze wnioski – zarys części praktycznej
+
+Cześć praktyczna (szkic)
+Implementacja aplikacji wykorzystującej narzędzia i koncepcje DevOps + Cloud Native
+1.	Plan (opis na narzędzi do planowania zadań, przykłady rozplanowania funkcji systemu, integrtacja z systemem kontroli wersji)
+a.	Jira
+2.	Code (narzędzia użyte do wytwarzania oprogramowania, alternatywy, architektura aplikacji z uzględnieniem 12 factor app)
+a.	System kontroli werjsji: GitHub
+b.	IDE: VS Code
+c.	Technologia backend: Java, Quarkus
+d.	Technologia frontend: React
+3.	Build (budowanie i wersjonowanie paczek)
+a.	GitHub Actions – proces CI/CD zapisany w kodzie
+b.	Gradle – budowanie backendu
+c.	Npm/Webpack – budowanie frontendu
+4.	Test (etap procesu CI/CD wbudowany w GitHub Actions)
+a.	GitHub Actions
+b.	JUnit
+5.	Release (wydawanie paczek releasowych, zapisywanie kolejnych iteracji projektów) 
+a.	Docker + DockerHub – publiczne repozytorium dla kontenerów
+b.	Helm + ArtifactHub – publiczne repozytorium dla schematów Helm
+6.	Deploy (infrastuktura wspierająca, klaster do uruchomienia kontenerów)
+a.	Terraform – tworzenie zasobów na AWS wg. koncepcji Infrastructure-as-a-Code
+b.	Ansible – konfiguracja serwerów z użyciem Configuration Management
+c.	Kubernetes – środowisko uruchomieniowe aplikacji
+7.	Operate (środowisko chmurowe, serwery, usługi wspierające)
+a.	AWS Cloud Service
+i.	RDS – bazy danych
+ii.	S3 – zapis plików
+iii.	Opensearch – zapis dokumentów
+iv.	(inne usługi – lista może się zmienić w trakcie implementacji)
+b.	Kubernetes
+8.	Monitor + Feedback (monitorowanie systemu, aplikacji, dziennki logów, ślady aplikacji)
+a.	Grafana – wizualizacja metryk
+b.	Prometheus – zbieranie metryk
+c.	Elasticsearch/Opensearch – zbieranie logów
+d.	Jaeger lub Zipkin – zbieranie trace’ów
+e.	(OpenTelemetry) – standard komunikacyjny do powyższych technologii
+f.	OpsGenie – alerting 

@@ -1,0 +1,165 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Bachelor's & Master's Thesis Template             %%
+%% Copyleft by Artur M. Brodzki & Piotr Woźniak      %%
+%% Faculty of Electronics and Information Technology %%
+%% Warsaw University of Technology, 2019-2020        %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[
+    left=2.5cm,         % Sadly, generic margin parameter
+    right=2.5cm,        % doesnt't work, as it is
+    top=2.5cm,          % superseded by more specific
+    bottom=3cm,         % left...bottom parameters.
+    bindingoffset=6mm,  % Optional binding offset.
+    nohyphenation=false % You may turn off hyphenation, if don't like.
+]{eiti/eiti-thesis}
+
+\usepackage{silence}
+\WarningFilter{caption}{Unknown document class}
+
+\ifluatex
+    \pdfvariable minorversion 7
+\fi
+
+\usepackage{etoolbox}
+
+\usepackage{fontspec}
+\setmainfont{texgyretermes}[
+  Extension      = .otf ,
+  UprightFont    = *-regular ,
+  ItalicFont     = *-italic ,
+  BoldFont       = *-bold ,
+  BoldItalicFont = *-bolditalic ,
+]
+
+\langpol % Dla języka angielskiego mamy \langeng
+\graphicspath{{img/}}             % Katalog z obrazkami.
+\addbibresource{bibliografia.bib} % Plik .bib z bibliografią
+
+\usepackage{xurl} % Pozwala na łamanie URL w dowolnym miejscu
+
+% Poprawa łamania linii w bibliografii
+\appto{\bibsetup}{
+    \setcounter{biburllcpenalty}{7000}
+    \setcounter{biburlucpenalty}{8000}
+    \setcounter{biburlnumpenalty}{9000}
+    \emergencystretch=3em
+    \sloppy
+}
+
+\raggedbottom
+
+\begin{document}
+
+%--------------------------------------
+% Strona tytułowa
+%--------------------------------------
+\EngineerThesis % Dla pracy inżynierskiej mamy \EngineerThesis
+\instytut{Telekomunikacji}
+\kierunek{Elektronika i Telekomunikacja}
+\specjalnosc{Teleinformatyka}
+\title{
+    DevOps – przegląd i implementacja dobrych praktyk nowoczesnego wytwarzania oprogramowania
+}
+\engtitle{ % Tytuł po angielsku do angielskiego streszczenia
+    DevOps – review and implementation of modern software development good practices
+}
+\author{Mateusz Waś}
+\album{217860}
+\promotor{mgr Maciej Sosnowski}
+\date{\the\year}
+\maketitle
+
+%--------------------------------------
+% Streszczenie po polsku
+%--------------------------------------
+\cleardoublepage % Zaczynamy od nieparzystej strony
+\streszczenie{
+Ta praca skupia się na prezentacji dobrych praktyk w projektowaniu i wytwarzaniu oprogramowania w oparciu o metodykę DevOps i podejście Cloud Native. Przykładem jest projekt serwisu oparty na architekturze mikrousługowej, który prezentuje krok po kroku idee "pętli ciągłego rozwoju" zaczerpniętej z DevOps oraz konkretne narzędzia, które można wykorzystać na każdym etapie. Jest to praktyczny przykład architektury nowoczesnego systemu aplikacyjnego, który opiera się na mikroserwisach, konteneryzacji i orkiestracji na platformie Kubernetes. Na podstawie realnych przykładów, ta praca dostarcza czytelnikowi konkretnych wskazówek i rozwiązań na drodze do pomyślnego wdrożenia narzędzi DevOps w swoim projekcie.
+}
+\slowakluczowe DevOps, Cloud Native, Kubernetes, automatyzacja, dobre praktyki,  projektowanie systemów, pętla ciągłego rozwoju
+
+%--------------------------------------
+% Streszczenie po angielsku
+%--------------------------------------
+\newpage
+\abstract{
+The thesis illustrates best practices in software design and implementation, thorough the lens of DevOps methodology and Cloud Native principles. Using a microservices project as a practical example it demonstrates each step of the DevOps continuous improvement loop. By showcasing the relevant tools for each project stage, it offers a hands-on look at modern system software design centered around microservices, containerization and Kubernetes. By providing real-world examples, this research equips readers with valuable insights and actionable guidance for adopting and implementing DevOps tools effectively in their own projects.
+}
+\keywords DevOps, Cloud Native, Kubernetes, automation, best practices, system design, continuous improvement loop
+
+%--------------------------------------
+% Oświadczenie o autorstwie
+%--------------------------------------
+\cleardoublepage  % Zaczynamy od nieparzystej strony
+\pagestyle{plain}
+\makeauthorship
+
+%--------------------------------------
+% Spis treści
+%--------------------------------------
+\cleardoublepage % Zaczynamy od nieparzystej strony
+\tableofcontents
+
+%--------------------------------------
+% Rozdziały
+%--------------------------------------
+\cleardoublepage % Zaczynamy od nieparzystej strony
+\pagestyle{headings}
+
+\input{tex/1-wstep}         
+\input{tex/2-teoria}    
+\input{tex/3-projekt}
+\input{tex/99-podsumowanie}
+
+%--------------------------------------------
+% Literatura
+%--------------------------------------------
+\cleardoublepage % Zaczynamy od nieparzystej strony
+\printbibliography
+
+%--------------------------------------------
+% Spisy (opcjonalne)
+%--------------------------------------------
+\newpage
+\pagestyle{plain}
+
+% Wykaz symboli i skrótów.
+% Pamiętaj, żeby posortować symbole alfabetycznie
+% we własnym zakresie. Ponieważ mało kto używa takiego wykazu,
+% uznałem, że robienie automatycznie sortowanej listy
+% na poziomie LaTeXa to za duży overkill.
+% Makro \acronymlist generuje właściwy tytuł sekcji,
+% w zależności od języka.
+% Makro \acronym dodaje skrót/symbol do listy,
+% zapewniając podstawowe formatowanie.
+% //AB
+\vspace{0.8cm}
+\acronymlist
+\acronym{Dev}{ang. development}
+\acronym{DORA}{DevOps Research and Assessment}
+\acronym{EiTI}{Wydział Elektroniki i Technik Informacyjnych}
+\acronym{IT}{Information Technology}
+\acronym{Ops}{ang. operations}
+\acronym{PW}{Politechnika Warszawska}
+
+\listoffigurestoc     % Spis rysunków.
+\vspace{1cm}          % vertical space
+\listoftablestoc      % Spis tabel.
+\vspace{1cm}          % vertical space
+\listofappendicestoc  % Spis załączników
+
+% Załączniki
+\newpage
+\appendix{Nazwa załącznika 1}
+\lipsum[1-8]
+
+\newpage
+\appendix{Nazwa załącznika 2}
+\lipsum[1-4]
+
+% Używając powyższych spisów jako szablonu,
+% możesz tu dodać swój własny wykaz bądź listę,
+% np. spis algorytmów.
+
+\end{document} % Dobranoc.
