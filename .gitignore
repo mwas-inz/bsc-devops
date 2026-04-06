@@ -1,0 +1,33 @@
+# Build outputs
+target/
+build/
+out/
+bin/
+
+# Java artifacts
+*.class
+*.jar
+*.war
+*.ear
+
+# Gradle
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDEs
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# Logs and runtime files
+*.log
+logs/
+hs_err_pid*
+replay_pid*
+
+# OS files
+.DS_Store
+Thumbs.db
