@@ -1,17 +1,22 @@
 # Cele i Wytyczne Pracy Inżynierskiej
 
 ## Cele Pracy
+
 W pracy formułuje się cele:
+
 - o charakterze praktycznym,
-- wymagające doboru i zastosowania metod inżynierskich, 
+- wymagające doboru i zastosowania metod inżynierskich,
 - wykorzystujące wiedzę techniczną oraz specjalistyczną.
 
 ## Wskazówki i Zalecenia
+
 - **Analiza rozwiązania**: Podanie ograniczeń oraz słabych i mocnych stron opracowanego rozwiązania.
 - **Ocena kompetencji**: Praca ma odpowiedzieć na pytanie, czy poziom wiedzy i umiejętności autora predysponuje go do rozwiązywania zagadnień inżynierskich.
 
 ## Struktura Pracy Inżynierskiej
+
 Praca powinna składać się z następujących części:
+
 1. **Spis treści**
 2. **Streszczenie**
 3. **Wstęp**: Zawierający wprowadzenie do tematyki i uzasadnienie wyboru tematu.
@@ -23,6 +28,7 @@ Praca powinna składać się z następujących części:
 9. **Załączniki**
 
 ## Charakterystyka Opracowania
+
 - **Monografia**: Pisemne opracowanie podzielone na rozdziały i podrozdziały.
 - **Wstęp**: Cele, motywacje i opis zawartości.
 - **Część analityczno-projektowa**: Uzasadnienie na tle istniejących rozwiązań, opis metod, technik i narzędzi. Zawiera opis projektu, obliczeń, implementacji i ocenę wyników.
