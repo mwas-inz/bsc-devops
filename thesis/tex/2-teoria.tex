@@ -1,147 +1,235 @@
 \newpage
+
 \section{Cześć teoretyczna}
 Obszary do opisania, baza do wykorzystania w projekcie, dodatkowe informacje z tematu:
 
 \subsection{Twelve Factor App}
-\begin{enumerate}
-    \item Kod źródłowy - Jedno źródło kodu śledzone systemem kontroli wersji, wiele wdrożeń
-    \item Zależności - Jawnie zadeklaruj i wydziel zależności
-    \item Konfiguracja - Przechowuj konfigurację w środowisku
-    \item Usługi wspierające - Traktuj usługi wspierające jako przydzielone zasoby
-    \item Buduj, publikuj, uruchamiaj - Oddzielaj etap budowania od uruchamiania
-    \item Procesy - Uruchamiaj aplikację jako jeden lub więcej bezstanowych procesów
-    \item Przydzielanie portów - Udostępniaj usługi przez przydzielanie portów
-    \item Współbieżność - Skaluj przez odpowiednio dobrane procesy
-    \item Zbywalność - Zwiększ elastyczność pozwalając na szybkie uruchamianie i zatrzymywanie aplikacji
-    \item Jednolitość środowisk - Utrzymuj konfigurację środowisk jak najbardziej zbliżoną do siebie
-    \item Logi - Traktuj logi jako strumień zdarzeń
-    \item Zarządzanie aplikacją - Uruchamiaj zadania administracyjne jako jednorazowe procesy
+
+Twelve-Factor App (skr. 12FA) to zestaw zasad dotyczących budowy skalowalnych, łatwych w utrzymaniu aplikacji sieciowych w nowoczesnych środowiskach chmurowych.
+Kładzie nacisk na konfigurację deklaratywną, utrwalanie kodu źródłowego, konfiguracji  i opisu infrastruktury jako kod. Ułatwia obsługę usług wspierających oraz możliwość szybkiego uruchamiania,
+łatwe odtwarzanie środowisk. Ma umożliwić przenośność, odporność i szybkie iteracje w rozproszonych systemach.
+W praktyce współczesnego oprogramowania 12FA jest często używany jako punkt odniesienia dla projektowania usług Software-as-a-Service (SaaS),
+systemów mikroserwisowych i procesów DevOps.
+\cite{12factor}\cite{KosinskaBrotonTobiasz2023Kroa}
+
+\subsubsection{Zasady Twelve-Factor App}
+
+\begin{enumerate}[label=\Roman*., font=\bfseries]
+    \item \textbf{Kod źródłowy} --- Jedno źródło kodu śledzone systemem kontroli wersji, wiele wdrożeń.
+
+          Aplikacja zawsze jest zarządzana w systemie kontroli wersji takim jak Git, czy Subversion.
+          Miejsce, w którym trzymany i wersjonowany jest kod nazywane jest repozytorium kodu źródłowego lub po prostu repozytorium.
+          Repozytorium jest pojedynczym źródłem prawdy dla kodu aplikacji, co oznacza, że wszystkie zmiany w kodzie są śledzone i zarządzane przez system kontroli wersji.
+          Każde wdrożenie aplikacji jest powiązane z konkretną wersją kodu w repozytorium, co umożliwia łatwe odtwarzanie i zarządzanie różnymi środowiskami (np. deweloperskim, testowym, produkcyjnym) bez konieczności duplikowania kodu.
+          Jeśli aplikacja jest rozproszona na wiele usług, każda usługa powinna być zarządzana w oddzielnym repozytorium, co ułatwia zarządzanie i skalowanie poszczególnych komponentów aplikacji.
+
+          \textbf{TODO:} skomentować monorepozytoria, które są popularne w dużych organizacjach (np. Google, Facebook) i często wykorzystywane w architekturze mikroserwisowej.
+
+    \item \textbf{Zależności} --- Jawnie zadeklaruj i wydziel zależności
+
+          Aplikacja powinna jawnie deklarować wszystkie swoje zależności, takie jak biblioteki, frameworki i narzędzia, które są wymagane do jej działania.
+          Deklaracja ta jest zazwyczaj realizowana poprzez pliki konfiguracyjne (np. `requirements.txt` dla Pythona, `package.json` dla Node.js, `build.gradle` dla Java),
+          które zawierają listę wszystkich zależności wraz z ich wersjami.
+          Dzięki temu można łatwo odtworzyć środowisko aplikacji na różnych maszynach i uniknąć problemów związanych z brakującymi lub niekompatybilnymi zależnościami.
+          Wydzielanie zależności oznacza, że aplikacja nie powinna polegać na globalnie zainstalowanych bibliotekach lub narzędziach, co zwiększa przenośność i izolację środowiska aplikacji.
+
+    \item \textbf{Konfiguracja} --- Przechowuj konfigurację w środowisku
+
+          Konfiguracja aplikacji, taka jak dane uwierzytelniające, adresy URL usług zewnętrznych, powinna być przechowywana w środowisku, a nie w kodzie źródłowym.
+          Jedną z implementacji takiego podejścia są zmienne środowiskowe (ang. environment variables, env vars), które pozwalają na łatwe dostosowanie aplikacji nawet po jej wdrożeniu, bez konieczności modyfikowania kodu.
+          Zmienne w te środowiskowe też zapobiegają wyciekowi wrażliwych danych (np. haseł, kluczy API) w repozytorium kodu, co poprawia bezpieczeństwo aplikacji.
+
+    \item \textbf{Usługi wspierające} --- Traktuj usługi wspierające jako przydzielone zasoby
+
+          Usługi wspierające, takie jak bazy danych, kolejki wiadomości, systemy cache, powinny być traktowane jako przydzielone zasoby,
+          co oznacza, że aplikacja powinna być w stanie łatwo zastąpić jedną usługę inną bez konieczności modyfikowania kodu.
+          Na przykład, jeśli aplikacja korzysta z bazy danych, powinna być w stanie przełączyć się z jednej bazy danych na inną (np. zmiana z MySQL na PostgreSQL)
+          bez konieczności zmiany kodu aplikacji, poprzez odpowiednią konfigurację.
+
+    \item \textbf{Buduj, publikuj, uruchamiaj} --- Oddzielaj etap budowania od uruchamiania
+
+          Proces wdrażania kodu powinien być podzielony na trzy niezależne etapy:
+          \begin{itemize}
+              \item \textit{Build} (budowanie): zamiana kodu źródłowego w gotowy do uruchomienia pakiet (tzw. artefakt).
+              \item \textit{Release} (publikowanie): połączenie zbudowanego pakietu z aktualną konfiguracją środowiska. Każdy \textit{release} powinien mieć unikalny identyfikator i być niezmienny (\textit{immutable}).
+              \item \textit{Run} (uruchamianie): uruchomienie konkretnej wersji publikacji w środowisku wykonawczym.
+          \end{itemize}
+          Rozdzielenie tych faz zapobiega wprowadzaniu zmian bezpośrednio w działającym środowisku i ułatwia szybkie wycofywanie zmian (\textit{rollback}) do poprzedniej, stabilnej wersji publikacji.
+
+    \item \textbf{Procesy} --- Uruchamiaj aplikację jako jeden lub więcej bezstanowych procesów
+
+          Aplikacje 12-factor są bezstanowe (\textit{stateless}) i niczego nie współdzielą (\textit{share-nothing}).
+          Wszelkie dane, które muszą zostać zachowane (trwałe), powinny być przechowywane w usługach wspierających, takich jak bazy danych lub magazyny obiektowe.
+          Pamięć lokalna procesu może być używana jedynie jako tymczasowy schowek (\textit{cache}).
+          Takie podejście umożliwia łatwe skalowanie aplikacji poprzez uruchamianie wielu kopii procesów bez obawy o spójność danych między nimi.
+
+    \item \textbf{Przydzielanie portów} --- Udostępniaj usługi przez przydzielanie portów
+
+          Aplikacja nie powinna polegać na obecności zewnętrznego serwera WWW (jak Apache czy Tomcat) w środowisku wykonawczym.
+          Zamiast tego, powinna być całkowicie samowystarczalna i udostępniać swoje usługi poprzez przypisanie się (\textit{binding}) do określonego portu sieciowego.
+          W środowisku chmurowym (np. Kubernetes) to infrastruktura zajmuje się routingiem ruchu z publicznych adresów do odpowiednich portów przypisanych przez procesy aplikacji.
+
+    \item \textbf{Współbieżność} --- Skaluj przez odpowiednio dobrane procesy
+
+          W modelu 12-factor procesy są traktowane jako obywatele pierwszej kategorii.
+          Aplikacja powinna być zaprojektowana tak, aby mogła być łatwo skalowana poprzez uruchamianie wielu kopii procesów, które mogą obsługiwać różne zadania (np. obsługa żądań HTTP, przetwarzanie zadań w tle, renderowanie).
+          Skalowanie jest osiągane poprzez uruchamianie wielu instancji tych procesów, zależnie od potrzeb, co pozwala na elastyczne dostosowanie się do zmieniającego się obciążenia.
+
+    \item \textbf{Zbywalność} --- Zwiększ elastyczność pozwalając na szybkie uruchamianie i zatrzymywanie aplikacji
+
+          Procesy aplikacji powinny być "zbywalne" (\textit{disposable}), co oznacza, że mogą być uruchamiane lub zatrzymywane w dowolnym momencie bez negatywnego wpływu na system.
+          Dąży się do minimalizacji czasu uruchamiania (\textit{startup time}) oraz zapewnienia bezpiecznego wyłączania (\textit{graceful shutdown}).
+          W przypadku zatrzymania, proces powinien przestać przyjmować nowe zadania, dokończyć bieżące i czysto zwolnić zasoby.
+          Zwiększa to odporność systemu na awarie i ułatwia szybkie wdrażanie nowych wersji.
+
+    \item \textbf{Jednolitość środowisk} --- Utrzymuj konfigurację środowisk jak najbardziej zbliżoną do siebie
+
+          Różnice między środowiskiem deweloperskim a produkcyjnym powinny być minimalizowane w trzech obszarach:
+          \begin{itemize}
+              \item Czasu: deweloperzy powinni wdrażać kod jak najszybciej po jego napisaniu.
+              \item Osób: twórcy kodu powinni być zaangażowani w jego wdrażanie i monitorowanie.
+              \item Narzędzi: stosowanie tych samych wersji oprogramowania i usług wspierających (np. ta sama wersja bazy danych) na wszystkich etapach.
+          \end{itemize}
+          Pomaga to uniknąć błędów typu "u mnie działa", które często wynikają z subtelnych różnic w konfiguracji systemów.
+
+    \item \textbf{Logi} --- Traktuj logi jako strumień zdarzeń
+
+          Aplikacja nie powinna zajmować się zarządzaniem plikami dziennika (logami) ani ich przechowywaniem.
+          Zamiast tego, każdy proces powinien wypisywać strumień zdarzeń bezpośrednio na standardowe wyjście (\textit{stdout}).
+          W środowiskach produkcyjnych to infrastruktura przejmuje te strumienie, agreguje je i przesyła do wyspecjalizowanych systemów analizy danych (takich jak ELK Stack lub Splunk).
+          Daje to lepszą widoczność (\textit{observability}) stanu systemu bez obciążania logiką logowania samej aplikacji.
+
+    \item \textbf{Zarządzanie aplikacją} --- Uruchamiaj zadania administracyjne jako jednorazowe procesy
+
+          Zadania administracyjne lub konserwacyjne (np. migracje bazy danych, inspekcja danych za pomocą skryptów) powinny być uruchamiane jako jednorazowe procesy (\textit{one-off processes}) w tym samym środowisku, w którym działa aplikacja.
+          Powinny one korzystać z tej samej wersji kodu i tej samej konfiguracji co procesy obsługujące regularny ruch.
+          Współczesne platformy PaaS i systemy orkiestracji (Kubernetes Jobs) zapewniają mechanizmy do wygodnego uruchamiania takich zadań w izolacji od głównej aplikacji.
 \end{enumerate}
 
 \subsection{DevOps}
 
 \subsubsection{Kultura}
-\begin{enumerate}
-    \item \textbf{Współpraca i Komunikacja}: Promowanie otwartej i ciągłej komunikacji między zespołami w celu szybszego rozwiązywania problemów i lepszego zrozumienia celów.
-    \item \textbf{Wspólna Odpowiedzialność}: Deweloperzy i specjaliści od operacji dzielą odpowiedzialność za cały cykl życia aplikacji, co zwiększa zaangażowanie i jakość pracy.
-    \item \textbf{Ciągłe Doskonalenie}: Stałe dążenie do ulepszania procesów, narzędzi i produktów poprzez iteracyjne podejście i feedback.
-    \item \textbf{Automatyzacja}: Wykorzystanie narzędzi do automatyzacji zadań takich jak testowanie, wdrażanie i monitorowanie w celu zwiększenia efektywności i redukcji błędów.
-    \item \textbf{Uczenie się na Błędach}: Kultura, która traktuje błędy jako okazje do nauki, zachęcając do otwartości i dzielenia się wiedzą.
-    \item \textbf{Pomiar i Analiza}: Używanie metryk i danych do podejmowania świadomych decyzji i monitorowania postępów.
-    \item \textbf{Orientacja na Klienta}: Skupienie na dostarczaniu wartości dla użytkownika końcowego poprzez szybkie i niezawodne wydawanie oprogramowania.
-    \item \textbf{Eliminacja Silosów}: Rozbijanie barier między działami w organizacji w celu tworzenia zintegrowanego i spójnego środowiska pracy.
-\end{enumerate}
+\begin{description}[font=\bfseries]
+    \item[Współpraca i Komunikacja] Promowanie otwartej i ciągłej komunikacji między zespołami w celu szybszego rozwiązywania problemów i lepszego zrozumienia celów.
+    \item[Wspólna Odpowiedzialność] Deweloperzy i specjaliści od operacji dzielą odpowiedzialność za cały cykl życia aplikacji, co zwiększa zaangażowanie i jakość pracy.
+    \item[Ciągłe Doskonalenie] Stałe dążenie do ulepszania procesów, narzędzi i produktów poprzez iteracyjne podejście i feedback.
+    \item[Automatyzacja] Wykorzystanie narzędzi do automatyzacji zadań takich jak testowanie, wdrażanie i monitorowanie w celu zwiększenia efektywności i redukcji błędów.
+    \item[Uczenie się na Błędach] Kultura, która traktuje błędy jako okazje do nauki, zachęcając do otwartości i dzielenia się wiedzą.
+    \item[Pomiar i Analiza] Używanie metryk i danych do podejmowania świadomych decyzji i monitorowania postępów.
+    \item[Orientacja na Klienta] Skupienie na dostarczaniu wartości dla użytkownika końcowego poprzez szybkie i niezawodne wydawanie oprogramowania.
+    \item[Eliminacja Silosów] Rozbijanie barier między działami w organizacji w celu tworzenia zintegrowanego i spójnego środowiska pracy.
+\end{description}
 
 \subsubsection{Cykl Ciągłego Doskonalenia (\textit{ang.} Continuous Improvement)}
 Kluczowe (kolejne podrozdziały) do realizacji części praktycznej
-\begin{enumerate}
-    \item \textbf{Planowanie} z wykorzystaniem narzędzi do zarządzania projektami.
-    \item \textbf{Kodowanie} przy użyciu nowoczesnych technologii i narzędzi programistycznych.
-    \item \textbf{Budowanie} i \textbf{testowanie} w zautomatyzowanych pipeline'ach CI/CD.
-    \item \textbf{Wydawanie} stabilnych wersji aplikacji poprzez konteneryzację i zarządzanie pakietami.
-    \item \textbf{Wdrażanie} na skalowalnej infrastrukturze chmurowej z wykorzystaniem IaC i orkiestracji kontenerów.
-    \item \textbf{Operacje} z zapewnieniem wysokiej dostępności i elastyczności dzięki usługom chmurowym.
-    \item \textbf{Monitorowanie} aplikacji i infrastruktury w celu zapewnienia jakości i szybkiego reagowania na incydenty.
-\end{enumerate}
+\begin{description}[font=\bfseries]
+    \item[Planowanie] z wykorzystaniem narzędzi do zarządzania projektami.
+    \item[Kodowanie] przy użyciu nowoczesnych technologii i narzędzi programistycznych.
+    \item[Budowanie i testowanie] w zautomatyzowanych pipeline'ach CI/CD.
+    \item[Wydawanie] stabilnych wersji aplikacji poprzez konteneryzację i zarządzanie pakietami.
+    \item[Wdrażanie] na skalowalnej infrastrukturze chmurowej z wykorzystaniem IaC i orkiestracji kontenerów.
+    \item[Operacje] z zapewnieniem wysokiej dostępności i elastyczności dzięki usługom chmurowym.
+    \item[Monitorowanie] aplikacji i infrastruktury w celu zapewnienia jakości i szybwego reagowania na incydenty.
+\end{description}
 
 \subsubsection{Pochodne od DevOps, nowe kierunki, specjalizacje}
-\begin{itemize}
-% Wykorzystane w części praktycznej:
-    \item \textbf{DevSecOps}: Integracja bezpieczeństwa (Security) w procesie DevOps. Bezpieczeństwo jest uwzględniane na każdym etapie cyklu życia aplikacji, od planowania po wdrożenie i utrzymanie, co pozwala na szybsze wykrywanie i eliminowanie zagrożeń.
-    \item \textbf{GitOps}: Podejście, które wykorzystuje Git jako jedyne źródło prawdy dla infrastruktury i aplikacji. Automatyzacja wdrożeń jest osiągana poprzez monitorowanie zmian w repozytorium Git i automatyczne zastosowanie ich w środowisku produkcyjnym.
-% Specjalizacje inżynierskie
-    \item \textbf{Cloud Engineering}:
-    \item \textbf{Site Reliability Engineering}:
-    \item \textbf{Platform Engineering}:
-% Pozostałe:    
-    \item \textbf{FinOps}: Połączenie praktyk finansowych z operacjami IT. Celem jest optymalizacja kosztów chmury poprzez lepszą współpracę między działami finansowymi, technicznymi i biznesowymi, co prowadzi do świadomego zarządzania wydatkami na infrastrukturę.
-    \item \textbf{MLOps}: Integracja praktyk DevOps w dziedzinie uczenia maszynowego (Machine Learning). Ułatwia zarządzanie cyklem życia modeli ML, od trenowania po wdrażanie i monitorowanie, zapewniając spójność i skalowalność modeli w produkcji.
-    \item \textbf{DataOps}: Zastosowanie zasad DevOps w inżynierii danych. Skupia się na automatyzacji procesów związanych z danymi, poprawie ich jakości oraz współpracy między zespołami, co przyspiesza dostarczanie wartościowych informacji biznesowych.
-    \item \textbf{AIOps}: Wykorzystanie sztucznej inteligencji (AI) w operacjach IT. Pomaga w automatyzacji i optymalizacji zarządzania infrastrukturą poprzez analizę dużych zbiorów danych i predykcyjne wykrywanie problemów.
-    \item \textbf{ModelOps}: Skupia się na zarządzaniu cyklem życia modeli analitycznych i AI w produkcji. Ułatwia wdrażanie, monitorowanie i aktualizację modeli w środowiskach produkcyjnych.
-    \item \textbf{NoOps}: Koncepcja zakładająca pełną automatyzację operacji IT, eliminując potrzebę tradycyjnych działań operacyjnych. Deweloperzy mogą skupić się wyłącznie na kodzie, podczas gdy infrastruktura zarządza się sama poprzez chmurę i automatyzację.
-    \item \textbf{BizDevOps}: Rozszerzenie DevOps o aspekt biznesowy. Ma na celu zintegrowanie celów biznesowych z procesem deweloperskim i operacyjnym, co prowadzi do lepszego dopasowania produktów do potrzeb rynku.
-    \item \textbf{SecOps}: Skupia się na integracji bezpieczeństwa z operacjami IT, często w czasie rzeczywistym. Chociaż podobne do DevSecOps, SecOps kładzie większy nacisk na ciągłe monitorowanie i reagowanie na incydenty bezpieczeństwa.
-    \item \textbf{ChatOps}: Wykorzystanie platform komunikacyjnych (np. Slack, Microsoft Teams) do zarządzania operacjami i automatyzacją zadań poprzez interakcje w czasie rzeczywistym, co zwiększa przejrzystość i szybkość reakcji zespołów.
-    \item \textbf{IoTOps}: Integracja zasad DevOps w obszarze Internetu Rzeczy (Internet of Things). Pomaga w zarządzaniu i monitorowaniu urządzeń IoT oraz zapewnia bezpieczne i efektywne wdrażanie aktualizacji.
-\end{itemize}
+\begin{description}[style=nextline, font=\bfseries]
+    % Wykorzystane w części praktycznej:
+    \item[DevSecOps] Integracja bezpieczeństwa (Security) w procesie DevOps. Bezpieczeństwo jest uwzględniane na każdym etapie cyklu życia aplikacji, od planowania po wdrożenie i utrzymanie, co pozwala na szybsze wykrywanie i eliminowanie zagrożeń.
+    \item[GitOps] Podejście, które wykorzystuje Git jako jedyne źródło prawdy dla infrastruktury i aplikacji. Automatyzacja wdrożeń jest osiągana poprzez monitorowanie zmian w repozytorium Git i automatyczne zastosowanie ich w środowisku produkcyjnym.
+          % Specjalizacje inżynierskie
+    \item[Cloud Engineering]
+    \item[Site Reliability Engineering] Podejście skupiające się na niezawodności, skalowaniu i efektywności systemów produkcyjnych poprzez inżynierię i automatyzację.
+    \item[Platform Engineering] Tworzenie i utrzymywanie wewnętrznych platform wspierających zespoły deweloperskie w szybszym i łatwiejszym wdrażaniu aplikacji.
+          % Pozostałe:    
+    \item[FinOps] Połączenie praktyk finansowych z operacjami IT. Celem jest optymalizacja kosztów chmury poprzez lepszą współpracę między działami finansowymi, technicznymi i biznesowymi, co prowadzi do świadomego zarządzania wydatkami na infrastrukturę.
+    \item[MLOps] Integracja praktyk DevOps in dziedzinie uczenia maszynowego (Machine Learning). Ułatwia zarządzanie cyklem życia modeli ML, od trenowania po wdrażanie i monitorowanie, zapewniając spójność i skalowalność modeli w produkcji.
+    \item[DataOps] Zastosowanie zasad DevOps w inżynierii danych. Skupia się na automatyzacji procesów związanych z danymi, poprawie ich jakości oraz współpracy między zespołami, co przyspiesza dostarczanie wartościowych informacji biznesowych.
+    \item[AIOps] Wykorzystanie sztucznej inteligencji (AI) w operacjach IT. Pomaga w automatyzacji i optymalizacji zarządzania infrastrukturą poprzez analizę dużych zbiorów danych i predykcyjne wykrywanie problemów.
+    \item[ModelOps] Skupia się na zarządzaniu cyklem życia modeli analitycznych i AI w produkcji. Ułatwia wdrażanie, monitorowanie i aktualizację modeli w środowiskach produkcyjnych.
+    \item[NoOps] Koncepcja zakładająca pełną automatyzację operacji IT, eliminując potrzebę tradycyjnych działań operacyjnych. Deweloperzy mogą skupić się wyłącznie na kodzie, podczas gdy infrastruktura zarządza się sama poprzez chmurę i automatyzację.
+    \item[BizDevOps] Rozszerzenie DevOps o aspekt biznesowy. Ma na celu zintegrowanie celów biznesowych z procesem deweloperskim i operacyjnym, co prowadzi do lepszego dopasowania produktów do potrzeb rynku.
+    \item[SecOps] Skupia się na integracji bezpieczeństwa z operacjami IT, często w czasie rzeczywistym. Chociaż podobne do DevSecOps, SecOps kładzie większy nacisk na ciągłe monitorowanie i reagowanie na incydenty bezpieczeństwa.
+    \item[ChatOps] Wykorzystanie platform komunikacyjnych (np. Slack, Microsoft Teams) do zarządzania operacjami i automatyzacją zadań poprzez interakcje w czasie rzeczywistym, co zwiększa przejrzystość i szybkość reakcji zespołów.
+    \item[IoTOps] Integracja zasad DevOps w obszarze Internetu Rzeczy (Internet of Things). Pomaga w zarządzaniu i monitorowaniu urządzeń IoT oraz zapewnia bezpieczne i efektywne wdrażanie aktualizacji.
+\end{description}
 
 \subsection{Cloud computing}
 
 \subsubsection{Rodzaje chmur}
-\begin{enumerate}
-    \item \textbf{Chmura publiczna} \\
-    Chmura publiczna to model usług chmurowych, w którym zasoby obliczeniowe, takie jak serwery, przestrzeń dyskowa, aplikacje i moc obliczeniowa, są dostarczane przez zewnętrznego dostawcę usług za pośrednictwem internetu. W tym modelu infrastruktura jest współdzielona między wieloma użytkownikami (klientami), a dostawca chmury jest odpowiedzialny za zarządzanie, utrzymanie i zabezpieczenie zasobów. Użytkownicy płacą zazwyczaj za rzeczywiste wykorzystanie zasobów według modelu "pay-as-you-go". Chmury publiczne oferują wysoką skalowalność i elastyczność, co pozwala na szybkie dostosowanie się do zmieniających się potrzeb biznesowych bez konieczności inwestowania w infrastrukturę sprzętową. Przykładami dostawców chmury publicznej są:
-    \begin{itemize}
-        \item \textbf{Amazon Web Services (AWS)}
-        \item \textbf{Microsoft Azure}
-        \item \textbf{Google Cloud Platform (GCP)}
-    \end{itemize}
+\begin{description}[style=nextline, font=\bfseries]
+    \item[Chmura publiczna]
+          Chmura publiczna to model usług chmurowych, w którym zasoby obliczeniowe, takie jak serwery, przestrzeń dyskowa, aplikacje i moc obliczeniowa, są dostarczane przez zewnętrznego dostawcę usług za pośrednictwem internetu. W tym modelu infrastruktura jest współdzielona między wieloma użytkownikami (klientami), a dostawca chmury jest odpowiedzialny za zarządzanie, utrzymanie i zabezpieczenie zasobów. Użytkownicy płacą zazwyczaj za rzeczywiste wykorzystanie zasobów według modelu "pay-as-you-go". Chmury publiczne oferują wysoką skalowalność i elastyczność, co pozwala na szybkie dostosowanie się do zmieniających się potrzeb biznesowych bez konieczności inwestowania w infrastrukturę sprzętową. Przykładami dostawców chmury publicznej są:
+          \begin{itemize}[leftmargin=*]
+              \item \textbf{Amazon Web Services (AWS)}
+              \item \textbf{Microsoft Azure}
+              \item \textbf{Google Cloud Platform (GCP)}
+          \end{itemize}
 
-    \item \textbf{Chmura prywatna} \\
-    Chmura prywatna to infrastruktura chmurowa wykorzystywana wyłącznie przez jedną organizację. Może być zarządzana przez tę organizację lub przez zewnętrznego dostawcę usług, ale zasoby i usługi są dostępne tylko dla tej konkretnej firmy, co zapewnia wyższy poziom kontroli nad danymi, bezpieczeństwem i zgodnością z regulacjami. Chmury prywatne są często wykorzystywane przez przedsiębiorstwa, które mają ścisłe wymagania dotyczące bezpieczeństwa, poufności danych lub regulacji prawnych (np. instytucje finansowe, rządowe, medyczne). Mogą być hostowane w lokalnym centrum danych organizacji lub w dedykowanym ośrodku danych dostawcy usług. Chmura prywatna oferuje:
+    \item[Chmura prywatna]
+          Chmura prywatna to infrastruktura chmurowa wykorzystywana wyłącznie przez jedną organizację. Może być zarządzana przez tę organizację lub przez zewnętrznego dostawcę usług, ale zasoby i usługi są dostępne tylko dla tej konkretnej firmy, co zapewnia wyższy poziom kontroli nad danymi, bezpieczeństwem i zgodnością z regulacjami. Chmury prywatne są często wykorzystywane przez przedsiębiorstwa, które mają ścisłe wymagania dotyczące bezpieczeństwa, poufności danych lub regulacji prawnych (np. instytucje finansowe, rządowe, medyczne). Mogą być hostowane w lokalnym centrum danych organizacji lub w dedykowanym ośrodku danych dostawcy usług. Chmura prywatna oferuje:
 
-    \begin{itemize}
-        \item \textbf{Wyższy poziom bezpieczeństwa i prywatności}: Dane są przechowywane na dedykowanych serwerach.
-        \item \textbf{Dostosowanie}: Możliwość konfiguracji infrastruktury zgodnie z konkretnymi potrzebami.
-        \item \textbf{Kontrola}: Pełny wgląd i zarządzanie zasobami oraz politykami bezpieczeństwa.
-    \end{itemize}
+          \begin{itemize}[leftmargin=*]
+              \item \textbf{Wyższy poziom bezpieczeństwa i prywatności}: Dane są przechowywane na dedykowanych serwerach.
+              \item \textbf{Dostosowanie}: Możliwość konfiguracji infrastruktury zgodnie z konkretnymi potrzebami.
+              \item \textbf{Kontrola}: Pełny wgląd i zarządzanie zasobami oraz politykami bezpieczeństwa.
+          \end{itemize}
 
-    \item \textbf{Chmura hybrydowa} \\
-    Chmura hybrydowa to połączenie chmury publicznej i prywatnej, które pozwala na przenoszenie danych i aplikacji między tymi dwoma środowiskami. Umożliwia to organizacjom korzystanie z zalet obu modeli:
+    \item[Chmura hybrydowa]
+          Chmura hybrydowa to połączenie chmury publicznej i prywatnej, które pozwala na przenoszenie danych i aplikacji między tymi dwoma środowiskami. Umożliwia to organizacjom korzystanie z zalet obu modeli:
 
-    \begin{itemize}
-        \item \textbf{Elastyczność i skalowalność chmury publicznej}: Możliwość szybkiego zwiększenia zasobów w razie potrzeby.
-        \item \textbf{Bezpieczeństwo i kontrola chmury prywatnej}: Przechowywanie wrażliwych danych w zabezpieczonym środowisku.
-    \end{itemize}
+          \begin{itemize}[leftmargin=*]
+              \item \textbf{Elastyczność i skalowalność chmury publicznej}: Możliwość szybkiego zwiększenia zasobów w razie potrzeby.
+              \item \textbf{Bezpieczeństwo i kontrola chmury prywatnej}: Przechowywanie wrażliwych danych in zabezpieczonym środowisku.
+          \end{itemize}
 
-    Chmura hybrydowa jest idealna dla firm, które chcą utrzymać kontrolę nad krytycznymi danymi i aplikacjami, jednocześnie korzystając z mocy obliczeniowej chmury publicznej do obsługi zmiennego obciążenia lub wykonywania zadań wymagających dużej mocy obliczeniowej. Przykładowe scenariusze użycia chmury hybrydowej:
+          Chmura hybrydowa jest idealna dla firm, które chcą utrzymać kontrolę nad krytycznymi danymi i aplikacjami, jednocześnie korzystając z mocy obliczeniowej chmury publicznej do obsługi zmiennego obciążenia lub wykonywania zadań wymagających dużej mocy obliczeniowej. Przykładowe scenariusze użycia chmury hybrydowej:
 
-    \begin{itemize}
-        \item \textbf{Disaster Recovery}: Kopie zapasowe danych w chmurze publicznej.
-        \item \textbf{Burst Computing}: Przenoszenie dodatkowego obciążenia do chmury publicznej podczas szczytów.
-        \item \textbf{Testowanie i rozwój}: Wykorzystanie chmury publicznej do tworzenia i testowania aplikacji przed wdrożeniem w środowisku prywatnym.
-    \end{itemize}
+          \begin{itemize}[leftmargin=*]
+              \item \textbf{Disaster Recovery}: Kopie zapasowe danych w chmurze publicznej.
+              \item \textbf{Burst Computing}: Przenoszenie dodatkowego obciążenia do chmury publicznej podczas szczytów.
+              \item \textbf{Testowanie i rozwój}: Wykorzystanie chmury publicznej do tworzenia i testowania aplikacji przed wdrożeniem w środowisku prywatnym.
+          \end{itemize}
 
-    \item \textbf{Chmury specjalne (branżowe, społecznościowe)} \\
-    Chmury specjalne, znane również jako chmury społecznościowe lub branżowe, są zaprojektowane w celu spełnienia specyficznych wymagań określonej grupy użytkowników, branży lub społeczności. Infrastruktura jest współdzielona między organizacjami o podobnych potrzebach, takich jak:
+    \item[Chmury specjalne (branżowe, społecznościowe)]
+          Chmury specjalne, znane również jako chmury społecznościowe lub branżowe, są zaprojektowane w celu spełnienia specyficznych wymagań określonej grupy użytkowników, branży lub społeczności. Infrastruktura jest współdzielona między organizacjami o podobnych potrzebach, takich jak:
 
-    \begin{itemize}
-        \item \textbf{Regulacje prawne i zgodność}: Branże podlegające restrykcyjnym regulacjom (np. służba zdrowia, finanse).
-        \item \textbf{Wymagania dotyczące bezpieczeństwa}: Potrzeba wysokiego poziomu ochrony danych.
-        \item \textbf{Specyficzne potrzeby branżowe}: Wymagania dotyczące wydajności, integracji czy specjalistycznych aplikacji.
-    \end{itemize}
+          \begin{itemize}[leftmargin=*]
+              \item \textbf{Regulacje prawne i zgodność}: Branże podlegające restrykcyjnym regulacjom (np. służba zdrowia, finanse).
+              \item \textbf{Wymagania dotyczące bezpieczeństwa}: Potrzeba wysokiego poziomu ochrony danych.
+              \item \textbf{Specyficzne potrzeby branżowe}: Wymagania dotyczące wydajności, integracji czy specjalistycznych aplikacji.
+          \end{itemize}
 
-    Chmury specjalne łączą zalety chmur prywatnych (bezpieczeństwo, kontrola) i publicznych (skalowalność, efektywność kosztowa) w kontekście specyficznych potrzeb. Przykłady chmur specjalnych:
+          Chmury specjalne łączą zalety chmur prywatnych (bezpieczeństwo, kontrola) i publicznych (skalowalność, efektywność kosztowa) w kontekście specyficznych potrzeb. Przykłady chmur specjalnych:
 
-    \begin{itemize}
-        \item \textbf{Chmura dla sektora publicznego}: Spełniająca wymogi rządowe dotyczące bezpieczeństwa i przechowywania danych.
-        \item \textbf{Chmura dla służby zdrowia}: Zgodna z regulacjami dotyczącymi ochrony danych pacjentów (np. RODO, HIPAA).
-        \item \textbf{Chmura edukacyjna}: Wspierająca instytucje edukacyjne w dostarczaniu zasobów i aplikacji dla studentów i pracowników.
-    \end{itemize}
+          \begin{itemize}[leftmargin=*]
+              \item \textbf{Chmura dla sektora publicznego}: Spełniająca wymogi rządowe dotyczące bezpieczeństwa i przechowywania danych.
+              \item \textbf{Chmura dla służby zdrowia}: Zgodna z regulacjami dotyczącymi ochrony danych pacjentów (np. RODO, HIPAA).
+              \item \textbf{Chmura edukacyjna}: Wspierająca instytucje edukacyjne w dostarczaniu zasobów i aplikacji dla studentów i pracowników.
+          \end{itemize}
 
-\end{enumerate}
+\end{description}
 
 \subsubsection{Usługodawcy do wyboru}
-\begin{itemize}
+\begin{itemize}[leftmargin=*]
     \item AWS
     \item Azure
     \item GCP
 \end{itemize}
 
 \subsubsection{Typy usług}
-\begin{itemize}
-    \item SaaS (Software as a Service): Oprogramowanie jako usługa. Dostarczanie aplikacji przez internet, dostępnych za pośrednictwem przeglądarki, bez konieczności instalacji lokalnej. Przykłady: Google Workspace, Microsoft Office 365, Salesforce.
-    \item PaaS (Platform as a Service): Platforma jako usługa. Udostępnianie środowiska do tworzenia, testowania i wdrażania aplikacji bez zarządzania infrastrukturą. Przykłady: Google App Engine, Microsoft Azure App Service, Heroku.
-    \item IaaS (Infrastructure as a Service): Infrastruktura jako usługa. Dostarczanie zasobów obliczeniowych, takich jak serwery, sieci, przestrzeń dyskowa, na żądanie. Przykłady: Amazon Web Services (AWS), Microsoft Azure, Google Compute Engine.
-    \item FaaS (Function as a Service): Funkcja jako usługa. Model serverless, w którym kod jest uruchamiany w odpowiedzi na zdarzenia, a infrastruktura jest zarządzana przez dostawcę. Przykłady: AWS Lambda, Azure Functions, Google Cloud Functions.
-    \item CaaS (Container as a Service): Kontenery jako usługa. Usługi zarządzania kontenerami, ułatwiające wdrażanie i skalowanie aplikacji w kontenerach. Przykłady: AWS Elastic Container Service, Google Kubernetes Engine, Azure Kubernetes Service.
-    \item BaaS (Backend as a Service): Backend jako usługa. Udostępnianie zaplecza dla aplikacji mobilnych i webowych, takich jak bazy danych, uwierzytelnianie, przechowywanie plików. Przykłady: Google Firebase, AWS Amplify, Backendless.
-    \item XaaS (Anything as a Service): Wszystko jako usługa. Ogólny termin obejmujący wszystkie usługi dostarczane przez chmurę, umożliwiający elastyczne skorzystanie z usługi, zasobów IT i ekspertyzy dostawcy z danego obszaru (przykłady XaaS: Gaming, Learning, Voice, Knowledge, Mobility, Logging, Encryption, etc)
-\end{itemize}
+\begin{description}[font=\bfseries]
+    \item[SaaS (Software as a Service)] Oprogramowanie jako usługa. Dostarczanie aplikacji przez internet, dostępnych za pośrednictwem przeglądarki, bez konieczności instalacji lokalnej. Przykłady: Google Workspace, Microsoft Office 365, Salesforce.
+    \item[PaaS (Platform as a Service)] Platforma jako usługa. Udostępnianie środowiska do tworzenia, testowania i wdrażania aplikacji bez zarządzania infrastrukturą. Przykłady: Google App Engine, Microsoft Azure App Service, Heroku.
+    \item[IaaS (Infrastructure as a Service)] Infrastruktura jako usługa. Dostarczanie zasobów obliczeniowych, takich jak serwery, sieci, przestrzeń dyskowa, na żądanie. Przykłady: Amazon Web Services (AWS), Microsoft Azure, Google Compute Engine.
+    \item[FaaS (Function as a Service)] Funkcja jako usługa. Model serverless, w którym kod jest uruchamiany w odpowiedzi na zdarzenia, a infrastruktura jest zarządzana przez dostawcę. Przykłady: AWS Lambda, Azure Functions, Google Cloud Functions.
+    \item[CaaS (Container as a Service)] Kontenery jako usługa. Usługi zarządzania kontenerami, ułatwiające wdrażanie i skalowanie aplikacji w kontenerach. Przykłady: AWS Elastic Container Service, Google Kubernetes Engine, Azure Kubernetes Service.
+    \item[BaaS (Backend as a Service)] Backend jako usługa. Udostępnianie zaplecza dla aplikacji mobilnych i webowych, takich jak bazy danych, uwierzytelnianie, przechowywanie plików. Przykłady: Google Firebase, AWS Amplify, Backendless.
+    \item[XaaS (Anything as a Service)] Wszystko jako usługa. Ogólny termin obejmujący wszystkie usługi dostarczane przez chmurę, umożliwiający elastyczne skorzystanie z usługi, zasobów IT i ekspertyzy dostawcy z danego obszaru (przykłady XaaS: Gaming, Learning, Voice, Knowledge, Mobility, Logging, Encryption, etc)
+\end{description}
 
 \subsection{Cloud Native}
-\begin{itemize}
+\begin{itemize}[leftmargin=*]
     \item co to jest? różne definicje
     \item Cloud computing vs cloud native - implementacja vs architektura
     \item Cloud-native pillars
@@ -149,7 +237,7 @@ Kluczowe (kolejne podrozdziały) do realizacji części praktycznej
 \end{itemize}
 
 \subsubsection{Cloud Native Computing Fundation}
-\begin{itemize}
+\begin{itemize}[leftmargin=*]
     \item technologie i narzedzia - Landscape
     \item Standardy
     \item Eventy
@@ -158,41 +246,36 @@ Kluczowe (kolejne podrozdziały) do realizacji części praktycznej
 
 \subsection{Kubernetes}
 zloty standard, no1 projekt CNCF, dominacja rynku
-\begin{itemize}
+\begin{itemize}[leftmargin=*]
     \item główne zalety
-        \begin{itemize}
-            \item everything as code
-            \item cloud agnostic
-            \item spójność narzędzi niezależnie od dostawcy
-            \item automatyzacja
-            \item rozszerzalne API
-            \item deklaratywnosc i self healing cycle
-        \end{itemize}
+          \begin{itemize}[leftmargin=*]
+              \item everything as code
+              \item cloud agnostic
+              \item spójność narzędzi niezależnie od dostawcy
+              \item automatyzacja
+              \item rozszerzalne API
+              \item deklaratywnosc i self healing cycle
+          \end{itemize}
     \item alternatywy:
-        \begin{itemize}
-            \item rancher
-            \item openshift
-        \end{itemize}
+          \begin{itemize}[leftmargin=*]
+              \item rancher
+              \item openshift
+          \end{itemize}
     \item managed kubernetes:
-        \begin{itemize}
-            \item GKE
-            \item EKS
-            \item AKS
-        \end{itemize}
+          \begin{itemize}[leftmargin=*]
+              \item GKE
+              \item EKS
+              \item AKS
+          \end{itemize}
     \item cloud containers:
-        \begin{itemize}
-            \item ECS
-            \item Azure Container Instances
-            \item Google Cloud Run
-        \end{itemize}
+          \begin{itemize}[leftmargin=*]
+              \item ECS
+              \item Azure Container Instances
+              \item Google Cloud Run
+          \end{itemize}
     \item lekka orkiestracja:
-        \begin{itemize}
-            \item Docker Swarm
-            \item Nomad
-        \end{itemize}
+          \begin{itemize}[leftmargin=*]
+              \item Docker Swarm
+              \item Nomad
+          \end{itemize}
 \end{itemize}
-
-
-
-
-
