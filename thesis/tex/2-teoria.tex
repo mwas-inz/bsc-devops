@@ -5,7 +5,7 @@ Obszary do opisania, baza do wykorzystania w projekcie, dodatkowe informacje z t
 
 \subsection{Twelve Factor App}
 
-Twelve-Factor App (skr. 12FA) to zestaw zasad dotyczących budowy skalowalnych, łatwych w utrzymaniu aplikacji sieciowych w nowoczesnych środowiskach chmurowych.
+Twelve-Factor App (rów. 12-factor app, skr. 12FA) to zestaw zasad dotyczących budowy skalowalnych, łatwych w utrzymaniu aplikacji sieciowych w nowoczesnych środowiskach chmurowych.
 Kładzie nacisk na konfigurację deklaratywną, utrwalanie kodu źródłowego, konfiguracji  i opisu infrastruktury jako kod. Ułatwia obsługę usług wspierających oraz możliwość szybkiego uruchamiania,
 łatwe odtwarzanie środowisk. Ma umożliwić przenośność, odporność i szybkie iteracje w rozproszonych systemach.
 W praktyce współczesnego oprogramowania 12FA jest często używany jako punkt odniesienia dla projektowania usług Software-as-a-Service (SaaS),
@@ -103,7 +103,7 @@ systemów mikroserwisowych i procesów DevOps.
 
           Zadania administracyjne lub konserwacyjne (np. migracje bazy danych, inspekcja danych za pomocą skryptów) powinny być uruchamiane jako jednorazowe procesy (\textit{one-off processes}) w tym samym środowisku, w którym działa aplikacja.
           Powinny one korzystać z tej samej wersji kodu i tej samej konfiguracji co procesy obsługujące regularny ruch.
-          Współczesne platformy PaaS i systemy orkiestracji (Kubernetes Jobs) zapewniają mechanizmy do wygodnego uruchamiania takich zadań w izolacji od głównej aplikacji.
+          Kod zadania administracyjnego musi zostać dołączony do kodu aplikacji, a jego uruchomienie powinno być możliwe poprzez prostą komendę, co zapewnia spójność i łatwość zarządzania zadaniami administracyjnymi.
 \end{enumerate}
 
 \subsection{DevOps}
