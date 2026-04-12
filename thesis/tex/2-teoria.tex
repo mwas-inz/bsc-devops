@@ -106,19 +106,63 @@ systemów mikroserwisowych i procesów DevOps.
           Kod zadania administracyjnego musi zostać dołączony do kodu aplikacji, a jego uruchomienie powinno być możliwe poprzez prostą komendę, co zapewnia spójność i łatwość zarządzania zadaniami administracyjnymi.
 \end{enumerate}
 
+% todo(?): komentarz do 12FA, znaczenie dla pracy i dla projektu
+
 \subsection{DevOps}
 
-\subsubsection{Kultura}
+DevOps to podejście do rozwoju oprogramowania, które łączy praktyki i narzędzia z obszarów deweloperskich (Dev) i operacyjnych (Ops) w celu zwiększenia efektywności, jakości i szybkości dostarczania oprogramowania.
+Początki tego podejścia sięgają około 2007 roku, kiedy to inżynierowie i liderzy IT zaczęli dostrzegać potrzebę lepszej współpracy między zespołami deweloperskimi a operacyjnymi, aby sprostać rosnącym wymaganiom rynku i użytkowników.
+Jej prekursorami byli m.in. Patrick Debois, Nicole Forsgren, Jez Humble, Gene Kim i John Willis, którzy promowali idee takie jak ciągła integracja (CI), ciągłe dostarczanie (CD) i automatyzacja procesów.
+Ich prace i działalniość przyczyniły się do rozwoju DevOps jako kultury, filozofii i praktyki, która zyskała szerokie uznanie w branży IT i stała się kluczowym elementem nowoczesnego rozwoju oprogramowania.
+\cite{AtlassianDevOpsHistory} \cite{devopsHandbook2021}
+
+\subsubsection{Kluczowe wartości i modele dojrzałości DevOps}
+
+DevOps koncentruje się nie na technicznej implementacji, tylko na wskazówkach, w jaki sposób wytwarzać oprogramowanie, tak by proces był bardziej powtarzalny, stabilny i szybki.
+Wartości i zasady DevOps są fundamentem, na którym opiera się kultura i praktyki DevOps, a ich celem jest stworzenie środowiska pracy, które sprzyja współpracy, innowacji i ciągłemu doskonaleniu.
+Mimo tego, że w branży IT bardzo często utożsamia się go z użyciem konkretnych narzędzi, to są one jednak tylko implementacją kluczowych wartości, które zaproponowała ta metodologia. 
+
+Głównymi wartościami, które wynikają z źródeł i publikacji z głównego nurtu, są: 
+\begin{itemize}[font=\bfseries]
+    \item \textbf{Współpraca i Komunikacja} --- Promowanie otwartej i ciągłej komunikacji między zespołami w celu szybszego rozwiązywania problemów i lepszego zrozumienia celów.
+    \item \textbf{Wspólna Odpowiedzialność} --- Deweloperzy i specjaliści od operacji dzielą odpowiedzialność za cały cykl życia aplikacji, co zwiększa zaangażowanie i jakość pracy.
+    \item \textbf{Ciągłe Doskonalenie} --- Stałe dążenie do ulepszania procesów, narzędzi i produktów poprzez iteracyjne podejście i feedback.
+    \item \textbf{Automatyzacja} --- Wykorzystanie narzędzi do automatyzacji zadań takich jak testowanie, wdrażanie i monitorowanie w celu zwiększenia efektywności i redukcji błędów.
+    \item \textbf{Uczenie się na Błędach} --- Kultura, która traktuje błędy jako okazje do nauki (ang. no blame culture), zachęcając do otwartości, dzielenia się wiedzą, a także wspierająca ciągłe eksperymentowanie i doskonalenie.
+    \item \textbf{Pomiar i Analiza} --- Używanie metryk i danych, jako głównego narzędzia do podejmowania świadomych decyzji i monitorowania postępów.
+    \item \textbf{Orientacja na Klienta} --- Skupienie na dostarczaniu wartości dla użytkownika końcowego poprzez szybkie i niezawodne wydawanie oprogramowania.
+    \item \textbf{Eliminacja Silosów} --- Rozbijanie barier komunikacyjnych i organizacyjnych między działami organizacji w celu tworzenia zintegrowanego i spójnego środowiska pracy.
+\end{itemize}
+
+Aby obiektywnie mierzyć stopień wdrożenia i skuteczność powyższych zasad w organizacji, stosuje się uznane modele dojrzałości oraz zestawy metryk.
+Jest to próba przełożenia wartości i zasad DevOps na konkretne, skodyfikowane wskaźniki, które pozwalają organizacjom ocenić swoje praktyki i ich aktualny poziom, a potem zidentyfikować kierunki do poprawy.
+Dwoma najbardziej wpływowymi podejściami są model CALMS oraz metryki DORA.
+
 \begin{description}[font=\bfseries]
-    \item[Współpraca i Komunikacja] Promowanie otwartej i ciągłej komunikacji między zespołami w celu szybszego rozwiązywania problemów i lepszego zrozumienia celów.
-    \item[Wspólna Odpowiedzialność] Deweloperzy i specjaliści od operacji dzielą odpowiedzialność za cały cykl życia aplikacji, co zwiększa zaangażowanie i jakość pracy.
-    \item[Ciągłe Doskonalenie] Stałe dążenie do ulepszania procesów, narzędzi i produktów poprzez iteracyjne podejście i feedback.
-    \item[Automatyzacja] Wykorzystanie narzędzi do automatyzacji zadań takich jak testowanie, wdrażanie i monitorowanie w celu zwiększenia efektywności i redukcji błędów.
-    \item[Uczenie się na Błędach] Kultura, która traktuje błędy jako okazje do nauki, zachęcając do otwartości i dzielenia się wiedzą.
-    \item[Pomiar i Analiza] Używanie metryk i danych do podejmowania świadomych decyzji i monitorowania postępów.
-    \item[Orientacja na Klienta] Skupienie na dostarczaniu wartości dla użytkownika końcowego poprzez szybkie i niezawodne wydawanie oprogramowania.
-    \item[Eliminacja Silosów] Rozbijanie barier między działami w organizacji w celu tworzenia zintegrowanego i spójnego środowiska pracy.
+    \item[Model CALMS] \cite{devopsHandbook2021} Opracowany przez Johna Willisa i Damona Edwardsa (a później uzupełniony przez Jeza Humble'a), model ten definiuje pięć fundamentów sukcesu DevOps:
+    \begin{itemize}
+        \item \textbf{C (Culture)} --- Kultura oparta na zaufaniu, współpracy i wspólnym celu. Jest to najważniejszy element, bez którego inne narzędzia i procesy tracą na znaczeniu.
+        \item \textbf{A (Automation)} --- Automatyzacja powtarzalnych zadań (np. testowanie, wdrażanie), co pozwala na eliminację błędów ludzkich i szybsze dostarczanie wartości.
+        \item \textbf{L (Lean)} --- Stosowanie zasad szczupłego zarządzania, takich jak eliminacja marnotrawstwa (\textit{muda}), praca w małych partiach (\textit{small batches}) i optymalizacja przepływu wartości.
+        \item \textbf{M (Measurement)} --- Gromadzenie i analiza danych dotyczących procesów i wydajności w celu podejmowania decyzji w oparciu o fakty.
+        \item \textbf{S (Sharing)} --- Dzielenie się wiedzą, sukcesami i porażkami wewnątrz organizacji, co wspiera ciągłe uczenie się i buduje spójność zespołu.
+    \end{itemize}
+
+    \item[Metryki DORA] \cite{GoogleStateOfDevOps2022}\cite{DORAcapabilities} DevOps Research and Assessment (DORA) zaproponowany przez Nicole Forsgren w Google to model,
+    który zidentyfikował cztery kluczowe wskaźniki (ang. \textit{Four Key Metrics}) pozwalające obiektywnie mierzyć wydajność dostarczania oprogramowania:
+    \begin{itemize}
+        \item \textbf{Deployment Frequency} (Częstotliwość wdrożeń) --- Mierzy, jak często organizacja pomyślnie wdraża kod do produkcji. Wysoka częstotliwość wskazuje na zwinność zespołu.
+        \item \textbf{Lead Time for Changes} (Czas realizacji zmian) --- Czas od zatwierdzenia zmiany w kodzie do jej pomyślnego uruchomienia na produkcji. Krótki czas pozwala na szybką reakcję na potrzeby rynku.
+        \item \textbf{Change Failure Rate} (Wskaźnik awaryjności zmian) --- Odsetek wdrożeń, które kończą się awarią lub wymagają natychmiastowych działań naprawczych (np. \textit{rollback}).
+        \item \textbf{Time to Restore Service} (Czas przywracania usługi) --- Średni czas potrzebny na przywrócenie sprawności systemu po wystąpieniu incydentu krytycznego na produkcji.
+    \end{itemize}
 \end{description}
+
+Są one powszechnie używane do klasyfikowania organizacji według poziomów wydajności (elita, wysoka, średnia, niska) i diagnozowania wąskich gardeł w dostarczaniu i niezawodności.
+Rapory publikowane przez Google każdego roku \cite{DoraResearchArchives} są też dobrym wskaźnikiem stanu rozwoju oprogramowania na rynku.
+Pokazują problemy, które organizacje napotykają na swojej drodze i trendy rozwoju.
+Od 2024 roku raporty zawierają też wpływ sztucznej inteligencji na rozwój oprogramowania, co jest bardzo istotne w kontekście tego, co dzieje się obecnie w branży IT.
+
 
 \subsubsection{Cykl Ciągłego Doskonalenia (\textit{ang.} Continuous Improvement)}
 Kluczowe (kolejne podrozdziały) do realizacji części praktycznej
