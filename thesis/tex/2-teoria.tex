@@ -115,12 +115,15 @@ Początki tego podejścia sięgają około 2007 roku, kiedy to inżynierowie i l
 Jej prekursorami byli m.in. Patrick Debois, Nicole Forsgren, Jez Humble, Gene Kim i John Willis, którzy promowali idee takie jak ciągła integracja (CI), ciągłe dostarczanie (CD) i automatyzacja procesów.
 Ich prace i działalniość przyczyniły się do rozwoju DevOps jako kultury, filozofii i praktyki, która zyskała szerokie uznanie w branży IT i stała się kluczowym elementem nowoczesnego rozwoju oprogramowania.
 \cite{AtlassianDevOpsHistory} \cite{devopsHandbook2021}
+Kultura DevOps promuje otwartą komunikację i współpracę między zespołami deweloperskimi a operacyjnymi, co pozwala na szybsze rozwiązywanie problemów i lepsze zrozumienie wymagań biznesowych.
+Automatyzacja jest kluczowym elementem, który umożliwia eliminację manualnych procesów, co z kolei przyspiesza cykle wydania i redukuje ryzyko błędów \cite{DevOpsConceptsLeite2019}.
 
 \subsubsection{Kluczowe wartości i modele dojrzałości DevOps}
 
 DevOps koncentruje się nie na technicznej implementacji, tylko na wskazówkach, w jaki sposób wytwarzać oprogramowanie, tak by proces był bardziej powtarzalny, stabilny i szybki.
 Wartości i zasady DevOps są fundamentem, na którym opiera się kultura i praktyki DevOps, a ich celem jest stworzenie środowiska pracy, które sprzyja współpracy, innowacji i ciągłemu doskonaleniu.
 Mimo tego, że w branży IT bardzo często utożsamia się go z użyciem konkretnych narzędzi, to są one jednak tylko implementacją kluczowych wartości, które zaproponowała ta metodologia. 
+
 
 Głównymi wartościami, które wynikają z źródeł i publikacji z głównego nurtu, są: 
 \begin{itemize}[font=\bfseries]
@@ -138,8 +141,10 @@ Aby obiektywnie mierzyć stopień wdrożenia i skuteczność powyższych zasad w
 Jest to próba przełożenia wartości i zasad DevOps na konkretne, skodyfikowane wskaźniki, które pozwalają organizacjom ocenić swoje praktyki i ich aktualny poziom, a potem zidentyfikować kierunki do poprawy.
 Dwoma najbardziej wpływowymi podejściami są model CALMS oraz metryki DORA.
 
+
+
 \begin{description}[font=\bfseries]
-    \item[Model CALMS] \cite{devopsHandbook2021} Opracowany przez Johna Willisa i Damona Edwardsa (a później uzupełniony przez Jeza Humble'a), model ten definiuje pięć fundamentów sukcesu DevOps:
+    \item[Model CALMS] \cite{devopsHandbook2021}\cite{LeadingDevOpsPracticeMaroukian2020} Opracowany przez Johna Willisa i Damona Edwardsa (a później uzupełniony przez Jeza Humble'a), model ten definiuje pięć fundamentów sukcesu DevOps:
     \begin{itemize}
         \item \textbf{C (Culture)} --- Kultura oparta na zaufaniu, współpracy i wspólnym celu. Jest to najważniejszy element, bez którego inne narzędzia i procesy tracą na znaczeniu.
         \item \textbf{A (Automation)} --- Automatyzacja powtarzalnych zadań (np. testowanie, wdrażanie), co pozwala na eliminację błędów ludzkich i szybsze dostarczanie wartości.
@@ -165,16 +170,36 @@ Od 2024 roku raporty zawierają też wpływ sztucznej inteligencji na rozwój op
 
 
 \subsubsection{Cykl Ciągłego Doskonalenia (\textit{ang.} Continuous Improvement)}
-Kluczowe (kolejne podrozdziały) do realizacji części praktycznej
+
+Jedną z centralnych idei metodologii DevOps jest pętla ciągłego doskonalenia, która składa się z ośmiu etapów powtarzanych cyklicznie.
+Każdy z nich jest kluczowy dla zapewnienia, że proces wytwarzania oprogramowania jest nie tylko szybki, ale także stabilny i bezpieczny.
+
+\begin{figure}[!htbp]
+    \label{fig:devops-cycle}
+    \centering \includegraphics[width=0.5\linewidth]{devops-cycle.png}
+    \caption{Etapy rozwoju aplikacji w metodologii DevOps \cite{DynatraceDevOpsEbook}}
+\end{figure}
+
 \begin{description}[font=\bfseries]
-    \item[Planowanie] z wykorzystaniem narzędzi do zarządzania projektami.
-    \item[Kodowanie] przy użyciu nowoczesnych technologii i narzędzi programistycznych.
-    \item[Budowanie i testowanie] w zautomatyzowanych pipeline'ach CI/CD.
-    \item[Wydawanie] stabilnych wersji aplikacji poprzez konteneryzację i zarządzanie pakietami.
-    \item[Wdrażanie] na skalowalnej infrastrukturze chmurowej z wykorzystaniem IaC i orkiestracji kontenerów.
-    \item[Operacje] z zapewnieniem wysokiej dostępności i elastyczności dzięki usługom chmurowym.
-    \item[Monitorowanie] aplikacji i infrastruktury w celu zapewnienia jakości i szybwego reagowania na incydenty.
+    \item[1. Planowanie] z wykorzystaniem narzędzi do zarządzania projektami.
+    \item[2. Kodowanie] przy użyciu nowoczesnych technologii i narzędzi programistycznych.
+    \item[3. Budowanie] w zautomatyzowanych procesach CI/CD.
+    \item[4. Testowanie] jednostkowe, integracyjne i end-to-end, z automatyzacją testów.
+    \item[5. Wydawanie] stabilnych wersji aplikacji poprzez konteneryzację i zarządzanie pakietami.
+    \item[6. Wdrażanie] na skalowalnej infrastrukturze chmurowej z wykorzystaniem IaC i orkiestracji kontenerów.
+    \item[7. Operacje] z zapewnieniem wysokiej dostępności i elastyczności dzięki usługom chmurowym.
+    \item[8. Monitorowanie] aplikacji i infrastruktury w celu szybkiego reagowania na incydenty oraz zbieranie informacji o wydajności i użyciu systemu.
 \end{description}
+
+Kolejne iteracje mają za zadanie w sposób ciągły dostarczać wartość dla odbiorcy systemu.
+Pętla ta jest podstawą kultury DevOps. Promuje ciągłe uczenie się, eksperymentowanie i doskonalenie procesów, narzędzi i produktów.
+Z założenia jest to proces, który osiąga sprzężenie zwrotne (ang. feedback loop), gdzie każda iteracja dostarcza informacji zwrotnej, która jest wykorzystywana do poprawy następnych iteracji.
+
+\noindent\textcolor{red}{\rule{\textwidth}{2pt}}
+\begin{center}
+    \textbf{\textcolor{red}{--- START DRAFT ---}}
+\end{center}
+\noindent\textcolor{red}{\rule{\textwidth}{2pt}}
 
 \subsubsection{Pochodne od DevOps, nowe kierunki, specjalizacje}
 \begin{description}[style=nextline, font=\bfseries]
@@ -182,7 +207,7 @@ Kluczowe (kolejne podrozdziały) do realizacji części praktycznej
     \item[DevSecOps] Integracja bezpieczeństwa (Security) w procesie DevOps. Bezpieczeństwo jest uwzględniane na każdym etapie cyklu życia aplikacji, od planowania po wdrożenie i utrzymanie, co pozwala na szybsze wykrywanie i eliminowanie zagrożeń.
     \item[GitOps] Podejście, które wykorzystuje Git jako jedyne źródło prawdy dla infrastruktury i aplikacji. Automatyzacja wdrożeń jest osiągana poprzez monitorowanie zmian w repozytorium Git i automatyczne zastosowanie ich w środowisku produkcyjnym.
           % Specjalizacje inżynierskie
-    \item[Cloud Engineering]
+    \item[Cloud Engineering] Projektowanie, budowanie i zarządzanie infrastrukturą chmurową, która wspiera procesy DevOps, z naciskiem na skalowalność, bezpieczeństwo i efektywność kosztową.
     \item[Site Reliability Engineering] Podejście skupiające się na niezawodności, skalowaniu i efektywności systemów produkcyjnych poprzez inżynierię i automatyzację.
     \item[Platform Engineering] Tworzenie i utrzymywanie wewnętrznych platform wspierających zespoły deweloperskie w szybszym i łatwiejszym wdrażaniu aplikacji.
           % Pozostałe:    
