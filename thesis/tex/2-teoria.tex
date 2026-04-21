@@ -195,33 +195,32 @@ Kolejne iteracje mają za zadanie w sposób ciągły dostarczać wartość dla o
 Pętla ta jest podstawą kultury DevOps. Promuje ciągłe uczenie się, eksperymentowanie i doskonalenie procesów, narzędzi i produktów.
 Z założenia jest to proces, który osiąga sprzężenie zwrotne (ang. feedback loop), gdzie każda iteracja dostarcza informacji zwrotnej, która jest wykorzystywana do poprawy następnych iteracji.
 
+\subsubsection{Rozwój DevOps --- nowe kierunki i specjalizacje}
+W miarę rozwoju metodologii DevOps, pojawiło się wiele specjalizacji i podejść, które rozszerzają lub uzupełniają jej podstawowe zasady.
+Wybrane z nich to:
+\begin{description}[style=nextline, font=\bfseries]
+    % Wykorzystane w części praktycznej:
+    \item[GitOps] Podejście, które wykorzystuje Git jako jedyne źródło prawdy dla infrastruktury i aplikacji. Automatyzacja wdrożeń jest osiągana poprzez monitorowanie zmian w repozytorium Git i automatyczne zastosowanie ich w środowisku produkcyjnym.
+    \item[DevSecOps] Integracja bezpieczeństwa (Security) w procesie DevOps. Bezpieczeństwo jest uwzględniane na każdym etapie cyklu życia aplikacji, od planowania po wdrożenie i utrzymanie, co pozwala na szybsze wykrywanie i eliminowanie zagrożeń.
+    % Specjalizacje inżynierskie
+    \item[Cloud Engineering] Projektowanie, budowanie i zarządzanie infrastrukturą chmurową, która wspiera procesy DevOps, z naciskiem na skalowalność, bezpieczeństwo i efektywność kosztową.
+    \item[Site Reliability Engineering] Podejście skupiające się na niezawodności, skalowaniu i efektywności systemów produkcyjnych poprzez inżynierię i automatyzację.
+    \item[Platform Engineering] Tworzenie i utrzymywanie wewnętrznych platform wspierających zespoły deweloperskie w szybszym i łatwiejszym wdrażaniu aplikacji.
+    % Pozostałe:    
+    \item[FinOps] Połączenie praktyk finansowych z operacjami IT. Celem jest optymalizacja kosztów chmury poprzez lepszą współpracę między działami finansowymi, technicznymi i biznesowymi, co prowadzi do świadomego zarządzania wydatkami na infrastrukturę.
+    \item[MLOps] Integracja praktyk DevOps in dziedzinie uczenia maszynowego (Machine Learning). Ułatwia zarządzanie cyklem życia modeli ML, od trenowania po wdrażanie i monitorowanie, zapewniając spójność i skalowalność modeli w produkcji.
+    \item[DataOps] Zastosowanie zasad DevOps w inżynierii danych. Skupia się na automatyzacji procesów związanych z danymi, poprawie ich jakości oraz współpracy między zespołami, co przyspiesza dostarczanie wartościowych informacji biznesowych.
+    \item[AIOps] Wykorzystanie sztucznej inteligencji (AI) w operacjach IT. Pomaga w automatyzacji i optymalizacji zarządzania infrastrukturą poprzez analizę dużych zbiorów danych i predykcyjne wykrywanie problemów.
+    \item[ChatOps] Wykorzystanie platform komunikacyjnych (np. Slack, Microsoft Teams) do zarządzania operacjami i automatyzacją zadań poprzez interakcje w czasie rzeczywistym, co zwiększa przejrzystość i szybkość reakcji zespołów.
+\end{description}
+
+Elementy GitOps, DevSecOps i Site Reliability Engineering będą wykorzystywane w części praktycznej pracy, a pozostałe specjalizacje są opisane dla pokazania kontekstu i trendów rozwoju metodologii DevOps. 
+
 \noindent\textcolor{red}{\rule{\textwidth}{2pt}}
 \begin{center}
     \textbf{\textcolor{red}{--- START DRAFT ---}}
 \end{center}
 \noindent\textcolor{red}{\rule{\textwidth}{2pt}}
-
-\subsubsection{Pochodne od DevOps, nowe kierunki, specjalizacje}
-\begin{description}[style=nextline, font=\bfseries]
-    % Wykorzystane w części praktycznej:
-    \item[DevSecOps] Integracja bezpieczeństwa (Security) w procesie DevOps. Bezpieczeństwo jest uwzględniane na każdym etapie cyklu życia aplikacji, od planowania po wdrożenie i utrzymanie, co pozwala na szybsze wykrywanie i eliminowanie zagrożeń.
-    \item[GitOps] Podejście, które wykorzystuje Git jako jedyne źródło prawdy dla infrastruktury i aplikacji. Automatyzacja wdrożeń jest osiągana poprzez monitorowanie zmian w repozytorium Git i automatyczne zastosowanie ich w środowisku produkcyjnym.
-          % Specjalizacje inżynierskie
-    \item[Cloud Engineering] Projektowanie, budowanie i zarządzanie infrastrukturą chmurową, która wspiera procesy DevOps, z naciskiem na skalowalność, bezpieczeństwo i efektywność kosztową.
-    \item[Site Reliability Engineering] Podejście skupiające się na niezawodności, skalowaniu i efektywności systemów produkcyjnych poprzez inżynierię i automatyzację.
-    \item[Platform Engineering] Tworzenie i utrzymywanie wewnętrznych platform wspierających zespoły deweloperskie w szybszym i łatwiejszym wdrażaniu aplikacji.
-          % Pozostałe:    
-    \item[FinOps] Połączenie praktyk finansowych z operacjami IT. Celem jest optymalizacja kosztów chmury poprzez lepszą współpracę między działami finansowymi, technicznymi i biznesowymi, co prowadzi do świadomego zarządzania wydatkami na infrastrukturę.
-    \item[MLOps] Integracja praktyk DevOps in dziedzinie uczenia maszynowego (Machine Learning). Ułatwia zarządzanie cyklem życia modeli ML, od trenowania po wdrażanie i monitorowanie, zapewniając spójność i skalowalność modeli w produkcji.
-    \item[DataOps] Zastosowanie zasad DevOps w inżynierii danych. Skupia się na automatyzacji procesów związanych z danymi, poprawie ich jakości oraz współpracy między zespołami, co przyspiesza dostarczanie wartościowych informacji biznesowych.
-    \item[AIOps] Wykorzystanie sztucznej inteligencji (AI) w operacjach IT. Pomaga w automatyzacji i optymalizacji zarządzania infrastrukturą poprzez analizę dużych zbiorów danych i predykcyjne wykrywanie problemów.
-    \item[ModelOps] Skupia się na zarządzaniu cyklem życia modeli analitycznych i AI w produkcji. Ułatwia wdrażanie, monitorowanie i aktualizację modeli w środowiskach produkcyjnych.
-    \item[NoOps] Koncepcja zakładająca pełną automatyzację operacji IT, eliminując potrzebę tradycyjnych działań operacyjnych. Deweloperzy mogą skupić się wyłącznie na kodzie, podczas gdy infrastruktura zarządza się sama poprzez chmurę i automatyzację.
-    \item[BizDevOps] Rozszerzenie DevOps o aspekt biznesowy. Ma na celu zintegrowanie celów biznesowych z procesem deweloperskim i operacyjnym, co prowadzi do lepszego dopasowania produktów do potrzeb rynku.
-    \item[SecOps] Skupia się na integracji bezpieczeństwa z operacjami IT, często w czasie rzeczywistym. Chociaż podobne do DevSecOps, SecOps kładzie większy nacisk na ciągłe monitorowanie i reagowanie na incydenty bezpieczeństwa.
-    \item[ChatOps] Wykorzystanie platform komunikacyjnych (np. Slack, Microsoft Teams) do zarządzania operacjami i automatyzacją zadań poprzez interakcje w czasie rzeczywistym, co zwiększa przejrzystość i szybkość reakcji zespołów.
-    \item[IoTOps] Integracja zasad DevOps w obszarze Internetu Rzeczy (Internet of Things). Pomaga w zarządzaniu i monitorowaniu urządzeń IoT oraz zapewnia bezpieczne i efektywne wdrażanie aktualizacji.
-\end{description}
 
 \subsection{Cloud computing}
 
