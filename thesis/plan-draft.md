@@ -2,65 +2,92 @@
 
 ## I. Fundamenty Teoretyczne
 
-* **Nowoczesne systemy aplikacyjne**
-  * Filary *Cloud Native* i architektura *Twelve-Factor App*.
-  * *Cloud Native Maturity Model* (CNCF) jako punkt odniesienia.
-  * **Modele dojrzałości DevOps (Capability/Maturity Models):** Analiza etapów rozwoju organizacji (od *ad-hoc* do *fully automated/optimized*) oraz kluczowych zdolności technicznych i kulturowych wpływających na wydajność zespołu (DORA metrics).
+* **Twelve-Factor App** ✅
+  * Zestaw 12 zasad budowania skalowalnych aplikacji SaaS — punkt odniesienia dla mikroserwisów i DevOps.
 
-* **Strategie wytwarzania i operacji (DevOps vs SRE vs Platform Engineering)**
-  * GitOps: Analiza wzorców *Pull vs Push*, *drift detection* i *reconciliation*.
-  * Ewolucja od klasycznego DevOps do Platform Engineering (Internal Developer Portals).
+* **DevOps** ✅
+  * Historia i geneza (Debois, Forsgren, Humble, Kim, Willis).
+  * Kluczowe wartości i kultura; model CALMS (Culture, Automation, Lean, Measurement, Sharing).
+  * Metryki DORA: *Deployment Frequency*, *Lead Time for Changes*, *Change Failure Rate*, *Time to Restore Service*.
+  * Pętla ciągłego doskonalenia — 8 etapów (Plan → Code → Build → Test → Release → Deploy → Operate → Monitor).
+  * Specjalizacje: GitOps, DevSecOps, SRE, Platform Engineering i inne (omówione kontekstowo).
 
-* **Cykl życia oprogramowania (SDLC)**
-  * Dojrzałość procesów CI/CD i wyzwania mikroserwisów (*Dependency Hell*, wersjonowanie API).
+* **Cloud computing** ✅
+  * Definicja NIST; typy chmur: publiczna, prywatna, hybrydowa, społecznościowa.
+  * Wiodący dostawcy: AWS, Azure, GCP i poboczni.
 
-## II. Implementacja Systemu (Kubernetes-first)
+* **Cloud Native** 🔲
+  * Definicje i filary Cloud Native; Cloud computing vs Cloud Native.
+  * Cloud Native Computing Foundation — landscape, standardy, certyfikaty.
 
-* **Planowanie i rozwój (Plan & Code)**
+* **Kubernetes** 🔲
+  * Pozycja rynkowa i główne zalety (deklaratywność, self-healing, cloud-agnostic).
+  * Alternatywy i zarządzane klastry (GKE, EKS, AKS) -> łatwość deploymentu w chmurze i lokalnie (minikube, kind).
+
+## II. Implementacja Systemu
+
+> Format każdego etapu: karta narzędzia (opis + fragment konfiguracji + dobre nawyki + rola w projekcie).
+> Aplikacja jest pretekstem, nie tematem — interesuje nas generyczny proces wdrożenia.
+
+* **Plan & Code**
   * Zarządzanie wymaganiami (Jira), kontrola wersji (GitHub).
-  * **Architektura:** Java (Quarkus lub SpringBoot), React.
-  * **Wytwarzanie aplikacji:** Strategie konteneryzacji (Cloud Native Buildpacks vs Dockerfile), optymalizacja obrazów (Native images).
-  * **DX (Developer Experience):** Środowisko lokalne (*minikube*, *kind* lub *k3s*), workflow deweloperski.
+  * Aplikacja: serwis klient-serwer (Java backend, React frontend) w architekturze mikroserwisowej. Szczegóły implementacyjne poza zakresem — skupiamy się na procesie wdrożenia.
+  * Środowisko lokalne: *minikube* lub *kind* jako lokalny klaster Kubernetes.
 
-* **Automatyzacja i GitOps (Build, Test, Release)**
-  * Proces CI/CD: GitHub Actions, Gradle, JUnit.
-  * GitOps: ArgoCD lub Flux w architekturze *App of Apps* (wzorzec zarządzania mikroserwisami).
-  * *Supply Chain Security*: Skanowanie obrazów w procesie CI/CD (Trivy/Clair), podpisywanie (Cosign/Kyverno).
+* **Build**
+  * Budowanie artefaktów: Gradle.
+  * Konteneryzacja: Dockerfile → obraz Docker (uzasadnienie wyboru w ADR: Dockerfile vs Jib vs Paketo Buildpacks).
+  * Automatyzacja: GitHub Actions jako pipeline CI.
+  * *Shift Left Security*: skanowanie obrazu (Trivy) i podpisywanie (Cosign) jako etap pipeline CI — bezpieczeństwo przesuniete możliwie wcześnie w cyklu wytwarzania.
 
-* **Produkcyjna gotowość (Orchestration & Security)**
-  * *Admission Controllers*: Kyverno lub OPA.
-  * Segmentacja sieci: *NetworkPolicies*.
-  * Niezawodność: *Liveness* i *Readiness probes* (fundament *self-healing*).
-  * *SecurityContexts*: Zabezpieczanie kontenerów.
+* **Test**
+  * Testy jednostkowe i integracyjne: JUnit osadzony w pipeline CI.
+
+* **Release**
+  * Rejestr obrazów: DockerHub.
+  * Pakietowanie dla Kubernetes: Helm + ArtifactHub.
+
+* **Deploy**
+  * GitOps: ArgoCD lub Flux w architekturze *App of Apps*.
+  * Provisioning infrastruktury: Terraform.
+
+* **Operate**
+  * Środowisko docelowe: Kubernetes (jedyne omawiane środowisko uruchomieniowe).
 
 ## III. Obserwowalność (Observability)
 
-* **Standardy zbierania danych**
-  * *OpenTelemetry*: Instrumentacja automatyczna i manualna jako serce obserwowalności.
+> Standard: OpenTelemetry jako wspólny mianownik — jeden Collector, jeden SDK, niezależność od backendu.
+> Stos: LGTM (Loki, Grafana, Tempo, Prometheus) — Grafana jako *single pane of glass*.
 
-* **Studium porównawcze staków (LGTM vs ELK)**
-  * *LGTM* (Loki, Grafana, Tempo, Mimir/Prometheus): Nowoczesny cel.
-  * *ELK* (Elasticsearch, Logstash, Kibana): Historyczne studium przypadku.
+* **Logi** — Logback/Log4j (format JSON) → OTel Collector → Loki → Grafana
+* **Metryki** — Micrometer + OTel bridge → Prometheus → Grafana
+* **Ślady (Traces)** — OTel Java Agent (auto-instrumentation, zero zmian w kodzie) → Tempo → Grafana
 
-* **Analiza inżynierska**
-  * Porównanie wydajności i kosztów (CPU, RAM, Storage).
-  * Definicja SLO/SLI (np. czas odpowiedzi < 200ms w 99% przypadków).
-  * Alerting: Integracja z OpsGenie.
+## IV. Analiza i Wnioski
 
-## IV. Analiza, FinOps i Rozwój
+* Uzasadnienie wyborów inżynierskich w kontekście potrzeb projektu i akademickich ADR-ów.
+* Ocena przyjętego podejścia DevOps end-to-end na przykładzie jednej aplikacji.
 
-* **Analiza decyzji inżynierskich**
-  * Uzasadnienie wyborów (dlaczego wybrano dane narzędzia) w kontekście potrzeb biznesowych.
+## V. Podsumowanie
 
-* **Optymalizacja kosztów (FinOps)**
-  * Wdrożenie *Pod Autoscaling* (HPA, VPA) i analiza ich wpływu na koszty w chmurze (np. AWS).
+* *Lessons learned*: wyzwania w konfiguracji GitOps i Observability.
+* Wnioski inżynierskie i kierunki dalszego rozwoju.
 
-* **Kierunki rozwoju**
-  * Hybrydowe modele zarządzania (rola Ansible).
-  * Przekształcenie systemu w platformę (wzorce *Internal Developer Portal* - Backstage).
+---
 
-## V. Podsumowanie i Wnioski
+## Brudnopis — kwestie do rozstrzygnięcia
 
-* *Lessons learned*: Wyzwania w konfiguracji obserwowalności i GitOps.
-* Ewaluacja: GitOps vs Klasyczny DevOps.
-* Wnioski inżynierskie i ocena końcowa systemu.
+> Poniższe punkty wymagają decyzji przed rozmową z promotorem lub przed implementacją.
+
+---
+
+> **Rozstrzygnięte (2026-04-26):**
+>
+> * ~~AWS~~ → Kubernetes jako jedyne środowisko uruchomieniowe.
+> * ~~Supply Chain Security jako osobny rozdział~~ → Shift Left w etapie Build (Trivy + Cosign w pipeline CI).
+> * ~~Porównanie LGTM vs ELK~~ → LGTM jako jedyny omawiany stos, bez studium porównawczego.
+> * ~~FinOps, HPA/VPA, Platform Engineering/Backstage~~ → poza zakresem pracy.
+> * ~~Porównanie strategii konteneryzacji~~ → Dockerfile jako wybór; uzasadnienie w ADR.
+> * ~~Ansible~~ → poza zakresem pracy.
+> * ~~Frontend jako osobny etap~~ → aplikacja istnieje, opis koncepcyjny bez szczegółów implementacyjnych.
+> * ~~Observability ADR~~ → ADR-0006 (OpenTelemetry) i ADR-0007 (LGTM) przyjęte; karty narzędzi gotowe.
