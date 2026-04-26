@@ -2,7 +2,9 @@
 
 * Status: accepted
 * Date: 2026-04-21
-* Decision-makers: Mateusz Waś
+* Decision-makers: mateusz.was
+* Consulted:
+* Informed:
 
 ## Context and Problem Statement
 
