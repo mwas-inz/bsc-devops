@@ -23,7 +23,7 @@ systemów mikroserwisowych i procesów DevOps.
           Każde wdrożenie aplikacji jest powiązane z konkretną wersją kodu w repozytorium, co umożliwia łatwe odtwarzanie i zarządzanie różnymi środowiskami (np. deweloperskim, testowym, produkcyjnym) bez konieczności duplikowania kodu.
           Jeśli aplikacja jest rozproszona na wiele usług, każda usługa powinna być zarządzana w oddzielnym repozytorium, co ułatwia zarządzanie i skalowanie poszczególnych komponentów aplikacji.
 
-          \textbf{TODO:} skomentować monorepozytoria, które są popularne w dużych organizacjach (np. Google, Facebook) i często wykorzystywane w architekturze mikroserwisowej.
+          Współczesnym trendem, szczególnie w dużych organizacjach (np. Google, Meta), jest wykorzystywanie \textit{monorepozytoriów}. W takim podejściu kod wielu usług jest przechowywany w jednym, wspólnym repozytorium. Pozwala to na łatwiejsze zarządzanie współdzielonymi zależnościami, spójne wersjonowanie całego systemu oraz uproszczenie procesów refaktoryzacji międzyprojektowej. Niniejsza praca również wykorzystuje strukturę monorepozytorium, co pozwala na ścisłe powiązanie kodu aplikacji z definicjami infrastruktury i procesów CI/CD.
 
     \item \textbf{Zależności} --- Jawnie zadeklaruj i wydziel zależności
 
@@ -106,8 +106,8 @@ systemów mikroserwisowych i procesów DevOps.
           Kod zadania administracyjnego musi zostać dołączony do kodu aplikacji, a jego uruchomienie powinno być możliwe poprzez prostą komendę, co zapewnia spójność i łatwość zarządzania zadaniami administracyjnymi.
 \end{enumerate}
 
-% todo(?): komentarz do 12FA, znaczenie dla pracy i dla projektu
-
+\subsubsection{Znaczenie Twelve-Factor App dla projektu}
+Zasady sformułowane w ramach metodologii Twelve-Factor App stanowią fundament techniczny niniejszej pracy. Ich zastosowanie w części praktycznej pozwala na budowę systemu, który jest w pełni gotowy do działania w nowoczesnych środowiskach chmurowych. Kluczowe aspekty, takie jak ścisła izolacja zależności, przechowywanie konfiguracji w środowisku czy traktowanie logów jako strumieni zdarzeń, bezpośrednio przekładają się na łatwość konteneryzacji aplikacji oraz jej późniejszej orkiestracji w klastrze Kubernetes. Implementacja tych zasad jest niezbędnym krokiem do osiągnięcia wysokiego poziomu automatyzacji w procesach CI/CD, co stanowi główny cel pracy.
 
 \subsection{DevOps}
 
