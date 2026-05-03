@@ -1,64 +1,22 @@
 \newpage
 \section{Część praktyczna}
-\subsection{Architektura}
+Niniejszy rozdział stanowi opis implementacji demonstracyjnego systemu informatycznego oraz towarzyszącego mu ekosystemu narzędziowego, zrealizowanego zgodnie z pryncypiami kultury DevOps oraz paradygmatem \textit{Cloud Native}. Głównym celem części praktycznej nie jest samo wytworzenie aplikacji, lecz zaprezentowanie kompleksowego procesu jej dostarczania, utrzymania i monitorowania w nowoczesnym środowisku chmurowym.
 
-\subsection{Kolejne obszary wg DevOps}
-\begin{enumerate}
-    \item \textbf{Plan} (opis na narzędzi do planowania zadań, przykłady rozplanowania funkcji systemu, integracja z systemem kontroli wersji)
-    \begin{enumerate}
-        \item Jira
-    \end{enumerate}
-    \item \textbf{Code} (narzędzia użyte do wytwarzania oprogramowania, alternatywy, architektura aplikacji z uwzględnieniem 12 factor app)
-    \begin{enumerate}
-        \item System kontroli werjsji: GitHub
-        \item IDE: VS Code, IntelliJ IDEA
-        \item Technologia backend: Java, Quarkus
-        \item Technologia frontend: React
-    \end{enumerate}
-    \item \textbf{Build} (budowanie i wersjonowanie paczek)
-    \begin{enumerate}
-        \item GitHub Actions – proces CI/CD zapisany w kodzie
-        \item Gradle – budowanie backendu
-        \item Npm/Webpack – budowanie frontendu
-    \end{enumerate}
-    \item \textbf{Test} (etap procesu CI/CD wbudowany w GitHub Actions)
-    \begin{enumerate}
-        \item GitHub Actions
-        \item JUnit
-    \end{enumerate}
-    \item \textbf{Release} (wydawanie paczek releasowych, zapisywanie kolejnych iteracji projektów)
-    \begin{enumerate}
-        \item Docker + DockerHub – publiczne repozytorium dla kontenerów
-        \item Helm + ArtifactHub – publiczne repozytorium dla schematów Helm
-    \end{enumerate}
-    \item \textbf{Deploy} (infrastruktura wspierająca, klaster do uruchomienia kontenerów)
-    \begin{enumerate}
-        \item Terraform – tworzenie zasobów na AWS wg. koncepcji Infrastructure-as-a-Code
-        \item Ansible – konfiguracja serwerów z użyciem Configuration Management
-        \item Kubernetes – środowisko uruchomieniowe aplikacji
-    \end{enumerate}
-    \item \textbf{Operate} (środowisko chmurowe, serwery, usługi wspierające)
-    \begin{enumerate}
-        \item Kubernetes
-            \begin{enumerate}
-            \item kind
-            \item minikube
-        \end{enumerate}
-        \item AWS Cloud Service
-        \begin{enumerate}
-            \item RDS – bazy danych
-            \item S3 – zapis plików
-            \item Opensearch – zapis dokumentów
-            \item (inne usługi – rozwinąć, lista może się zmienić w trakcie implementacji)
-        \end{enumerate}
-    \end{enumerate}
-    \item \textbf{Monitor + Feedback} (monitorowanie systemu, aplikacji, dzienniki logów, ślady aplikacji)
-    \begin{enumerate}
-        \item Grafana – wizualizacja metryk
-        \item Prometheus – zbieranie metryk
-        \item Elasticsearch/Opensearch – zbieranie logów
-        \item Jaeger lub Zipkin – zbieranie trace’ów
-        \item (OpenTelemetry) – standard komunikacyjny do powyższych technologii
-        \item OpsGenie – alerting
-    \end{enumerate}
-\end{enumerate}
+\subsection{Architektura systemu}
+Projektowany system to „Portal do zarządzania zadaniami”, który służy jako poligon doświadczalny dla wdrażanych praktyk inżynierskich. System został zaprojektowany w architekturze mikroserwisowej, co pozwala na pełną demonstrację procesów DevOps w środowisku rozproszonym, w tym niezależnego budowania, testowania i wdrażania poszczególnych komponentów. Architektura aplikacji została oparta na wzorcu \textit{Clean Architecture}, co zapewnia separację logiki biznesowej od szczegółów technicznych i frameworków. Dzięki temu rdzeń każdego mikroserwisu pozostaje niezależny od infrastruktury.
+
+W warstwie technologicznej zdecydowano się na wykorzystanie ekosystemu Java z frameworkiem \textit{Quarkus}. Wybór ten podyktowany był charakterem środowiska uruchomieniowego, jakim jest \textit{Kubernetes}. Quarkus, będący rozwiązaniem \textit{Kubernetes-native}, pozwala na znaczną optymalizację zużycia zasobów (pamięci RAM i procesora) oraz skrócenie czasu uruchamiania aplikacji dzięki kompilacji przed czasem (\textit{Ahead-of-Time} - AOT). Jest to kluczowe w architekturze mikroserwisowej, gdzie efektywność kosztowa i szybkość skalowania są priorytetem. Aplikacja została zaprojektowana zgodnie z wytycznymi \textit{Twelve-Factor App}, co gwarantuje jej pełną przenośność.
+
+Głównym środowiskiem uruchomieniowym wykorzystywanym w części praktycznej jest lokalny klaster Kubernetes (narzędzia \textit{kind} lub \textit{minikube}). Takie podejście pozwala na pełną reprodukowalność środowiska produkcyjnego na maszynie deweloperskiej, co jest zgodne z ideą \textit{Cloud Native}. Mimo skupienia na środowisku lokalnym, wszystkie zastosowane narzędzia i konfiguracje (np. Terraform, Helm, manifesty K8s) są projektowane w sposób \textit{cloud-agnostic}, umożliwiający ich przeniesienie do publicznych dostawców chmurowych (np. AWS).
+
+\subsection{Struktura części praktycznej}
+Opis części praktycznej został ustrukturyzowany w sposób odzwierciedlający klasyczną pętlę cyklu życia oprogramowania (ang. \textit{DevOps Lifecycle}). Każdy z etapów pętli — od planowania po monitorowanie — został szczegółowo omówiony w kontekście wybranych narzędzi i metodologii.
+
+Przyjęto formę opisu opartą na tzw. „kartach narzędzi”. Dla każdego z kluczowych komponentów infrastruktury przedstawiono:
+\begin{itemize}
+    \item opis i uzasadnienie wyboru danego rozwiązania (często poparte dokumentami ADR — \textit{Architectural Decision Records}),
+    \item fragmenty konfiguracji (\textit{Infrastructure as Code}, manifesty YAML, definicje pipeline'ów),
+    \item rolę narzędzia w całym ekosystemie oraz dobre praktyki inżynierskie zastosowane przy jego konfiguracji.
+\end{itemize}
+
+Dzięki takiej strukturze, łatwo zrozumieć, jak poszczególne narzędzia współgrają ze sobą w ramach kompleksowego procesu dostarczania oprogramowania, a także jakie decyzje architektoniczne i inżynierskie stoją za ich implementacją.
