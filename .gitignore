@@ -61,3 +61,4 @@ Thumbs.db
 *.mtc
 *.mtc0
 *.pyg
+*.synctex(busy)
