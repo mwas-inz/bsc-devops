@@ -3,7 +3,7 @@
 \section{Część teoretyczna}
 Obszary do opisania, baza do wykorzystania w projekcie, dodatkowe informacje z tematu:
 
-\subsection{Twelve Factor App}
+\subsection{Twelve-Factor App}
 
 Twelve-Factor App (rów. 12-factor app, skr. 12FA) to zestaw zasad dotyczących budowy skalowalnych, łatwych w utrzymaniu aplikacji sieciowych w nowoczesnych środowiskach chmurowych.
 Kładzie nacisk na konfigurację deklaratywną, utrwalanie kodu źródłowego, konfiguracji  i opisu infrastruktury jako kod. Ułatwia obsługę usług wspierających oraz możliwość szybkiego uruchamiania,
@@ -123,10 +123,10 @@ Automatyzacja jest kluczowym elementem, który umożliwia eliminację manualnych
 
 DevOps koncentruje się nie na technicznej implementacji, tylko na wskazówkach, w jaki sposób wytwarzać oprogramowanie, tak by proces był bardziej powtarzalny, stabilny i szybki.
 Wartości i zasady DevOps są fundamentem, na którym opiera się kultura i praktyki DevOps, a ich celem jest stworzenie środowiska pracy, które sprzyja współpracy, innowacji i ciągłemu doskonaleniu.
-Mimo tego, że w branży IT bardzo często utożsamia się go z użyciem konkretnych narzędzi, to są one jednak tylko implementacją kluczowych wartości, które zaproponowała ta metodologia. 
+Mimo tego, że w branży IT bardzo często utożsamia się go z użyciem konkretnych narzędzi, to są one jednak tylko implementacją kluczowych wartości, które zaproponowała ta metodologia.
 
 
-Głównymi wartościami, które wynikają z źródeł i publikacji z głównego nurtu, są: 
+Głównymi wartościami, które wynikają z źródeł i publikacji z głównego nurtu, są:
 \begin{itemize}[font=\bfseries]
     \item \textbf{Współpraca i Komunikacja} --- Promowanie otwartej i ciągłej komunikacji między zespołami w celu szybszego rozwiązywania problemów i lepszego zrozumienia celów.
     \item \textbf{Wspólna Odpowiedzialność} --- Deweloperzy i specjaliści od operacji dzielą odpowiedzialność za cały cykl życia aplikacji, co zwiększa zaangażowanie i jakość pracy.
@@ -144,22 +144,22 @@ Dwoma najbardziej wpływowymi podejściami są model CALMS oraz metryki DORA.
 
 \begin{description}[font=\bfseries]
     \item[Model CALMS] \cite{Kim2021DevOpsHandbook}\cite{Maroukian2020DevOpsAdoption} Opracowany przez Johna Willisa i Damona Edwardsa (a później uzupełniony przez Jeza Humble'a), model ten definiuje pięć fundamentów sukcesu DevOps:
-    \begin{itemize}
-        \item \textbf{C (Culture)} --- Kultura oparta na zaufaniu, współpracy i wspólnym celu. Jest to najważniejszy element, bez którego inne narzędzia i procesy tracą na znaczeniu.
-        \item \textbf{A (Automation)} --- Automatyzacja powtarzalnych zadań (np. testowanie, wdrażanie), co pozwala na eliminację błędów ludzkich i szybsze dostarczanie wartości.
-        \item \textbf{L (Lean)} --- Stosowanie zasad szczupłego zarządzania, takich jak eliminacja marnotrawstwa (\textit{muda}), praca w małych partiach (\textit{small batches}) i optymalizacja przepływu wartości.
-        \item \textbf{M (Measurement)} --- Gromadzenie i analiza danych dotyczących procesów i wydajności w celu podejmowania decyzji w oparciu o fakty.
-        \item \textbf{S (Sharing)} --- Dzielenie się wiedzą, sukcesami i porażkami wewnątrz organizacji, co wspiera ciągłe uczenie się i buduje spójność zespołu.
-    \end{itemize}
+          \begin{itemize}
+              \item \textbf{C (Culture)} --- Kultura oparta na zaufaniu, współpracy i wspólnym celu. Jest to najważniejszy element, bez którego inne narzędzia i procesy tracą na znaczeniu.
+              \item \textbf{A (Automation)} --- Automatyzacja powtarzalnych zadań (np. testowanie, wdrażanie), co pozwala na eliminację błędów ludzkich i szybsze dostarczanie wartości.
+              \item \textbf{L (Lean)} --- Stosowanie zasad szczupłego zarządzania, takich jak eliminacja marnotrawstwa (\textit{muda}), praca w małych partiach (\textit{small batches}) i optymalizacja przepływu wartości.
+              \item \textbf{M (Measurement)} --- Gromadzenie i analiza danych dotyczących procesów i wydajności w celu podejmowania decyzji w oparciu o fakty.
+              \item \textbf{S (Sharing)} --- Dzielenie się wiedzą, sukcesami i porażkami wewnątrz organizacji, co wspiera ciągłe uczenie się i buduje spójność zespołu.
+          \end{itemize}
 
     \item[Metryki DORA] \cite{Google2022StateOfDevOps}\cite{DoraCapabilities} DevOps Research and Assessment (DORA) zaproponowany przez Nicole Forsgren w Google to model,
-    który zidentyfikował cztery kluczowe wskaźniki (ang. \textit{Four Key Metrics}) pozwalające obiektywnie mierzyć wydajność dostarczania oprogramowania:
-    \begin{itemize}
-        \item \textbf{Deployment Frequency} (Częstotliwość wdrożeń) --- Mierzy, jak często organizacja pomyślnie wdraża kod do produkcji. Wysoka częstotliwość wskazuje na zwinność zespołu.
-        \item \textbf{Lead Time for Changes} (Czas realizacji zmian) --- Czas od zatwierdzenia zmiany w kodzie do jej pomyślnego uruchomienia na produkcji. Krótki czas pozwala na szybką reakcję na potrzeby rynku.
-        \item \textbf{Change Failure Rate} (Wskaźnik awaryjności zmian) --- Odsetek wdrożeń, które kończą się awarią lub wymagają natychmiastowych działań naprawczych (np. \textit{rollback}).
-        \item \textbf{Time to Restore Service} (Czas przywracania usługi) --- Średni czas potrzebny na przywrócenie sprawności systemu po wystąpieniu incydentu krytycznego na produkcji.
-    \end{itemize}
+          który zidentyfikował cztery kluczowe wskaźniki (ang. \textit{Four Key Metrics}) pozwalające obiektywnie mierzyć wydajność dostarczania oprogramowania:
+          \begin{itemize}
+              \item \textbf{Deployment Frequency} (Częstotliwość wdrożeń) --- Mierzy, jak często organizacja pomyślnie wdraża kod do produkcji. Wysoka częstotliwość wskazuje na zwinność zespołu.
+              \item \textbf{Lead Time for Changes} (Czas realizacji zmian) --- Czas od zatwierdzenia zmiany w kodzie do jej pomyślnego uruchomienia na produkcji. Krótki czas pozwala na szybką reakcję na potrzeby rynku.
+              \item \textbf{Change Failure Rate} (Wskaźnik awaryjności zmian) --- Odsetek wdrożeń, które kończą się awarią lub wymagają natychmiastowych działań naprawczych (np. \textit{rollback}).
+              \item \textbf{Time to Restore Service} (Czas przywracania usługi) --- Średni czas potrzebny na przywrócenie sprawności systemu po wystąpieniu incydentu krytycznego na produkcji.
+          \end{itemize}
 \end{description}
 
 Są one powszechnie używane do klasyfikowania organizacji według poziomów wydajności (elita, wysoka, średnia, niska) i diagnozowania wąskich gardeł w dostarczaniu i niezawodności.
@@ -202,11 +202,11 @@ Wybrane z nich to:
     % Wykorzystane w części praktycznej:
     \item[GitOps] Podejście, które wykorzystuje Git jako jedyne źródło prawdy dla infrastruktury i aplikacji. Automatyzacja wdrożeń jest osiągana poprzez monitorowanie zmian w repozytorium Git i automatyczne zastosowanie ich w środowisku produkcyjnym.
     \item[DevSecOps] Integracja bezpieczeństwa (Security) w procesie DevOps. Bezpieczeństwo jest uwzględniane na każdym etapie cyklu życia aplikacji, od planowania po wdrożenie i utrzymanie, co pozwala na szybsze wykrywanie i eliminowanie zagrożeń.
-    % Specjalizacje inżynierskie
+          % Specjalizacje inżynierskie
     \item[Cloud Engineering] Projektowanie, budowanie i zarządzanie infrastrukturą chmurową, która wspiera procesy DevOps, z naciskiem na skalowalność, bezpieczeństwo i efektywność kosztową.
     \item[Site Reliability Engineering] Podejście skupiające się na niezawodności, skalowaniu i efektywności systemów produkcyjnych poprzez inżynierię i automatyzację.
     \item[Platform Engineering] Tworzenie i utrzymywanie wewnętrznych platform wspierających zespoły deweloperskie w szybszym i łatwiejszym wdrażaniu aplikacji.
-    % Pozostałe:    
+          % Pozostałe:    
     \item[FinOps] Połączenie praktyk finansowych z operacjami IT. Celem jest optymalizacja kosztów chmury poprzez lepszą współpracę między działami finansowymi, technicznymi i biznesowymi, co prowadzi do świadomego zarządzania wydatkami na infrastrukturę.
     \item[MLOps] Integracja praktyk DevOps in dziedzinie uczenia maszynowego (Machine Learning). Ułatwia zarządzanie cyklem życia modeli ML, od trenowania po wdrażanie i monitorowanie, zapewniając spójność i skalowalność modeli w produkcji.
     \item[DataOps] Zastosowanie zasad DevOps w inżynierii danych. Skupia się na automatyzacji procesów związanych z danymi, poprawie ich jakości oraz współpracy między zespołami, co przyspiesza dostarczanie wartościowych informacji biznesowych.
@@ -214,7 +214,7 @@ Wybrane z nich to:
     \item[ChatOps] Wykorzystanie platform komunikacyjnych (np. Slack, Microsoft Teams) do zarządzania operacjami i automatyzacją zadań poprzez interakcje w czasie rzeczywistym, co zwiększa przejrzystość i szybkość reakcji zespołów.
 \end{description}
 
-Elementy GitOps, DevSecOps i Site Reliability Engineering będą wykorzystywane w części praktycznej pracy, a pozostałe specjalizacje są opisane dla pokazania kontekstu i trendów rozwoju metodologii DevOps. 
+Elementy GitOps, DevSecOps i Site Reliability Engineering będą wykorzystywane w części praktycznej pracy, a pozostałe specjalizacje są opisane dla pokazania kontekstu i trendów rozwoju metodologii DevOps.
 
 \subsection{Cloud computing}
 
@@ -233,7 +233,7 @@ Model przetwarzania w chmurze (ang. \textit{cloud computing}) zdefiniowany jest 
           Może być zarządzana przez tę organizację lub przez zewnętrznego dostawcę usług, ale zasoby i usługi są dostępne tylko dla tej konkretnej firmy, co zapewnia wyższy poziom kontroli nad danymi, bezpieczeństwem i zgodnością z regulacjami.
           Chmury prywatne są często wykorzystywane przez przedsiębiorstwa, które mają wysokie wymagania dotyczące bezpieczeństwa, poufności danych lub regulacji prawnych (np. instytucje finansowe, rządowe, medyczne).
           Mogą być utrzymane w lokalnym centrum danych organizacji lub w dedykowanym ośrodku danych dostawcy usług.
-          
+
           Chmura prywatna oferuje:
           \begin{itemize}[leftmargin=*]
               \item \textbf{Wyższy poziom bezpieczeństwa i prywatności}: Dane są przechowywane na dedykowanych serwerach.
@@ -242,7 +242,7 @@ Model przetwarzania w chmurze (ang. \textit{cloud computing}) zdefiniowany jest 
           \end{itemize}
 
     \item[Chmura hybrydowa]
-          Chmura hybrydowa to kompozycja dwóch lub więcej odrębnych infrastruktur chmurowych (prywatnych, społecznościowych lub publicznych), które pozostają rozdzielne, ale są powiązane ze sobą standaryzowaną technologią umożliwiającą przenoszenie danych i aplikacji \cite{Mell2011NISTCloudDefinition}. 
+          Chmura hybrydowa to kompozycja dwóch lub więcej odrębnych infrastruktur chmurowych (prywatnych, społecznościowych lub publicznych), które pozostają rozdzielne, ale są powiązane ze sobą standaryzowaną technologią umożliwiającą przenoszenie danych i aplikacji \cite{Mell2011NISTCloudDefinition}.
           Umożliwia to organizacjom korzystanie z zalet obu modeli:
 
           \begin{itemize}[leftmargin=*]
@@ -251,7 +251,7 @@ Model przetwarzania w chmurze (ang. \textit{cloud computing}) zdefiniowany jest 
           \end{itemize}
 
           Chmura hybrydowa jest idealna dla firm, które chcą utrzymać kontrolę nad krytycznymi danymi i aplikacjami, jednocześnie korzystając z mocy obliczeniowej chmury publicznej.
-          
+
           Przykładowe scenariusze użycia chmury hybrydowej:
           \begin{itemize}[leftmargin=*]
               \item \textbf{Disaster Recovery}: Kopie zapasowe danych w chmurze publicznej.
@@ -260,9 +260,9 @@ Model przetwarzania w chmurze (ang. \textit{cloud computing}) zdefiniowany jest 
           \end{itemize}
 
     \item[Chmura społecznościowa]
-          Chmura społecznościowa (ang. \textit{community cloud}) to infrastruktura udostępniana wyłącznie specyficznej społeczności konsumentów z organizacji, które mają wspólne interesy (np. misję, wymagania dotyczące bezpieczeństwa, politykę lub względy zgodności) \cite{Mell2011NISTCloudDefinition}. 
+          Chmura społecznościowa (ang. \textit{community cloud}) to infrastruktura udostępniana wyłącznie specyficznej społeczności konsumentów z organizacji, które mają wspólne interesy (np. misję, wymagania dotyczące bezpieczeństwa, politykę lub względy zgodności) \cite{Mell2011NISTCloudDefinition}.
           Może być zarządzana przez same organizacje lub stronę trzecią.
-          
+
           Infrastruktura jest współdzielona między organizacjami o podobnych potrzebach, takich jak:
           \begin{itemize}[leftmargin=*]
               \item \textbf{Regulacje prawne i zgodność}: Branże podlegające restrykcyjnym regulacjom (np. służba zdrowia, finanse).
@@ -287,60 +287,67 @@ Najpopularniejsi dostawcy chmur (ang. \textit{Cloud Service Providers}) to:
 
 Oprócz powyższych liderów, na rynku funkcjonuje wielu innych dostawców o profilu globalnym lub regionalnym, takich jak Alibaba Cloud (lider rynku azjatyckiego), IBM Cloud oraz Oracle Cloud. Istnieją również platformy wyspecjalizowane, jak Salesforce (model SaaS), DigitalOcean i Linode (popularne wśród deweloperów i startupów) oraz dostawcy europejscy kładący szczególny nacisk na suwerenność danych, m.in. OVHcloud, Hetzner Online czy Scaleway.
 
-\noindent\textcolor{red}{\rule{\textwidth}{2pt}}
-\begin{center}
-    \textbf{\textcolor{red}{--- START DRAFT ---}}
-\end{center}
-\noindent\textcolor{red}{\rule{\textwidth}{2pt}}
 
 \subsection{Cloud Native}
-\begin{itemize}[leftmargin=*]
-    \item co to jest? różne definicje
-    \item Cloud computing vs cloud native - implementacja vs architektura
-    \item Cloud-native pillars
-    \item jaki jest wplyw na IT? Cloud-native benefits
-\end{itemize}
 
-\subsubsection{Cloud Native Computing Fundation}
-\begin{itemize}[leftmargin=*]
-    \item technologie i narzedzia - Landscape
-    \item Standardy
-    \item Eventy
-    \item Kursy i certyfikaty
-\end{itemize}
+Metodologia Cloud-native to podejście do projektowania, budowania i uruchamiania aplikacji, które w pełni wykorzystuje zalety modelu dostarczania usług w chmurze obliczeniowej (ang. \textit{Cloud Computing}) \cite{Kosinska2023CloudNativeKnowledge}. Aplikacje te są tworzone celowo z myślą o środowisku chmurowym, a nie jedynie do niego przenoszone (ang. \textit{cloud-ready}) \cite{CNCFCloudNativeDefinition}.
+
+Główne aspekty i cechy metodologii Cloud-native obejmują:
+
+\begin{description}
+    \item[Cztery filary technologiczne] Fundamentem tego podejścia są DevOps, ciągła integracja i dostarczanie (CI/CD), konteneryzacja oraz architektura mikroserwisów \cite{Kratzke2017CloudNative}.
+    \item[Kluczowe cele projektowe] Podejście to ma na celu zwiększenie szybkości dostarczania oprogramowania, poprawę jego skalowalności i odporności (ang. \textit{resilience}) oraz redukcję ryzyka technicznego związanego z wdrożeniem \cite{Oyekunle2024CloudNativeReview}.
+    \item[Agnostyczność technologiczna] Aplikacje Cloud-native są projektowane jako niezależne od konkretnej infrastruktury, systemu operacyjnego czy języka programowania. Pozwala to na uniknięcie uzależnienia od jednego dostawcy chmury (ang. \textit{vendor lock-in}) i traktowanie zasobów jako uniwersalnych komponentów chmurowych \cite{Alonso2023MultiCloudNative}.
+    \item[Architektura mikroserwisów] Systemy Cloud-native składają się z małych, niezależnych usług, które realizują konkretne funkcje biznesowe, komunikują się przez interfejsy API (często REST/HTTP) i mogą być niezależnie wdrażane oraz skalowane \cite{Balalaie2016MicroservicesDevOps}.
+    \item[Konteneryzacja i orkiestracja] Kontenery zapewniają spójne i odizolowane środowisko wykonawcze, które działa identycznie niezależnie od miejsca wdrożenia. Niezbędnym elementem jest orkiestrator (np. Kubernetes), który automatyzuje tworzenie, monitorowanie i skalowanie zasobów w kontenerach \cite{Mondal2023KubernetesAutoscaling}.
+    \item[Wzorce projektowe] Projektowanie opiera się na sprawdzonych wzorcach, takich jak \textit{Twelve-Factor App}. Wzorce te kładą nacisk na szybkość, bezpieczeństwo i skalowalność aplikacji SaaS \cite{Wiggins2012TwelveFactor}.
+    \item[Niezmienna infrastruktura] (ang. \textit{Immutable Infrastructure}) Zamiast modyfikować istniejące komponenty, w metodologii tej promuje się zastępowanie ich nowymi wersjami, co zwiększa przewidywalność i stabilność systemu.
+    \item[Ewolucja w stronę Serverless] Nowoczesne podejście Cloud-native obejmuje również model \textit{Function-as-a-Service} (FaaS), gdzie logika biznesowa jest uruchamiana w formie bezstanowych funkcji wyzwalanych zdarzeniami, co pozwala na optymalizację kosztów poprzez skalowanie do zera (ang. \textit{scale-to-zero}).
+\end{description}
+
+W szerszym ujęciu metodologia ta dzieli środowisko wykonawcze na warstwy \cite{Kratzke2016CloudNativeReferenceModel}:
+\begin{enumerate}
+    \item \textbf{Infrastruktury} --- maszyny wirtualne, sieć i magazyny danych.
+    \item \textbf{Konteneryzacji i klastra} --- środowisko uruchomieniowe (ang. \textit{runtime}) oraz orkiestrator zarządzający zasobami.
+    \item \textbf{Aplikacji} --- mikroserwisy dostarczające funkcjonalność dla użytkownika końcowego.
+\end{enumerate}
+
 
 \subsection{Kubernetes}
-zloty standard, no1 projekt CNCF, dominacja rynku
-\begin{itemize}[leftmargin=*]
-    \item główne zalety
-          \begin{itemize}[leftmargin=*]
-              \item everything as code
-              \item cloud agnostic
-              \item spójność narzędzi niezależnie od dostawcy
-              \item automatyzacja
-              \item rozszerzalne API
-              \item deklaratywnosc i self healing cycle
-          \end{itemize}
-    \item alternatywy:
-          \begin{itemize}[leftmargin=*]
-              \item rancher
-              \item openshift
-          \end{itemize}
-    \item managed kubernetes:
-          \begin{itemize}[leftmargin=*]
-              \item GKE
-              \item EKS
-              \item AKS
-          \end{itemize}
-    \item cloud containers:
-          \begin{itemize}[leftmargin=*]
-              \item ECS
-              \item Azure Container Instances
-              \item Google Cloud Run
-          \end{itemize}
-    \item lekka orkiestracja:
-          \begin{itemize}[leftmargin=*]
-              \item Docker Swarm
-              \item Nomad
-          \end{itemize}
-\end{itemize}
+
+Kubernetes (często skracany jako K8s) jest powszechnie uznawany za wiodącą platformę orkiestracji kontenerów i de facto standard dla nowoczesnych wdrożeń chmurowych (ang. \textit{cloud-native}) \cite{Mondal2023KubernetesAutoscaling}. Jego pozycja wynika z dominacji w usługach zarządzanych oraz rozbudowanego ekosystemu narzędzi wspierających.
+
+\subsubsection{Pozycja rynkowa i porównanie rozwiązań}
+W porównaniu do alternatyw takich jak Docker Swarm czy Apache Mesos, Kubernetes oferuje znacznie szerszy zestaw funkcji, bogatszy ekosystem oraz bardziej dojrzałe możliwości w zakresie planowania i skalowania zasobów \cite{Alonso2023MultiCloudNative}. Choć Docker Swarm pozostaje prostszy w obsłudze dla mniejszych wdrożeń, to Kubernetes prowadzi pod względem liczby funkcji i dojrzałości rynkowej.
+
+\subsubsection{Usługi zarządzane (ang. \textit{Managed Kubernetes})}
+Praktycznym przejawem dominacji tej technologii są usługi oferowane przez głównych dostawców chmury: \textit{Elastic Kubernetes Service} (AWS EKS), \textit{Google Kubernetes Engine} (GKE) oraz \textit{Azure Kubernetes Service} (AKS). Usługi prze te stanowią fundament adopcji korporacyjnej, redukując bariery operacyjne poprzez automatyzację zarządzania warstwą sterowania (ang. \textit{control plane}), aktualizacji i zabezpieczeń \cite{Mondal2023KubernetesAutoscaling}. Pozwalają one na traktowanie klastra jako zasobu chmurowego, co jest kluczowe w nowoczesnych architekturach.
+
+\subsubsection{Kubernetes w ekosystemie CNCF}
+Zgodnie z systematycznymi przeglądami literatury, Kubernetes nie funkcjonuje jako izolowana warstwa, lecz jako centralny punkt krajobrazu technicznego \textit{Cloud Native Computing Foundation} (CNCF) \cite{Alonso2023MultiCloudNative}. Integruje on różnorodne komponenty, takie jak środowiska uruchomieniowe (ang. \textit{runtimes}), sieci usług (ang. \textit{service mesh}), systemy monitorowania oraz narzędzia CI/CD, tworząc spójny ekosystem dla nowoczesnego cyklu wytwarzania oprogramowania (ang. \textit{Software Development Life Cycle}, SDLC).
+
+\subsubsection{Przyczyny dominacji Kubernetes}
+Istnieje kilka kluczowych czynników, które sprawiły, że Kubernetes i technologie CNCF stały się standardem dla aplikacji o dużej skali:
+\begin{enumerate}
+    \item \textbf{Model deklaratywny i automatyzacja} --- Kubernetes opiera się na API i modelu deklaratywnym, co umożliwia automatyzację wdrażania, skalowania i operacji (np. poprzez mechanizmy HPA/VPA czy CRD). Wspiera to podejście Infrastruktura jako Kod (ang. \textit{Infrastructure as Code}) oraz procesy typu GitOps \cite{Mondal2023KubernetesAutoscaling, Oyekunle2024CloudNativeReview}.
+    \item \textbf{Dojrzałość ekosystemu} --- Głęboka integracja z projektami takimi jak Prometheus czy Grafana oraz wsparcie dla standardów sieciowych i magazynowania danych znacząco skraca czas dostarczania wartości (ang. \textit{time-to-value}) \cite{Alonso2023MultiCloudNative}.
+    \item \textbf{Prostota operacyjna w chmurze} --- Dzięki usługom zarządzanym organizacje mogą skupić się na dostarczaniu logiki biznesowej, przenosząc ciężar utrzymania infrastruktury na dostawców usług chmurowych.
+    \item \textbf{Obserwowalność i bezpieczeństwo} --- Rozszerzalna architektura pozwala na łatwą integrację zaawansowanych mechanizmów monitoringu, zarządzania sekretami i zabezpieczeń, co jest niezbędne dla systemów o znaczeniu krytycznym \cite{Oyekunle2024CloudNativeReview, Kosinska2023Observability}.
+\end{enumerate}
+
+\subsection{Wnioski z analizy literatury i wybór technologii}
+
+Analiza literatury pozwoliła na zidentyfikowanie kluczowych praktyk i technologii, które stanowią fundament nowoczesnego procesu wytwarzania oprogramowania (ang. \textit{Software Development Life Cycle}, SDLC). Zasady metodologii DevOps oraz podejście Cloud-native wyznaczają kierunek rozwoju współczesnych systemów, kładąc nacisk na elastyczność, szybkość i niezawodność.
+
+Jako autor niniejszej pracy, w części projektowej postaram się w miarę możliwości implementować rozwiązania zbliżone do tzw. „Złotego Standardu” (ang. \textit{Golden Standard}), bazując na sprawdzonych wzorcach DevOps/GitOps oraz najlepszych praktykach projektowania aplikacji chmurowych. Główne wartości i praktyki, które będą realizowane w projekcie, to:
+
+\begin{description}[font=\bfseries]
+    \item[Wszystko jako kod] (ang. \textit{Everything as Code}) --- Przechowywanie definicji infrastruktury, konfiguracji oraz procesów w systemie kontroli wersji, co zapewnia pełną transparentność zmian, ich audytowalność oraz powtarzalność środowisk.
+    \item[Automatyzacja] --- Kluczowym elementem jest automatyzacja procesów, takich jak testowanie, wdrażanie i monitorowanie, co pozwala na zwiększenie efektywności i redukcję błędów.
+    \item[Konteneryzacja] --- Wykorzystanie kontenerów do zapewnienia spójnego środowiska uruchomieniowe, co ułatwia przenoszenie aplikacji między różnymi środowiskami.
+    \item[Orkiestracja] --- Użycie platformy orkiestracji (Kubernetes) do zarządzania kontenerami, automatyzacji wdrożeń i skalowania zasobów.
+    \item[Architektura mikroserwisów] --- Projektowanie aplikacji jako zbioru małych, niezależnych usług, które mogą być rozwijane, wdrażane i skalowane niezależnie.
+    \item[Wzorce projektowe] --- Stosowanie sprawdzonych wzorców, takich jak \textit{Twelve-Factor App}, które kładą nacisk na szybkość, bezpieczeństwo i skalowalność aplikacji.
+    \item[Niezmienna infrastruktura] --- Zamiast modyfikować istniejące komponenty, promowanie zastępowania ich nowymi wersjami, co zwiększa przewidywalność i stabilność systemu.
+    \item[Obserwowalność] --- Zapewnienie zaawansowanych mechanizmów monitoringu, zarządzania sekretami i zabezpieczeń, co jest niezbędne dla systemów o znaczeniu krytycznym.
+\end{description}
