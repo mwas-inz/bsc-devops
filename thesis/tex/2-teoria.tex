@@ -10,7 +10,7 @@ Kładzie nacisk na konfigurację deklaratywną, utrwalanie kodu źródłowego, k
 łatwe odtwarzanie środowisk. Ma umożliwić przenośność, odporność i szybkie iteracje w rozproszonych systemach.
 W praktyce współczesnego oprogramowania 12FA jest często używany jako punkt odniesienia dla projektowania usług Software-as-a-Service (SaaS),
 systemów mikroserwisowych i procesów DevOps.
-\cite{12factor}\cite{KosinskaBrotonTobiasz2023Kroa}
+\cite{Wiggins2012TwelveFactor}\cite{Kosinska2023CloudNativeKnowledge}
 
 \subsubsection{Zasady Twelve-Factor App}
 
@@ -108,15 +108,16 @@ systemów mikroserwisowych i procesów DevOps.
 
 % todo(?): komentarz do 12FA, znaczenie dla pracy i dla projektu
 
+
 \subsection{DevOps}
 
 DevOps to podejście do rozwoju oprogramowania, które łączy praktyki i narzędzia z obszarów deweloperskich (Dev) i operacyjnych (Ops) w celu zwiększenia efektywności, jakości i szybkości dostarczania oprogramowania.
 Początki tego podejścia sięgają około 2007 roku, kiedy to inżynierowie i liderzy IT zaczęli dostrzegać potrzebę lepszej współpracy między zespołami deweloperskimi a operacyjnymi, aby sprostać rosnącym wymaganiom rynku i użytkowników.
 Jej prekursorami byli m.in. Patrick Debois, Nicole Forsgren, Jez Humble, Gene Kim i John Willis, którzy promowali idee takie jak ciągła integracja (CI), ciągłe dostarczanie (CD) i automatyzacja procesów.
 Ich prace i działalność przyczyniły się do rozwoju DevOps jako kultury, filozofii i praktyki, która zyskała szerokie uznanie w branży IT i stała się kluczowym elementem nowoczesnego rozwoju oprogramowania.
-\cite{AtlassianDevOpsHistory} \cite{devopsHandbook2021}
+\cite{AtlassianDevOpsHistory} \cite{Kim2021DevOpsHandbook}
 Kultura DevOps promuje otwartą komunikację i współpracę między zespołami deweloperskimi a operacyjnymi, co pozwala na szybsze rozwiązywanie problemów i lepsze zrozumienie wymagań biznesowych.
-Automatyzacja jest kluczowym elementem, który umożliwia eliminację manualnych procesów, co z kolei przyspiesza cykle wydania i redukuje ryzyko błędów \cite{DevOpsConceptsLeite2019}.
+Automatyzacja jest kluczowym elementem, który umożliwia eliminację manualnych procesów, co z kolei przyspiesza cykle wydania i redukuje ryzyko błędów \cite{Leite2019DevOpsConcepts}.
 
 \subsubsection{Kluczowe wartości i modele dojrzałości DevOps}
 
@@ -141,10 +142,8 @@ Aby obiektywnie mierzyć stopień wdrożenia i skuteczność powyższych zasad w
 Jest to próba przełożenia wartości i zasad DevOps na konkretne, skodyfikowane wskaźniki, które pozwalają organizacjom ocenić swoje praktyki i ich aktualny poziom, a potem zidentyfikować kierunki do poprawy.
 Dwoma najbardziej wpływowymi podejściami są model CALMS oraz metryki DORA.
 
-
-
 \begin{description}[font=\bfseries]
-    \item[Model CALMS] \cite{devopsHandbook2021}\cite{LeadingDevOpsPracticeMaroukian2020} Opracowany przez Johna Willisa i Damona Edwardsa (a później uzupełniony przez Jeza Humble'a), model ten definiuje pięć fundamentów sukcesu DevOps:
+    \item[Model CALMS] \cite{Kim2021DevOpsHandbook}\cite{Maroukian2020DevOpsAdoption} Opracowany przez Johna Willisa i Damona Edwardsa (a później uzupełniony przez Jeza Humble'a), model ten definiuje pięć fundamentów sukcesu DevOps:
     \begin{itemize}
         \item \textbf{C (Culture)} --- Kultura oparta na zaufaniu, współpracy i wspólnym celu. Jest to najważniejszy element, bez którego inne narzędzia i procesy tracą na znaczeniu.
         \item \textbf{A (Automation)} --- Automatyzacja powtarzalnych zadań (np. testowanie, wdrażanie), co pozwala na eliminację błędów ludzkich i szybsze dostarczanie wartości.
@@ -153,7 +152,7 @@ Dwoma najbardziej wpływowymi podejściami są model CALMS oraz metryki DORA.
         \item \textbf{S (Sharing)} --- Dzielenie się wiedzą, sukcesami i porażkami wewnątrz organizacji, co wspiera ciągłe uczenie się i buduje spójność zespołu.
     \end{itemize}
 
-    \item[Metryki DORA] \cite{GoogleStateOfDevOps2022}\cite{DORAcapabilities} DevOps Research and Assessment (DORA) zaproponowany przez Nicole Forsgren w Google to model,
+    \item[Metryki DORA] \cite{Google2022StateOfDevOps}\cite{DoraCapabilities} DevOps Research and Assessment (DORA) zaproponowany przez Nicole Forsgren w Google to model,
     który zidentyfikował cztery kluczowe wskaźniki (ang. \textit{Four Key Metrics}) pozwalające obiektywnie mierzyć wydajność dostarczania oprogramowania:
     \begin{itemize}
         \item \textbf{Deployment Frequency} (Częstotliwość wdrożeń) --- Mierzy, jak często organizacja pomyślnie wdraża kod do produkcji. Wysoka częstotliwość wskazuje na zwinność zespołu.
@@ -177,7 +176,7 @@ Każdy z nich jest kluczowy dla zapewnienia, że proces wytwarzania oprogramowan
 \begin{figure}[!htbp]
     \label{fig:devops-cycle}
     \centering \includegraphics[width=0.5\linewidth]{devops-cycle.png}
-    \caption{Etapy rozwoju aplikacji w metodologii DevOps \cite{DynatraceDevOpsEbook}}
+    \caption{Etapy rozwoju aplikacji w metodologii DevOps \cite{DynatraceDevOpsGuide}}
 \end{figure}
 
 \begin{description}[font=\bfseries]
@@ -194,6 +193,7 @@ Każdy z nich jest kluczowy dla zapewnienia, że proces wytwarzania oprogramowan
 Kolejne iteracje mają za zadanie w sposób ciągły dostarczać wartość dla odbiorcy systemu.
 Pętla ta jest podstawą kultury DevOps. Promuje ciągłe uczenie się, eksperymentowanie i doskonalenie procesów, narzędzi i produktów.
 Z założenia jest to proces, który osiąga sprzężenie zwrotne (ang. feedback loop), gdzie każda iteracja dostarcza informacji zwrotnej, która jest wykorzystywana do poprawy następnych iteracji.
+
 
 \subsubsection{Rozwój DevOps --- nowe kierunki i specjalizacje}
 W miarę rozwoju metodologii DevOps, pojawiło się wiele specjalizacji i podejść, które rozszerzają lub uzupełniają jej podstawowe zasady.
@@ -218,18 +218,18 @@ Elementy GitOps, DevSecOps i Site Reliability Engineering będą wykorzystywane 
 
 \subsection{Cloud computing}
 
-Model przetwarzania w chmurze (ang. \textit{cloud computing}) zdefiniowany jest jako model umożliwiający wygodny dostęp sieciowy do współdzielonej puli konfigurowalnych zasobów obliczeniowych (np. sieci, serwerów, pamięci masowej, aplikacji i usług), które mogą być szybko udostępnione i zwolnione przy minimalnym nakładzie pracy zarządczej lub interakcji z dostawcą usług \cite{NIST_CloudComputing}.
+Model przetwarzania w chmurze (ang. \textit{cloud computing}) zdefiniowany jest jako model umożliwiający wygodny dostęp sieciowy do współdzielonej puli konfigurowalnych zasobów obliczeniowych (np. sieci, serwerów, pamięci masowej, aplikacji i usług), które mogą być szybko udostępnione i zwolnione przy minimalnym nakładzie pracy zarządczej lub interakcji z dostawcą usług \cite{Mell2011NISTCloudDefinition}.
 
 \subsubsection{Rodzaje chmur}
 \begin{description}[style=nextline, font=\bfseries]
     \item[Chmura publiczna]
-          Chmura publiczna to model usług chmurowych, w którym zasoby obliczeniowe są dostarczane przez zewnętrznego dostawcę usług za pośrednictwem internetu dla ogółu społeczeństwa lub dużej grupy branżowej \cite{NIST_CloudComputing}.
+          Chmura publiczna to model usług chmurowych, w którym zasoby obliczeniowe są dostarczane przez zewnętrznego dostawcę usług za pośrednictwem internetu dla ogółu społeczeństwa lub dużej grupy branżowej \cite{Mell2011NISTCloudDefinition}.
           W tym modelu infrastruktura jest współdzielona między wieloma użytkownikami (ang. \textit{tenants}), a dostawca chmury jest odpowiedzialny za zarządzanie, utrzymanie i zabezpieczenie zasobów.
           Użytkownicy płacą zazwyczaj za rzeczywiste wykorzystanie zasobów według modelu "pay-as-you-go".
           Chmury publiczne oferują wysoką skalowalność i elastyczność, co pozwala na szybkie dostosowanie się do zmieniających się potrzeb biznesowych bez konieczności inwestowania w infrastrukturę sprzętową.
 
     \item[Chmura prywatna]
-          Chmura prywatna to infrastruktura chmurowa wykorzystywana wyłącznie przez jedną organizację obejmującą wielu konsumentów (np. jednostki biznesowe) \cite{NIST_CloudComputing}.
+          Chmura prywatna to infrastruktura chmurowa wykorzystywana wyłącznie przez jedną organizację obejmującą wielu konsumentów (np. jednostki biznesowe) \cite{Mell2011NISTCloudDefinition}.
           Może być zarządzana przez tę organizację lub przez zewnętrznego dostawcę usług, ale zasoby i usługi są dostępne tylko dla tej konkretnej firmy, co zapewnia wyższy poziom kontroli nad danymi, bezpieczeństwem i zgodnością z regulacjami.
           Chmury prywatne są często wykorzystywane przez przedsiębiorstwa, które mają wysokie wymagania dotyczące bezpieczeństwa, poufności danych lub regulacji prawnych (np. instytucje finansowe, rządowe, medyczne).
           Mogą być utrzymane w lokalnym centrum danych organizacji lub w dedykowanym ośrodku danych dostawcy usług.
@@ -242,7 +242,7 @@ Model przetwarzania w chmurze (ang. \textit{cloud computing}) zdefiniowany jest 
           \end{itemize}
 
     \item[Chmura hybrydowa]
-          Chmura hybrydowa to kompozycja dwóch lub więcej odrębnych infrastruktur chmurowych (prywatnych, społecznościowych lub publicznych), które pozostają rozdzielne, ale są powiązane ze sobą standaryzowaną technologią umożliwiającą przenoszenie danych i aplikacji \cite{NIST_CloudComputing}. 
+          Chmura hybrydowa to kompozycja dwóch lub więcej odrębnych infrastruktur chmurowych (prywatnych, społecznościowych lub publicznych), które pozostają rozdzielne, ale są powiązane ze sobą standaryzowaną technologią umożliwiającą przenoszenie danych i aplikacji \cite{Mell2011NISTCloudDefinition}. 
           Umożliwia to organizacjom korzystanie z zalet obu modeli:
 
           \begin{itemize}[leftmargin=*]
@@ -260,7 +260,7 @@ Model przetwarzania w chmurze (ang. \textit{cloud computing}) zdefiniowany jest 
           \end{itemize}
 
     \item[Chmura społecznościowa]
-          Chmura społecznościowa (ang. \textit{community cloud}) to infrastruktura udostępniana wyłącznie specyficznej społeczności konsumentów z organizacji, które mają wspólne interesy (np. misję, wymagania dotyczące bezpieczeństwa, politykę lub względy zgodności) \cite{NIST_CloudComputing}. 
+          Chmura społecznościowa (ang. \textit{community cloud}) to infrastruktura udostępniana wyłącznie specyficznej społeczności konsumentów z organizacji, które mają wspólne interesy (np. misję, wymagania dotyczące bezpieczeństwa, politykę lub względy zgodności) \cite{Mell2011NISTCloudDefinition}. 
           Może być zarządzana przez same organizacje lub stronę trzecią.
           
           Infrastruktura jest współdzielona między organizacjami o podobnych potrzebach, takich jak:
