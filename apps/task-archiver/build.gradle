@@ -1,0 +1,70 @@
+plugins {
+    id 'java'
+    id 'io.quarkus'
+    id 'io.freefair.lombok'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
+    implementation 'io.quarkus:quarkus-kubernetes'
+    implementation 'io.quarkus:quarkus-micrometer-registry-prometheus'
+    implementation 'io.quarkus:quarkus-jdbc-postgresql'
+    implementation 'io.quarkus:quarkus-rest'
+    implementation 'io.quarkus:quarkus-smallrye-openapi'
+    implementation 'io.quarkus:quarkus-rest-jackson'
+    implementation 'io.quarkus:quarkus-opentelemetry'
+    implementation 'io.quarkus:quarkus-hibernate-orm-panache'
+    implementation 'io.quarkus:quarkus-messaging-pulsar'
+    implementation 'io.quarkus:quarkus-smallrye-health'
+    implementation 'io.quarkus:quarkus-micrometer'
+    implementation 'io.quarkus:quarkus-arc'
+    implementation 'io.quarkus:quarkus-hibernate-orm'
+    testImplementation 'io.quarkus:quarkus-junit5'
+    testImplementation 'io.rest-assured:rest-assured'
+    testImplementation "io.quarkus:quarkus-observability-devservices-lgtm"
+    implementation "io.opentelemetry.instrumentation:opentelemetry-jdbc"
+
+    // transitive dependency fix for Pulsar
+    // https://github.com/smallrye/smallrye-reactive-messaging/discussions/2567#discussioncomment-9042159
+    implementation("org.apache.bookkeeper:circe-checksum:4.16.1") {
+        artifact { type = "jar" }
+    }
+    implementation("org.apache.bookkeeper:cpu-affinity:4.16.1") {
+        artifact { type = "jar" }
+    }
+}
+
+group 'pl.edu.pw.eiti.mwas'
+version '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+test {
+    systemProperty "java.util.logging.manager", "org.jboss.logmanager.LogManager"
+}
+compileJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
+}
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
+
+jar {
+    enabled = false
+}
+
+quarkusBuild {
+    nativeArgs {
+        containerBuild = true
+        builderImage = "quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21"
+    }
+}
