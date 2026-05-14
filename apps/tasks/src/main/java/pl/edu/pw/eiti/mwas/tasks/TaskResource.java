@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Path("/users/{userId}/tasks")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class TaskResource {
 
     @Inject
@@ -28,7 +30,7 @@ public class TaskResource {
     UsersRestClient usersRestClient;
 
     @GET
-    public List<Task> getTasks(Long userId) {
+    public List<Task> getTasks(@PathParam("userId") Long userId) {
         checkIfUserIsPresent(userId);
         Log.info("Retrieving tasks for user " + userId);
         return repository.findTasksByUserId(userId);
@@ -36,7 +38,7 @@ public class TaskResource {
 
     @GET
     @Path("/{taskId}")
-    public Task getTask(Long userId, Long taskId) {
+    public Task getTask(@PathParam("userId") Long userId, @PathParam("taskId") Long taskId) {
         checkIfUserIsPresent(userId);
         Log.info("Retrieving task with id " + taskId);
         return repository.findById(taskId);
@@ -44,8 +46,7 @@ public class TaskResource {
 
     @POST
     @Transactional
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response createTask(Long userId, Task task) {
+    public Response createTask(@PathParam("userId") Long userId, Task task) {
         checkIfUserIsPresent(userId);
         Task aTask = Task.builder()
                 .userId(userId)
@@ -63,7 +64,7 @@ public class TaskResource {
     @PATCH
     @Path("/{taskId}")
     @Transactional
-    public Response changeStatus(Long userId, Long taskId, Task task) {
+    public Response changeStatus(@PathParam("userId") Long userId, @PathParam("taskId") Long taskId, Task task) {
         checkIfUserIsPresent(userId);
         Task aTask = repository.findById(taskId);
         if (task.status == TaskStatus.done) {
@@ -77,7 +78,7 @@ public class TaskResource {
 
     @DELETE
     @Path("/{taskId}")
-    public Response deleteTask(Long userId, Long taskId) {
+    public Response deleteTask(@PathParam("userId") Long userId, @PathParam("taskId") Long taskId) {
         checkIfUserIsPresent(userId);
         Task aTask = repository.findById(taskId);
         Log.info("Scheduled deletion of task: " + aTask);

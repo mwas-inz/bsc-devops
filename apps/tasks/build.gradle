@@ -60,6 +60,10 @@ compileTestJava {
     options.encoding = 'UTF-8'
 }
 
+jar {
+    enabled = false
+}
+
 quarkusBuild {
     nativeArgs {
         containerBuild = true
