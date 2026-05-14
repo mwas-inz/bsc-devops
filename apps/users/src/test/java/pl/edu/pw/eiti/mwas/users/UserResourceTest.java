@@ -8,7 +8,7 @@ import static io.restassured.RestAssured.given;
 @QuarkusTest
 class UserResourceTest {
     @Test
-    void testHelloEndpoint() {
+    void testListUsers() {
         given()
           .when().get("/users")
           .then()
