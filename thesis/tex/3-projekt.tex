@@ -20,3 +20,163 @@ Przyjęto formę opisu opartą na tzw. „kartach narzędzi”. Dla każdego z k
 \end{itemize}
 
 Dzięki takiej strukturze, łatwo zrozumieć, jak poszczególne narzędzia współgrają ze sobą w ramach kompleksowego procesu dostarczania oprogramowania, a także jakie decyzje architektoniczne i inżynierskie stoją za ich implementacją.
+
+
+
+
+
+Poniższe sekcje szczegółowo opisują realizację kolejnych etapów pętli DevOps.
+
+\subsection{Etap Plan i Code}
+Pierwsza faza cyklu DevOps obejmuje planowanie wymagań oraz wytwarzanie kodu źródłowego. W niniejszym projekcie etapy te są ze sobą ściśle zintegrowane, co pozwala na pełną identyfikowalność zmian — od zgłoszenia zadania po konkretną linię kodu.
+
+\subsubsection{Zarządzanie projektami: Jira}
+Do zarządzania wymaganiami funkcjonalnymi i planowania prac wykorzystano platformę \textbf{Jira}. Narzędzie to wybrano ze względu na jego status standardu rynkowego oraz zaawansowane możliwości wsparcia metodyk zwinnych (Agile).
+
+\textbf{Rola w projekcie:}
+Jira służy do definiowania historyjek użytkownika (\textit{User Stories}), zarządzania backlogiem produktu oraz planowania iteracji (sprintów). Każde zadanie techniczne jest powiązane z konkretnym wymaganiem biznesowym, co umożliwia monitorowanie postępów prac.
+
+\textbf{Integracja i dobre praktyki:}
+Zastosowano dwukierunkową integrację z systemem kontroli wersji GitHub. Dzięki temu, każda gałąź kodu (\textit{branch}) oraz każda zmiana (\textit{commit}) są automatycznie linkowane do odpowiedniego zgłoszenia w systemie Jira. Pozwala to na zachowanie pełnego kontekstu prac programistycznych bez konieczności ręcznego aktualizowania statusów zadań.
+
+\subsubsection{System kontroli wersji: GitHub}
+Jako system kontroli wersji i platformę współpracy wybrano \textbf{GitHub}, oparty na rozproszonym systemie Git. Jest on centralnym punktem prawdy (\textit{Single Source of Truth}) dla całego monorepozytorium.
+
+\textbf{Standard Conventional Commits:}
+Zgodnie z decyzją projektową \textit{ADR-0004}, wprowadzono standard \textbf{Conventional Commits}. Polega on na nadawaniu wiadomościom zatwierdzeń ustrukturyzowanej formy (np. \texttt{feat:}, \texttt{fix:}, \texttt{chore:}).
+\begin{itemize}
+    \item \textbf{Uzasadnienie:} Standaryzacja pozwala na automatyczne generowanie list zmian (\textit{changelogs}) oraz automatyzację wersjonowania semantycznego (\textit{Semantic Versioning}).
+    \item \textbf{Rola w CI/CD:} Czytelna historia zmian umożliwia narzędziom automatyzującym precyzyjne określenie, które komponenty systemu wymagają przebudowania i wdrożenia po każdej zmianie w monorepozytorium.
+\end{itemize}
+
+\subsubsection{Wytwarzanie oprogramowania: Stos technologiczny}
+Proces kodowania realizowany jest przy użyciu nowoczesnych środowisk programistycznych (\textit{IntelliJ IDEA}, \textit{VS Code}), a sama implementacja opiera się na technologiach wspierających paradygmat mikroserwisów.
+
+\textbf{Backend (Java i Quarkus):}
+Zastosowanie frameworka \textit{Quarkus} pozwala na realizację mikroserwisów w modelu \textit{Kubernetes-native}. Wykorzystuje on mechanizmy wstrzykiwania zależności (\textit{Dependency Injection}) oraz programowania reaktywnego, oferując jednocześnie bardzo niskie czasy startu aplikacji. Architektura kodu bazuje na zasadach \textit{Clean Architecture}, izolując domenę biznesową od zewnętrznych bibliotek.
+
+\textbf{Frontend (React):}
+Warstwa prezentacji budowana jest w oparciu o bibliotekę \textit{React}. Pozwala to na tworzenie interaktywnych komponentów interfejsu użytkownika, które komunikują się z backendem poprzez wystandaryzowane interfejsy API (REST).
+
+\textbf{Pryncypia Twelve-Factor App:}
+Wszystkie komponenty systemu są projektowane zgodnie z zasadami \textit{Twelve-Factor App}. Kluczowe aspekty to:
+\begin{itemize}
+    \item \textbf{Konfiguracja:} Cała konfiguracja specyficzna dla środowiska jest wstrzykiwana przez zmienne środowiskowe, a nie zaszyta w kodzie.
+    \item \textbf{Procesy:} Aplikacje są bezstanowe (\textit{stateless}), co umożliwia ich łatwe skalowanie w poziomie wewnątrz klastra Kubernetes.
+    \item \textbf{Logowanie:} Logi są traktowane jako strumień zdarzeń wysyłany na standardowe wyjście, co umożliwia ich centralizację przez narzędzia observability.
+\end{itemize}
+
+\subsection{Etap Build}
+Faza budowania (\textit{Build}) odpowiada za przekształcenie kodu źródłowego w gotowe do wdrożenia artefakty. W architekturze \textit{Cloud Native} proces ten kończy się wytworzeniem obrazu kontenera.
+
+\subsubsection{Orkiestracja potoku: GitHub Actions}
+Do automatyzacji procesu budowania wykorzystano usługę \textbf{GitHub Actions}. Pozwala ona na definiowanie potoków CI/CD (\textit{pipelines}) w formie kodu YAML, co jest zgodne z zasadą \textit{Everything as Code}.
+
+\textbf{Rola w projekcie:}
+GitHub Actions pełni funkcję silnika CI (\textit{Continuous Integration}), który reaguje na zdarzenia w repozytorium (np. \textit{pull request} lub \textit{push} do gałęzi głównej). Potok roboczy automatycznie uruchamia kompilację, testy oraz budowanie obrazów, zapewniając szybką pętlę informacji zwrotnej dla programisty.
+
+\subsubsection{Budowanie artefaktów: Gradle i NPM}
+W zależności od komponentu, wykorzystywane są dedykowane narzędzia budujące:
+\begin{itemize}
+    \item \textbf{Gradle (Backend):} Zarządza zależnościami projektu Java/Quarkus, kompiluje kod oraz uruchamia testy jednostkowe. Wybrano go ze względu na elastyczność i wydajność (mechanizm \textit{build cache}).
+    \item \textbf{NPM (Frontend):} Odpowiada za zarządzanie pakietami JavaScript oraz budowanie zoptymalizowanej paczki produkcyjnej aplikacji React.
+\end{itemize}
+
+\subsubsection{Konteneryzacja: Dockerfile}
+Zgodnie z decyzją \textit{ADR-0005}, jako standard budowania obrazów wybrano pliki \textbf{Dockerfile}. Wybór ten podyktowany był chęcią zachowania pełnej przejrzystości procesu, co ma kluczowe znaczenie w pracy inżynierskiej.
+
+\textbf{Dobre praktyki:}
+Zastosowano mechanizm \textit{multi-stage builds}, który pozwala na oddzielenie środowiska kompilacji od lekkiego środowiska uruchomieniowego. Dzięki temu obrazy produkcyjne nie zawierają niepotrzebnych narzędzi (jak Gradle czy JDK), co zmniejsza ich rozmiar oraz powierzchnię ataku.
+
+\textbf{Shift Left Security:}
+Bezpieczeństwo jest weryfikowane już na etapie budowania (\textit{Shift Left}):
+\begin{itemize}
+    \item \textbf{Trivy:} Każdy zbudowany obraz jest skanowany pod kątem znanych podatności (CVE) w bibliotekach systemowych i aplikacyjnych.
+    \item \textbf{Cosign:} Obrazy są cyfrowo podpisywane, co gwarantuje ich integralność i pozwala na weryfikację pochodzenia artefaktu przed jego uruchomieniem w klastrze.
+\end{itemize}
+
+\subsection{Etap Test}
+Automatyzacja testów jest fundamentem zaufania do procesu CI/CD. W projekcie testy są integralną częścią każdego potoku budowania.
+
+\subsubsection{Testy jednostkowe i integracyjne: JUnit}
+Podstawowym narzędziem weryfikacji poprawności logiki biznesowej jest framework \textbf{JUnit}.
+\begin{itemize}
+    \item \textbf{Zakres:} Testy pokrywają kluczowe komponenty domeny (zgodnie z \textit{Clean Architecture}) oraz integrację z bazą danych (przy użyciu biblioteki \textit{Testcontainers}).
+    \item \textbf{Automatyzacja:} Każde uruchomienie potoku w GitHub Actions wymaga przejścia wszystkich testów. Niepowodzenie choćby jednego testu blokuje możliwość przejścia do kolejnych etapów (np. budowania obrazu lub wdrożenia).
+\end{itemize}
+
+\subsection{Etap Release}
+Faza wydania (\textit{Release}) koncentruje się na bezpiecznym przechowywaniu artefaktów oraz ich wersji, gotowych do wdrożenia na środowiska docelowe.
+
+\subsubsection{Rejestr obrazów: Docker Hub}
+Jako centralne repozytorium obrazów kontenerowych wykorzystano platformę \textbf{Docker Hub}.
+\begin{itemize}
+    \item \textbf{Rola w projekcie:} Po pomyślnym zakończeniu etapu budowania i testowania, obrazy mikroserwisów są wysyłane (\textit{push}) do prywatnych lub publicznych repozytoriów w Docker Hub. Każdy obraz jest oznaczony unikalnym tagiem (np. skrótem \textit{commit SHA} lub numerem wersji semantycznej), co zapewnia pełną identyfikowalność.
+    \item \textbf{Uzasadnienie:} Docker Hub jest natywnie wspierany przez większość narzędzi CI/CD oraz klastry Kubernetes, co upraszcza proces pobierania obrazów podczas wdrożenia.
+\end{itemize}
+
+\subsubsection{Pakietowanie dla Kubernetes: Helm}
+Zarządzanie manifestami YAML dla wielu mikroserwisów staje się trudne bez odpowiedniego narzędzia. W tym celu wykorzystano \textbf{Helm} — menedżer pakietów dla systemu Kubernetes.
+\begin{itemize}
+    \item \textbf{Koncepcja Chartów:} Helm pozwala na definiowanie szablonów (\textit{Charts}), które opisują strukturę aplikacji w klastrze. Parametry specyficzne dla środowiska (np. liczba replik, limity zasobów) są wydzielone do plików \texttt{values.yaml}.
+    \item \textbf{Wersjonowanie wdrożeń:} Dzięki Helm możliwe jest traktowanie całej definicji infrastrukturalnej aplikacji jako pojedynczej wersji artefaktu. Ułatwia to procesy wycofywania zmian (\textit{rollback}) oraz promowania konkretnych wersji aplikacji między środowiskami.
+\end{itemize}
+
+\subsection{Etap Deploy}
+Faza wdrożenia (\textit{Deploy}) odpowiada za przeniesienie artefaktów na środowisko uruchomieniowe oraz zapewnienie odpowiedniej infrastruktury.
+
+\subsubsection{Infrastruktura jako Kod: Terraform}
+Do zarządzania zasobami infrastrukturalnymi wykorzystano narzędzie \textbf{Terraform}. Pozwala ono na definicję infrastruktury w sposób deklaratywny (\textit{Infrastructure as Code} - IaC).
+\begin{itemize}
+    \item \textbf{Rola w projekcie:} Terraform służy do automatycznego tworzenia i konfigurowania zasobów niezbędnych do działania klastra oraz usług pomocniczych. Mimo skupienia na środowisku lokalnym, wykorzystanie Terraform pozwala na łatwe przeniesienie projektu do chmury publicznej (np. AWS) poprzez zmianę dostawcy (\textit{provider}).
+    \item \textbf{Zalety:} Deklaratywność zapewnia powtarzalność środowisk oraz pozwala na wersjonowanie infrastruktury razem z kodem aplikacji.
+\end{itemize}
+
+\subsubsection{Środowisko uruchomieniowe: Kubernetes (kind/minikube)}
+Głównym środowiskiem, w którym pracują mikroserwisy, jest klaster \textbf{Kubernetes}. W części praktycznej wykorzystano narzędzia \textbf{kind} lub \textbf{minikube} do uruchomienia lokalnego klastra.
+\begin{itemize}
+    \item \textbf{Charakterystyka:} Lokalne instancje Kubernetes oferują niemal pełną kompatybilność z produkcyjnymi klastrami chmurowymi (EKS, GKE). Pozwalają one na testowanie manifestów, polityk sieciowych oraz mechanizmów skalowania bezpośrednio na maszynie programisty.
+    \item \textbf{Zasoby:} Klastry te są zoptymalizowane pod kątem szybkiego tworzenia i usuwania, co idealnie wpisuje się w potrzeby cyklu deweloperskiego i demonstracyjnego.
+\end{itemize}
+
+\subsubsection{Automatyzacja wdrożeń: GitOps (ArgoCD)}
+Zamiast tradycyjnych narzędzi \textit{Configuration Management} (jak Ansible), zdecydowano się na podejście \textbf{GitOps} przy użyciu narzędzia \textbf{ArgoCD}.
+\begin{itemize}
+    \item \textbf{Zasada działania:} GitOps zakłada, że repozytorium Git jest jedynym źródłem prawdy o stanie infrastruktury. ArgoCD stale monitoruje zmiany w plikach YAML (lub chartach Helm) i automatycznie synchronizuje stan klastra z definicją w kodzie.
+    \item \textbf{Korzyści:} Eliminuje to potrzebę ręcznego wykonywania poleceń \texttt{kubectl} i zapewnia, że środowisko jest zawsze zgodne z zatwierdzoną konfiguracją.
+\end{itemize}
+
+\subsection{Etap Operate}
+Faza operacyjna (\textit{Operate}) obejmuje utrzymanie aplikacji w środowisku produkcyjnym oraz zarządzanie usługami wspierającymi (bazami danych, systemami plików).
+
+\subsubsection{Usługi wspierające w klastrze}
+Zgodnie z założeniem o pełnej reprodukowalności środowiska w modelu lokalnym, zdecydowano się na uruchomienie odpowiedników usług chmurowych bezpośrednio wewnątrz klastra Kubernetes przy użyciu gotowych chartów Helm.
+\begin{itemize}
+    \item \textbf{Baza danych: PostgreSQL (zamiast AWS RDS):} Dane mikroserwisów są przechowywane w relacyjnej bazie danych PostgreSQL. W klastrze lokalnym baza ta działa jako kontener z podmontowanym wolumenem (\textit{Persistent Volume}), co zapewnia trwałość danych mimo restartów kontenerów.
+    \item \textbf{Zapis plików: MinIO (zamiast AWS S3):} Do przechowywania obiektów wykorzystano MinIO — rozwiązanie \textit{open-source} w pełni kompatybilne z API Amazon S3. Dzięki temu aplikacja może korzystać ze standardowych bibliotek S3, a zmiana środowiska na chmurowe wymaga jedynie aktualizacji adresów URL i kluczy dostępowych.
+\end{itemize}
+
+\subsubsection{Zarządzanie zasobami: Kubernetes}
+Kubernetes zarządza cyklem życia wszystkich komponentów, dbając o ich samonaprawę (\textit{self-healing}) oraz odpowiednie przydzielanie zasobów procesora i pamięci. Wykorzystanie lokalnego klastra pozwala na demonstrację tych mechanizmów bez generowania kosztów infrastrukturalnych.
+
+\subsection{Etap Monitor + Feedback}
+Ostatni etap pętli DevOps zamyka cykl, dostarczając informacji zwrotnej o działaniu systemu. W nowoczesnych architekturach etap ten jest realizowany poprzez koncepcję \textit{Observability}.
+
+\subsubsection{Standard zbierania danych: OpenTelemetry}
+Zgodnie z decyzją \textit{ADR-0006}, w całym projekcie zaimplementowano standard \textbf{OpenTelemetry}.
+\begin{itemize}
+    \item \textbf{Jednolita instrumentacja:} Zamiast oddzielnych bibliotek dla logów, metryk i trace'ów, aplikacje wykorzystują ujednolicony protokół OTLP.
+    \item \textbf{OTel Collector:} Centralnym punktem zbierania danych jest komponent Collector, który odbiera telemetrię z aplikacji, przetwarza ją i wysyła do odpowiednich systemów bazodanowych. Pozwala to na całkowite odseparowanie aplikacji od konkretnych dostawców narzędzi monitorujących.
+\end{itemize}
+
+\subsubsection{Stos Observability: LGTM}
+Jako systemy przechowywania i wizualizacji danych wybrano stos \textbf{LGTM} (ADR-0007):
+\begin{itemize}
+    \item \textbf{Prometheus (Metrics):} Gromadzi dane numeryczne o wydajności systemu i aplikacji.
+    \item \textbf{Loki (Logs):} Przechowuje logi aplikacji w sposób zoptymalizowany pod kątem Kubernetes (wykorzystując te same etykiety co system orkiestracji).
+    \item \textbf{Tempo (Traces):} Umożliwia śledzenie rozproszonych zapytań między mikroserwisami, co jest kluczowe w diagnozowaniu problemów wydajnościowych w architekturze rozproszonej.
+    \item \textbf{Grafana (Visualization):} Stanowi wspólny interfejs (\textit{Single Pane of Glass}) dla wszystkich powyższych narzędzi. Pozwala na tworzenie interaktywnych pulpitów sterowniczych i korelację danych (np. przejście od wykresu błędu do logów konkretnego kontenera).
+\end{itemize}
+
+\subsection{Podsumowanie części praktycznej}
+Zaprezentowany ekosystem narzędziowy tworzy spójny proces wytwórczy (\textit{Golden Path}), który minimalizuje nakład pracy ręcznej i ryzyko błędów ludzkich. Integracja poszczególnych etapów — od planowania w systemie Jira, przez automatyczne budowanie i testowanie w GitHub Actions, aż po wdrożenie GitOps i zaawansowane monitorowanie — stanowi kompletną realizację paradygmatu DevOps w architekturze \textit{Cloud Native}. Tak ukształtowane środowisko pozwala deweloperom skupić się na dostarczaniu wartości biznesowej, podczas gdy infrastruktura i procesy pozostają zautomatyzowane, przejrzyste i mierzalne.

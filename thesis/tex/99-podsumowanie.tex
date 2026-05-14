@@ -1,3 +1,26 @@
 \newpage
 \section{Podsumowanie i wnioski}
-\lipsum[1]
+Niniejsza praca stanowiła próbę kompleksowego ujęcia procesu wytwarzania oprogramowania w nowoczesnym ekosystemie \textit{Cloud Native}. Głównym celem było zaprezentowanie, w jaki sposób zasady metodologii DevOps oraz wytyczne \textit{Twelve-Factor App} przekładają się na konkretne rozwiązania techniczne i architektoniczne.
+
+\subsection{Osiągnięcie celów pracy}
+W ramach części praktycznej z powodzeniem zaimplementowano kompletną ścieżkę wytwórczą (\textit{Golden Path}), obejmującą wszystkie kluczowe etapy pętli DevOps. Stworzone środowisko pozwala na w pełni zautomatyzowane przejście od zmiany w kodzie źródłowym, przez testy jednostkowe i integracyjne, budowanie obrazów kontenerowych, aż po ich wdrożenie w klastrze Kubernetes przy użyciu modelu GitOps. Wykorzystanie dokumentów ADR (\textit{Architecture Decision Records}) pozwoliło na usystematyzowanie procesów decyzyjnych i utrwalenie wiedzy architektonicznej, co jest kluczowe w projektach o dużej skali.
+
+\subsection{Wyzwania inżynierskie}
+Podczas realizacji projektu zidentyfikowano kilka kluczowych wyzwań, które są charakterystyczne dla współczesnych systemów rozproszonych:
+\begin{itemize}
+    \item \textbf{Konfiguracja GitOps:} Wdrożenie narzędzia ArgoCD wymagało precyzyjnego zdefiniowania struktury repozytorium z manifestami. Największym wyzwaniem okazało się zarządzanie sekretami oraz synchronizacja stanów między wieloma mikroserwisami, co wymagało zastosowania wzorca \textit{App of Apps}.
+    \item \textbf{Złożoność stosu Observability:} Implementacja standardu OpenTelemetry oraz stosu LGTM (Loki, Grafana, Tempo, Prometheus) dostarczyła potężnych narzędzi diagnostycznych, ale wiązała się z wysokim kosztem konfiguracji. Poprawne skorelowanie logów z trace'ami wymagało precyzyjnego zarządzania kontekstem (\textit{Context Propagation}) w warstwie aplikacji i kolektora OTel.
+    \item \textbf{Zasobożerność środowiska:} Uruchomienie pełnego stosu infrastrukturalnego (Kubernetes, bazy danych, monitoring) w środowisku lokalnym stawia wysokie wymagania sprzętowe, co wymuszało agresywną optymalizację limitów zasobów dla poszczególnych kontenerów.
+\end{itemize}
+
+\subsection{Wnioski końcowe i kierunki rozwoju}
+Zrealizowany projekt potwierdza, że automatyzacja i standaryzacja procesów są niezbędne do zachowania zwinności w dostarczaniu oprogramowania. Kultura DevOps nie ogranicza się jedynie do doboru narzędzi, ale polega na stworzeniu spójnego ekosystemu, w którym technologia wspiera cele biznesowe i minimalizuje ryzyko błędów ludzkich.
+
+Dalszy rozwój systemu mógłby koncentrować się na następujących obszarach:
+\begin{itemize}
+    \item \textbf{DevSecOps:} Rozszerzenie potoków CI/CD o zaawansowane skanowanie statyczne (SAST) i dynamiczne (DAST) kodu oraz głębszą analizę bezpieczeństwa łańcucha dostaw.
+    \item \textbf{FinOps:} Implementacja narzędzi do monitorowania i optymalizacji kosztów infrastruktury chmurowej (np. Kubecost), co jest kluczowe przy przejściu z klastra lokalnego do chmury publicznej.
+    \item \textbf{Serverless:} Eksperymenty z architekturą bezserwerową (np. Knative) w celu dalszej optymalizacji zużycia zasobów w momentach niskiego obciążenia systemu.
+\end{itemize}
+
+Podsumowując, przedstawione w pracy podejście inżynierskie stanowi solidną bazę do budowy i utrzymania nowoczesnych aplikacji SaaS, łącząc akademicką rygorystyczność z najlepszymi praktykami branżowymi.
