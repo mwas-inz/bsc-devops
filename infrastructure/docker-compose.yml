@@ -1,0 +1,98 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine-otel
+    ports:
+      - 80:80
+    volumes:
+      - ./local/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - users
+      - tasks
+      - task-archiver
+    restart: always
+
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - todo_db:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U todo" ]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+    environment:
+      - POSTGRES_PASSWORD=todo
+      - POSTGRES_USER=todo
+      - POSTGRES_DB=todo
+
+  pulsar:
+    image: apachepulsar/pulsar:3.3.1
+    ports:
+      - 6650:6650
+      - 8080:8080
+    volumes:
+      - pulsar_data:/pulsar/data
+      - pulsar_conf:/pulsar/conf
+    environment:
+      - PULSAR_STANDALONE_USE_ZOOKEEPER=1
+    healthcheck:
+      test: [ "CMD-SHELL", "bin/pulsar-admin brokers healthcheck" ]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 5
+    command: >
+      bin/pulsar standalone
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+      - "4317:4317"
+      - "4318:4318"
+      - "14250:14250"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+
+  users:
+    image: mateuszwas/users:1.0.0
+    build:
+      context: ../apps/users
+      dockerfile: src/main/docker/Dockerfile.native
+    ports:
+      - 8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  tasks:
+    image: mateuszwas/tasks:1.0.0
+    build:
+      context: ../apps/tasks
+      dockerfile: src/main/docker/Dockerfile.native
+    ports:
+      - 8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+      pulsar:
+        condition: service_healthy
+
+  task-archiver:
+    image: mateuszwas/task-archiver:1.0.0
+    build:
+      context: ../apps/task-archiver
+      dockerfile: src/main/docker/Dockerfile.native
+    depends_on:
+      postgres:
+        condition: service_healthy
+      pulsar:
+        condition: service_healthy
+
+volumes:
+  todo_db:
+  pulsar_data:
+  pulsar_conf:
