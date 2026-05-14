@@ -5,12 +5,12 @@ pluginManagement {
     }
     plugins {
         id 'io.quarkus' version "${quarkusPlatformVersion}"
-        id 'io.freefair.lombok' version '8.6'
+        id 'io.freefair.lombok' version "${lombokPluginVersion}"
     }
 }
 
 rootProject.name = 'bsc-devops'
 
-include(':apps:tasks')
-include(':apps:users')
-include(':apps:task-archiver')
+include('apps:tasks')
+include('apps:users')
+include('apps:task-archiver')
