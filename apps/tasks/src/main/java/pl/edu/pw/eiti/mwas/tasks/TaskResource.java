@@ -1,0 +1,95 @@
+package pl.edu.pw.eiti.mwas.tasks;
+
+import io.quarkus.logging.Log;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+import pl.edu.pw.eiti.mwas.users.UsersRestClient;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Path("/users/{userId}/tasks")
+public class TaskResource {
+
+    @Inject
+    TaskRepository repository;
+
+    @Channel("delete-tasks")
+    Emitter<Long> deleteTasks;
+
+    @RestClient
+    UsersRestClient usersRestClient;
+
+    @GET
+    public List<Task> getTasks(Long userId) {
+        checkIfUserIsPresent(userId);
+        Log.info("Retrieving tasks for user " + userId);
+        return repository.findTasksByUserId(userId);
+    }
+
+    @GET
+    @Path("/{taskId}")
+    public Task getTask(Long userId, Long taskId) {
+        checkIfUserIsPresent(userId);
+        Log.info("Retrieving task with id " + taskId);
+        return repository.findById(taskId);
+    }
+
+    @POST
+    @Transactional
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response createTask(Long userId, Task task) {
+        checkIfUserIsPresent(userId);
+        Task aTask = Task.builder()
+                .userId(userId)
+                .title(task.title)
+                .content(task.content)
+                .status(TaskStatus.created)
+                .build();
+        repository.persist(aTask);
+
+        Log.info("Saving task: " + aTask);
+
+        return Response.ok(aTask).build();
+    }
+
+    @PATCH
+    @Path("/{taskId}")
+    @Transactional
+    public Response changeStatus(Long userId, Long taskId, Task task) {
+        checkIfUserIsPresent(userId);
+        Task aTask = repository.findById(taskId);
+        if (task.status == TaskStatus.done) {
+            Log.info("Closing task: " + aTask);
+            aTask.status = TaskStatus.done;
+            aTask.completedAt = LocalDateTime.now();
+        }
+
+        return Response.ok(aTask).build();
+    }
+
+    @DELETE
+    @Path("/{taskId}")
+    public Response deleteTask(Long userId, Long taskId) {
+        checkIfUserIsPresent(userId);
+        Task aTask = repository.findById(taskId);
+        Log.info("Scheduled deletion of task: " + aTask);
+
+        deleteTasks.send(taskId);
+
+        return Response.ok().build();
+    }
+
+    private void checkIfUserIsPresent(Long userId) {
+        if (usersRestClient.getUserById(userId) == null) {
+            throw new EntityNotFoundException("User with id " + userId + " not found");
+        }
+    }
+}
