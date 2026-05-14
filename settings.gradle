@@ -1,0 +1,16 @@
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    plugins {
+        id 'io.quarkus' version "${quarkusPlatformVersion}"
+        id 'io.freefair.lombok' version '8.6'
+    }
+}
+
+rootProject.name = 'bsc-devops'
+
+include(':apps:tasks')
+include(':apps:users')
+include(':apps:task-archiver')
