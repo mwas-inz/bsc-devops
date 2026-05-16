@@ -75,6 +75,33 @@ Do automatyzacji procesu budowania wykorzystano usługę \textbf{GitHub Actions}
 \textbf{Rola w projekcie:}
 GitHub Actions pełni funkcję silnika CI (\textit{Continuous Integration}), który reaguje na zdarzenia w repozytorium (np. \textit{pull request} lub \textit{push} do gałęzi głównej). Potok roboczy automatycznie uruchamia kompilację, testy oraz budowanie obrazów, zapewniając szybką pętlę informacji zwrotnej dla programisty.
 
+\begin{lstlisting}[language=yaml, caption={Fragment potoku CI -- etap budowania i testowania (.github/workflows/ci.yml)}, label={lst:github-actions-build}]
+jobs:
+  build:
+    name: Build, Test, Scan & Push
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [users, tasks, task-archiver]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: temurin
+          cache: gradle
+      - name: Run tests
+        run: ./gradlew :apps:${{ matrix.service }}:test --no-daemon
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/${{ matrix.service }}/Dockerfile
+          load: true
+          tags: ${{ matrix.service }}:${{ github.sha }}
+\end{lstlisting}
+
 \subsubsection{Budowanie artefaktów: Gradle i NPM}
 W zależności od komponentu, wykorzystywane są dedykowane narzędzia budujące:
 \begin{itemize}
@@ -88,10 +115,45 @@ Zgodnie z decyzją \textit{ADR-0005}, jako standard budowania obrazów wybrano p
 \textbf{Dobre praktyki:}
 Zastosowano mechanizm \textit{multi-stage builds}, który pozwala na oddzielenie środowiska kompilacji od lekkiego środowiska uruchomieniowego. Dzięki temu obrazy produkcyjne nie zawierają niepotrzebnych narzędzi (jak Gradle czy JDK), co zmniejsza ich rozmiar oraz powierzchnię ataku.
 
+\begin{lstlisting}[language=docker, caption={Wieloetapowy Dockerfile dla mikroserwisu \textit{users} (apps/users/Dockerfile)}, label={lst:dockerfile-multistage}]
+# Etap 1: Budowanie -- pelny JDK + Gradle
+FROM gradle:9-jdk25 AS build
+WORKDIR /workspace
+COPY settings.gradle gradle.properties ./
+COPY gradle/ gradle/
+COPY libs/ libs/
+COPY apps/users/ apps/users/
+RUN gradle :apps:users:build -x test --no-daemon
+
+# Etap 2: Srodowisko uruchomieniowe -- minimalne JRE
+FROM eclipse-temurin:25-jre
+WORKDIR /deployments
+COPY --from=build /workspace/apps/users/build/quarkus-app/lib/ lib/
+COPY --from=build /workspace/apps/users/build/quarkus-app/*.jar ./
+COPY --from=build /workspace/apps/users/build/quarkus-app/app/ app/
+COPY --from=build /workspace/apps/users/build/quarkus-app/quarkus/ quarkus/
+EXPOSE 8080
+USER 1001
+ENTRYPOINT ["java", "-Dquarkus.http.host=0.0.0.0", \
+  "-Djava.util.logging.manager=org.jboss.logmanager.LogManager", \
+  "-jar", "/deployments/quarkus-run.jar"]
+\end{lstlisting}
+
 \textbf{Shift Left Security:}
 Bezpieczeństwo jest weryfikowane już na etapie budowania (\textit{Shift Left}):
 \begin{itemize}
     \item \textbf{Trivy:} Każdy zbudowany obraz jest skanowany pod kątem znanych podatności (CVE) w bibliotekach systemowych i aplikacyjnych.
+\begin{lstlisting}[language=yaml, caption={Skanowanie obrazu narz\k{e}dziem Trivy w potoku CI (.github/workflows/ci.yml)}, label={lst:trivy-scan}]
+- name: Scan image with Trivy
+  uses: aquasecurity/trivy-action@master
+  with:
+    image-ref: ${{ matrix.service }}:${{ github.sha }}
+    format: table
+    exit-code: '1'
+    ignore-unfixed: true
+    vuln-type: os,library
+    severity: HIGH,CRITICAL
+\end{lstlisting}
     \item \textbf{Cosign:} Obrazy są cyfrowo podpisywane, co gwarantuje ich integralność i pozwala na weryfikację pochodzenia artefaktu przed jego uruchomieniem w klastrze.
 \end{itemize}
 

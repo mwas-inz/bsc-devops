@@ -38,6 +38,44 @@
 
 \usepackage{xurl} % Pozwala na łamanie URL w dowolnym miejscu
 
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    breakatwhitespace=false,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    tabsize=2,
+    showstringspaces=false,
+    captionpos=b,
+}
+
+\lstdefinelanguage{yaml}{
+  keywords={true,false,null,yes,no},
+  keywordstyle=\color{blue}\bfseries,
+  sensitive=false,
+  comment=[l]{\#},
+  commentstyle=\color{gray}\ttfamily,
+  stringstyle=\color{teal}\ttfamily,
+  morestring=[b]',
+  morestring=[b]",
+}
+
+\lstdefinelanguage{docker}{
+  keywords={FROM,RUN,CMD,LABEL,EXPOSE,ENV,ADD,COPY,ENTRYPOINT,VOLUME,USER,WORKDIR,ARG,ONBUILD,STOPSIGNAL,HEALTHCHECK,SHELL,AS},
+  keywordstyle=\color{blue}\bfseries,
+  sensitive=true,
+  comment=[l]{\#},
+  commentstyle=\color{gray}\ttfamily,
+  stringstyle=\color{teal}\ttfamily,
+  morestring=[b]',
+  morestring=[b]",
+}
+
 % Poprawa łamania linii w bibliografii
 \appto{\bibsetup}{
     \setcounter{biburllcpenalty}{7000}
