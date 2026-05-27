@@ -2,15 +2,13 @@ package pl.edu.pw.eiti.mwas.tasks;
 
 import io.quarkus.logging.Log;
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityNotFoundException;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
-import pl.edu.pw.eiti.mwas.users.UsersRestClient;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,9 +23,6 @@ public class TaskResource {
 
     @Channel("delete-tasks")
     Emitter<Long> deleteTasks;
-
-    @RestClient
-    UsersRestClient usersRestClient;
 
     @GET
     public List<Task> getTasks(@PathParam("userId") Long userId) {
@@ -89,8 +84,8 @@ public class TaskResource {
     }
 
     private void checkIfUserIsPresent(Long userId) {
-        if (usersRestClient.getUserById(userId) == null) {
-            throw new EntityNotFoundException("User with id " + userId + " not found");
+        if (KnownUser.findById(userId) == null) {
+            throw new NotFoundException("User with id " + userId + " not found");
         }
     }
 }
