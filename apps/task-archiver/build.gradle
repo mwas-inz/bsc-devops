@@ -60,6 +60,6 @@ jar {
 quarkusBuild {
     nativeArgs {
         containerBuild = true
-        builderImage = "quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21"
+        builderImage = "quay.io/quarkus/ubi10-quarkus-mandrel-builder-image:jdk-25"
     }
 }
