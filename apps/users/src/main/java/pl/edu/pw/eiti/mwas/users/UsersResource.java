@@ -1,5 +1,8 @@
 package pl.edu.pw.eiti.mwas.users;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -14,8 +17,11 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class UsersResource {
 
+    @Inject
+    ObjectMapper objectMapper;
+
     @Channel("user-events")
-    Emitter<UserEvent> userEvents;
+    Emitter<String> userEvents;
 
     @GET
     public List<User> list() {
@@ -32,7 +38,7 @@ public class UsersResource {
     @Transactional
     public Response create(User user) {
         User.persist(user);
-        userEvents.send(new UserEvent(user.id, UserEvent.Type.CREATED));
+        userEvents.send(serialize(new UserEvent(user.id, UserEvent.Type.CREATED)));
         return Response.status(Response.Status.CREATED).entity(user).build();
     }
 
@@ -41,7 +47,15 @@ public class UsersResource {
     @Transactional
     public Response delete(@PathParam("id") Long id) {
         User.deleteById(id);
-        userEvents.send(new UserEvent(id, UserEvent.Type.DELETED));
+        userEvents.send(serialize(new UserEvent(id, UserEvent.Type.DELETED)));
         return Response.noContent().build();
+    }
+
+    private String serialize(UserEvent event) {
+        try {
+            return objectMapper.writeValueAsString(event);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
