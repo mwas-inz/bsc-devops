@@ -27,8 +27,8 @@ dependencies {
     implementation "io.opentelemetry.instrumentation:opentelemetry-jdbc"
 }
 
-group 'pl.edu.pw.eiti.mwas'
-version '1.0.0'
+group = 'pl.edu.pw.eiti.mwas'
+version = '1.0.0'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
