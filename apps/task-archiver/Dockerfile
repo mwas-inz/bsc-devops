@@ -14,7 +14,7 @@ RUN gradle :apps:task-archiver:build -x test --no-daemon --build-cache
 
 # Stage 2: Runtime — minimal JRE, no build tooling
 FROM eclipse-temurin:25-jre-alpine
-RUN groupadd --gid 1001 quarkus && useradd --uid 1001 --gid quarkus quarkus
+RUN addgroup -g 1001 quarkus && adduser -u 1001 -G quarkus -D quarkus
 WORKDIR /deployments
 
 COPY --chown=1001:1001 --from=build /workspace/apps/task-archiver/build/quarkus-app/lib/ lib/
