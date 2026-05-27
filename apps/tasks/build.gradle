@@ -16,8 +16,6 @@ dependencies {
     implementation 'io.quarkus:quarkus-messaging-pulsar'
     implementation 'io.quarkus:quarkus-hibernate-orm-rest-data-panache'
     implementation 'io.quarkus:quarkus-rest'
-    implementation 'io.quarkus:quarkus-rest-client-jackson'
-    implementation 'io.quarkus:quarkus-rest-client'
     implementation 'io.quarkus:quarkus-smallrye-openapi'
     implementation 'io.quarkus:quarkus-rest-jackson'
     implementation 'io.quarkus:quarkus-opentelemetry'
