@@ -22,6 +22,15 @@ dependencies {
     implementation 'io.quarkus:quarkus-container-image-docker'
     implementation 'io.quarkus:quarkus-arc'
     implementation 'io.quarkus:quarkus-messaging-pulsar'
+
+    // transitive dependency fix for Pulsar
+    // https://github.com/smallrye/smallrye-reactive-messaging/discussions/2567#discussioncomment-9042159
+    implementation("org.apache.bookkeeper:circe-checksum:4.16.1") {
+        artifact { type = "jar" }
+    }
+    implementation("org.apache.bookkeeper:cpu-affinity:4.16.1") {
+        artifact { type = "jar" }
+    }
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:rest-assured'
     testImplementation "io.quarkus:quarkus-observability-devservices-lgtm"
