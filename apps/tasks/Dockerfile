@@ -1,5 +1,5 @@
 # Stage 1: Build — full JDK + Gradle, compiles the monorepo subproject
-FROM gradle:9-jdk25 AS build
+FROM gradle:9-jdk25-alpine AS build
 WORKDIR /workspace
 
 # Copy dependency declarations first for better layer caching
@@ -13,7 +13,7 @@ COPY apps/tasks/ apps/tasks/
 RUN gradle :apps:tasks:build -x test --no-daemon --build-cache
 
 # Stage 2: Runtime — minimal JRE, no build tooling
-FROM eclipse-temurin:25-jre
+FROM eclipse-temurin:25-jre-alpine
 RUN groupadd --gid 1001 quarkus && useradd --uid 1001 --gid quarkus quarkus
 WORKDIR /deployments
 
