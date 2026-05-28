@@ -37,6 +37,10 @@ jobs:
           root_file: main.tex
           latexmk_use_lualatex: true
 
+      - name: Print LaTeX log on failure
+        if: failure()
+        run: cat thesis/main.log
+
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v4
         with:
