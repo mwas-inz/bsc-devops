@@ -7,14 +7,13 @@ This repository combines Java application development, infrastructure as code, t
 ## Core Principles
 
 - **ADR First**: Major architectural changes must be documented in `docs/adr/`.
-- **Java Excellence**: Apply Clean Architecture and SOLID; keep business logic in `libs/` framework-agnostic where possible.
+- **Java Excellence**: Apply SOLID principles; keep code well-structured and maintainable.
 - **Cloud Native & DevOps**: Design for observability, scalability, and portability; follow 12-factor application practices.
 - **Academic Rigor**: Keep thesis language formal and align implementation details with thesis descriptions.
 
 ## Repository Structure
 
 - `apps/` - executable services (for example Spring Boot applications)
-- `libs/` - shared domain logic and utility modules
 - `infrastructure/` - infrastructure as code (Docker, Kubernetes, Terraform/Pulumi)
 - `docs/` - ADRs, diagrams, and technical documentation
 - `docs/adr/` - architecture decision records
