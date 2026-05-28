@@ -21,6 +21,10 @@ jobs:
     name: Build, Test, Scan & Push — ${{ matrix.service }}
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      id-token: write
+
     strategy:
       fail-fast: false
       matrix:
@@ -68,12 +72,16 @@ jobs:
 
       - name: Push image to Docker Hub
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:${{ github.sha }}
+        id: push
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:${{ github.sha }}
+          DIGEST=$(docker buildx imagetools inspect \
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:${{ github.sha }} \
+            --format '{{.Manifest.Digest}}')
+          echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
 
       - name: Sign image with Cosign (keyless)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           cosign sign --yes \
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:${{ github.sha }}
-        env:
-          COSIGN_EXPERIMENTAL: "1"
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}@${{ steps.push.outputs.digest }}
