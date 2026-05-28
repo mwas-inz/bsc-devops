@@ -7,11 +7,11 @@ const GRADIENTS: [string, string][] = [
 ];
 
 export function avatarGradient(name: string): string {
-  const idx = name.charCodeAt(0) % GRADIENTS.length;
+  const idx = name ? name.charCodeAt(0) % GRADIENTS.length : 0;
   const [from, to] = GRADIENTS[idx];
   return `linear-gradient(135deg, ${from}, ${to})`;
 }
 
 export function avatarInitial(name: string): string {
-  return name.charAt(0).toUpperCase();
+  return name ? name.charAt(0).toUpperCase() : '?';
 }
