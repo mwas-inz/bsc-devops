@@ -1,5 +1,5 @@
 {
-  "apps/users": "1.0.0",
-  "apps/tasks": "1.0.0",
-  "apps/task-archiver": "1.0.0"
+  "apps/users": "1.1.0",
+  "apps/tasks": "1.1.0",
+  "apps/task-archiver": "1.1.0"
 }
