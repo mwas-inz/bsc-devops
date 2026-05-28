@@ -86,16 +86,3 @@ jobs:
           cosign sign --yes \
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}@${{ steps.push.outputs.digest }}
 
-  release-please:
-    name: Release Please
-    needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-    steps:
-      - uses: googleapis/release-please-action@v4
-        with:
-          config-file: .release-please-config.json
-          manifest-file: .release-please-manifest.json

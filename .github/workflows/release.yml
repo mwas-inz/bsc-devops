@@ -33,7 +33,11 @@ jobs:
 
       - name: Pull SHA image
         run: |
-          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.meta.outputs.service }}:${{ github.sha }}
+          for i in 1 2 3 4 5; do
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.meta.outputs.service }}:${{ github.sha }} && break
+            echo "Attempt $i failed, retrying in 60s..."
+            sleep 60
+          done
 
       - name: Tag and push SemVer
         run: |
