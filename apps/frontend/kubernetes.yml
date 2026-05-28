@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/mwas-inz/frontend:latest
+          image: mateuszwas/frontend:latest
           ports:
             - containerPort: 80
           resources:
