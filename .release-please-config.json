@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "simple",
+  "packages": {
+    "apps/users": {
+      "component": "users",
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "apps/users/build.gradle"
+        }
+      ]
+    },
+    "apps/tasks": {
+      "component": "tasks",
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "apps/tasks/build.gradle"
+        }
+      ]
+    },
+    "apps/task-archiver": {
+      "component": "task-archiver",
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "apps/task-archiver/build.gradle"
+        }
+      ]
+    }
+  }
+}
