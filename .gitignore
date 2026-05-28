@@ -63,6 +63,15 @@ Thumbs.db
 *.pyg
 *.synctex(busy)
 
+# Node / JavaScript
+node_modules/
+dist/
+dist-ssr/
+*.local
+.env
+.env.*
+!.env.example
+
 # Superpowers brainstorming sessions
 .superpowers/
 
