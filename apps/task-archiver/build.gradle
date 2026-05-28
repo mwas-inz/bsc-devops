@@ -36,7 +36,7 @@ dependencies {
 }
 
 group = 'pl.edu.pw.eiti.mwas'
-version = '1.0.0'
+version = '1.0.0' // x-release-please-version
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
