@@ -70,6 +70,9 @@ jobs:
         id: push
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/task-archiver:${{ github.sha }}
+          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/task-archiver:${{ github.sha }} \
+            ${{ secrets.DOCKERHUB_USERNAME }}/task-archiver:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/task-archiver:latest
           DIGEST=$(docker buildx imagetools inspect \
             ${{ secrets.DOCKERHUB_USERNAME }}/task-archiver:${{ github.sha }} \
             --format '{{.Manifest.Digest}}')

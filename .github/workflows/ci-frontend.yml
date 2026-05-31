@@ -79,6 +79,8 @@ jobs:
         id: push
         run: |
           docker push mateuszwas/frontend:${{ github.sha }}
+          docker tag mateuszwas/frontend:${{ github.sha }} mateuszwas/frontend:latest
+          docker push mateuszwas/frontend:latest
           DIGEST=$(docker buildx imagetools inspect \
             mateuszwas/frontend:${{ github.sha }} \
             --format '{{.Manifest.Digest}}')
