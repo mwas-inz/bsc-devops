@@ -63,6 +63,18 @@ Thumbs.db
 *.pyg
 *.synctex(busy)
 
+# Node / JavaScript
+node_modules/
+dist/
+dist-ssr/
+*.local
+.env
+.env.*
+!.env.example
+
+# Superpowers brainstorming sessions
+.superpowers/
+
 # Thesis specific
 !thesis/eiti/oswiadczenie_autora_pracy.pdf
 !thesis/eiti/thesis_author_declaration-1.pdf

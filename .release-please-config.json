@@ -28,6 +28,10 @@
           "path": "apps/task-archiver/build.gradle"
         }
       ]
+    },
+    "apps/frontend": {
+      "component": "frontend",
+      "release-type": "node"
     }
   }
 }

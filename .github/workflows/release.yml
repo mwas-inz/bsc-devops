@@ -6,6 +6,7 @@ on:
       - 'users-v*'
       - 'tasks-v*'
       - 'task-archiver-v*'
+      - 'frontend-v*'
 
 jobs:
   retag:

@@ -1,0 +1,91 @@
+name: CI — Frontend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - apps/frontend/**
+      - .github/workflows/ci-frontend.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - apps/frontend/**
+      - .github/workflows/ci-frontend.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Test, Build & Push — frontend
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/frontend
+        run: npm ci
+
+      - name: Type check
+        working-directory: apps/frontend
+        run: npx vue-tsc --noEmit
+
+      - name: Run tests
+        working-directory: apps/frontend
+        run: npm test
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        run: docker build -t mateuszwas/frontend:${{ github.sha }} apps/frontend/
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: mateuszwas/frontend:${{ github.sha }}
+          format: table
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v4.1.2
+
+      - name: Log in to Docker Hub
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push image to GHCR
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        id: push
+        run: |
+          docker push mateuszwas/frontend:${{ github.sha }}
+          DIGEST=$(docker buildx imagetools inspect \
+            mateuszwas/frontend:${{ github.sha }} \
+            --format '{{.Manifest.Digest}}')
+          echo "digest=${DIGEST}" >> $GITHUB_OUTPUT
+
+      - name: Sign image with Cosign (keyless)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          cosign sign --yes \
+            mateuszwas/frontend@${{ steps.push.outputs.digest }}
