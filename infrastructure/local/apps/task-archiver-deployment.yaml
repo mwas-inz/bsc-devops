@@ -33,7 +33,7 @@ spec:
         runAsUser: 1001
       containers:
         - name: task-archiver
-          image: docker.io/mateuszwas/task-archiver:1.0.0
+          image: docker.io/mateuszwas/task-archiver:IMAGE_TAG
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8082

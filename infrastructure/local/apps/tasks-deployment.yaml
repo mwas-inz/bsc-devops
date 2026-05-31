@@ -33,7 +33,7 @@ spec:
         runAsUser: 1001
       containers:
         - name: tasks
-          image: docker.io/mateuszwas/tasks:1.0.0
+          image: docker.io/mateuszwas/tasks:IMAGE_TAG
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8081

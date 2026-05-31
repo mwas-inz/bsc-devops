@@ -33,7 +33,7 @@ spec:
         runAsUser: 1001
       containers:
         - name: users
-          image: docker.io/mateuszwas/users:1.0.0
+          image: docker.io/mateuszwas/users:IMAGE_TAG
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

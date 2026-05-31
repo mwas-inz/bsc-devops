@@ -1,10 +1,16 @@
+# Usage: .\scripts\local\deploy-minikube.ps1 [-Tag <IMAGE_TAG>]
+# Tag defaults to the current git commit SHA (must be pushed to Docker Hub by CI).
 #Requires -Version 5.1
+param(
+    [string]$Tag = (git rev-parse HEAD)
+)
 $ErrorActionPreference = 'Stop'
 
 $NAMESPACE = "bsc-devops"
 $INFRA = "infrastructure/local"
 
 Write-Host "=== BSC DevOps — Minikube Deployment ===" -ForegroundColor Cyan
+Write-Host "Image tag: $Tag"
 
 if (-not (Get-Command minikube -ErrorAction SilentlyContinue)) {
     Write-Host "ERROR: minikube not found. Install it first: https://minikube.sigs.k8s.io/docs/start/" -ForegroundColor Red
@@ -20,6 +26,11 @@ if ($minikubeHost -ne 'Running') {
 Write-Host ""
 Write-Host "Enabling ingress addon..."
 minikube addons enable ingress
+
+# Applies a manifest file after substituting IMAGE_TAG with $Tag.
+function Invoke-KApply([string]$File) {
+    (Get-Content $File) -replace 'IMAGE_TAG', $Tag | kubectl apply -f -
+}
 
 Write-Host ""
 Write-Host "--- Namespace ---"
@@ -57,13 +68,13 @@ kubectl apply -f "$INFRA/apps/app-config.yaml"
 
 Write-Host ""
 Write-Host "--- Applications ---"
-kubectl apply -f "$INFRA/apps/users-deployment.yaml"
-kubectl apply -f "$INFRA/apps/tasks-deployment.yaml"
-kubectl apply -f "$INFRA/apps/task-archiver-deployment.yaml"
+Invoke-KApply "$INFRA/apps/users-deployment.yaml"
+Invoke-KApply "$INFRA/apps/tasks-deployment.yaml"
+Invoke-KApply "$INFRA/apps/task-archiver-deployment.yaml"
 
 Write-Host ""
 Write-Host "--- Frontend ---"
-kubectl apply -f "apps/frontend/kubernetes.yml"
+Invoke-KApply "apps/frontend/kubernetes.yml"
 
 Write-Host ""
 Write-Host "Waiting for applications..."

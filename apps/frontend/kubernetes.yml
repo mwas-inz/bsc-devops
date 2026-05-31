@@ -31,8 +31,8 @@ spec:
         runAsUser: 101
       containers:
         - name: frontend
-          image: mateuszwas/frontend:latest
-          imagePullPolicy: Always
+          image: mateuszwas/frontend:IMAGE_TAG
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
           resources:

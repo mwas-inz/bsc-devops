@@ -1,10 +1,14 @@
 #!/bin/bash
+# Usage: bash scripts/local/deploy-minikube.sh [IMAGE_TAG]
+# IMAGE_TAG defaults to the current git commit SHA (must be pushed to Docker Hub by CI).
 set -euo pipefail
 
 NAMESPACE="bsc-devops"
 INFRA="infrastructure/local"
+TAG="${1:-$(git rev-parse HEAD)}"
 
 echo "=== BSC DevOps — Minikube Deployment ==="
+echo "Image tag: $TAG"
 
 if ! command -v minikube &>/dev/null; then
     echo "ERROR: minikube not found. Install it first: https://minikube.sigs.k8s.io/docs/start/"
@@ -19,6 +23,11 @@ fi
 echo ""
 echo "Enabling ingress addon..."
 minikube addons enable ingress
+
+# Applies a manifest file after substituting IMAGE_TAG with $TAG.
+kapply() {
+    sed "s/IMAGE_TAG/$TAG/g" "$1" | kubectl apply -f -
+}
 
 echo ""
 echo "--- Namespace ---"
@@ -56,13 +65,13 @@ kubectl apply -f "$INFRA/apps/app-config.yaml"
 
 echo ""
 echo "--- Applications ---"
-kubectl apply -f "$INFRA/apps/users-deployment.yaml"
-kubectl apply -f "$INFRA/apps/tasks-deployment.yaml"
-kubectl apply -f "$INFRA/apps/task-archiver-deployment.yaml"
+kapply "$INFRA/apps/users-deployment.yaml"
+kapply "$INFRA/apps/tasks-deployment.yaml"
+kapply "$INFRA/apps/task-archiver-deployment.yaml"
 
 echo ""
 echo "--- Frontend ---"
-kubectl apply -f apps/frontend/kubernetes.yml
+kapply "apps/frontend/kubernetes.yml"
 
 echo ""
 echo "Waiting for applications..."
