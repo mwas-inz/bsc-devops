@@ -33,13 +33,16 @@ spec:
               name: broker
             - containerPort: 8080
               name: admin
+          env:
+            - name: PULSAR_MEM
+              value: "-Xms256m -Xmx768m -XX:MaxDirectMemorySize=512m"
           resources:
             requests:
-              cpu: 300m
-              memory: 512Mi
+              cpu: 500m
+              memory: 768Mi
             limits:
               cpu: 1000m
-              memory: 1Gi
+              memory: 2Gi
           readinessProbe:
             httpGet:
               path: /admin/v2/brokers/ready
