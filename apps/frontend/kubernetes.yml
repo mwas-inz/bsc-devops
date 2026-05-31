@@ -1,9 +1,20 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: frontend-sa
+  namespace: bsc-devops
+  labels:
+    app: frontend
+    app.kubernetes.io/part-of: bsc-devops
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
+  namespace: bsc-devops
   labels:
     app: frontend
+    app.kubernetes.io/part-of: bsc-devops
 spec:
   replicas: 1
   selector:
@@ -14,9 +25,14 @@ spec:
       labels:
         app: frontend
     spec:
+      serviceAccountName: frontend-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
       containers:
         - name: frontend
           image: mateuszwas/frontend:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
           resources:
@@ -26,11 +42,32 @@ spec:
             limits:
               cpu: 200m
               memory: 64Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+              add: ["NET_BIND_SERVICE"]
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: frontend
+  namespace: bsc-devops
+  labels:
+    app: frontend
+    app.kubernetes.io/part-of: bsc-devops
 spec:
   selector:
     app: frontend
@@ -42,7 +79,11 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: frontend
+  namespace: bsc-devops
+  labels:
+    app.kubernetes.io/part-of: bsc-devops
 spec:
+  ingressClassName: nginx
   rules:
     - http:
         paths:
