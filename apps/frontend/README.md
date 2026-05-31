@@ -16,7 +16,7 @@ The Vite dev server proxies API calls to the backends:
 | Frontend path    | Backend                    |
 | ---------------- | -------------------------- |
 | `/api/users/*`   | `users` service on `:8080` |
-| `/api/tasks/*`   | `tasks` service on `:8081` |
+| `/api/tasks/*`   | `tasks` service on `:8080` |
 | `/health/users`  | `users` `/q/health`        |
 | `/health/tasks`  | `tasks` `/q/health`        |
 

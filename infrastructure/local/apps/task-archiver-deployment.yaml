@@ -36,7 +36,7 @@ spec:
           image: docker.io/mateuszwas/task-archiver:IMAGE_TAG
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8082
+            - containerPort: 8080
               name: http
           envFrom:
             - secretRef:
@@ -58,13 +58,13 @@ spec:
           livenessProbe:
             httpGet:
               path: /q/health/live
-              port: 8082
+              port: 8080
             initialDelaySeconds: 15
             periodSeconds: 20
           readinessProbe:
             httpGet:
               path: /q/health/ready
-              port: 8082
+              port: 8080
             initialDelaySeconds: 10
             periodSeconds: 10
           securityContext:
@@ -83,13 +83,13 @@ metadata:
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/path: /q/metrics
-    prometheus.io/port: "8082"
+    prometheus.io/port: "8080"
 spec:
   selector:
     app.kubernetes.io/name: task-archiver
     app.kubernetes.io/part-of: bsc-devops
   ports:
     - name: http
-      port: 8082
-      targetPort: 8082
+      port: 8080
+      targetPort: 8080
   type: ClusterIP

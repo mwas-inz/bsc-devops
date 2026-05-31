@@ -15,7 +15,7 @@ REST API for user management. Port `8080`.
 
 ### tasks
 
-REST API for task management scoped to users. Port `8081`.
+REST API for task management scoped to users. Port `8080`.
 
 - `GET /users/{userId}/tasks`, `GET /users/{userId}/tasks/{taskId}` — list / fetch tasks
 - `POST /users/{userId}/tasks` — create a task
@@ -26,7 +26,7 @@ Consumes `user-events` from Pulsar to maintain a local `KnownUser` cache used fo
 
 ### task-archiver
 
-Background consumer service. Port `8082` (no public HTTP API).
+Background consumer service. Port `8080` (health/metrics only, no business API).
 
 Consumes `delete-tasks` messages from Pulsar and permanently removes tasks from the database.
 

@@ -80,7 +80,7 @@ kubectl rollout status deployment/tasks -n "$NAMESPACE" --timeout=120s
 kubectl rollout status deployment/task-archiver -n "$NAMESPACE" --timeout=120s
 kubectl rollout status deployment/frontend -n "$NAMESPACE" --timeout=120s
 
-MINIKUBE_IP=$(minikube ip)
+DRIVER=$(minikube profile list --output=json 2>/dev/null | grep -o '"Driver":"[^"]*"' | head -1 | cut -d'"' -f4)
 echo ""
 echo "=== Deployment Complete ==="
 echo ""
@@ -88,7 +88,14 @@ echo "Pod status:"
 kubectl get pods -n "$NAMESPACE"
 echo ""
 echo "Access:"
-echo "  Frontend:  http://$MINIKUBE_IP"
+if [ "$DRIVER" = "docker" ]; then
+    echo "  Docker driver detected — minikube ip is not reachable from the host."
+    echo "  Run in a separate terminal:  minikube tunnel"
+    echo "  Then open:                   http://localhost"
+else
+    MINIKUBE_IP=$(minikube ip)
+    echo "  Frontend:  http://$MINIKUBE_IP"
+fi
 echo "  Jaeger UI: kubectl port-forward svc/jaeger 16686:16686 -n $NAMESPACE"
 echo "             then open http://localhost:16686"
 echo ""
@@ -96,4 +103,4 @@ echo "Debug commands:"
 echo "  kubectl logs -f deployment/users -n $NAMESPACE"
 echo "  kubectl logs -f deployment/tasks -n $NAMESPACE"
 echo "  kubectl port-forward svc/users 8080:8080 -n $NAMESPACE"
-echo "  kubectl port-forward svc/tasks 8081:8081 -n $NAMESPACE"
+echo "  kubectl port-forward svc/tasks 8080:8080 -n $NAMESPACE"
