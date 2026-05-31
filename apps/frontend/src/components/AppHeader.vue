@@ -35,7 +35,7 @@ onUnmounted(() => clearInterval(interval));
     <span class="title">■ DevOps Demo</span>
     <div class="health">
       <span :class="['dot', usersStatus]">● users :8080</span>
-      <span :class="['dot', tasksStatus]">● tasks :8081</span>
+      <span :class="['dot', tasksStatus]">● tasks :8080</span>
     </div>
   </header>
 </template>
