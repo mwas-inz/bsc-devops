@@ -15,11 +15,11 @@ export default defineConfig({
       },
       '/health/users': {
         target: 'http://localhost:8080',
-        rewrite: () => '/q/health',
+        rewrite: () => '/q/health/live',
       },
       '/health/tasks': {
         target: 'http://localhost:8080',
-        rewrite: () => '/q/health',
+        rewrite: () => '/q/health/live',
       },
     },
   },
