@@ -1,0 +1,36 @@
+BSC-DevOps Platform deployed.
+
+  Release:   {{ .Release.Name }}
+  Namespace: {{ include "bsc-devops.namespace" . }}
+
+Services:
+{{- if .Values.users.enabled }}
+  users         -> http://users:8080
+{{- end }}
+{{- if .Values.tasks.enabled }}
+  tasks         -> http://tasks:8080
+{{- end }}
+{{- if .Values.taskArchiver.enabled }}
+  task-archiver -> http://task-archiver:8080 (metrics/health only)
+{{- end }}
+{{- if .Values.frontend.enabled }}
+  frontend      -> http://frontend:80
+{{- end }}
+{{- if .Values.postgres.enabled }}
+  postgres      -> postgres:5432
+{{- end }}
+{{- if .Values.pulsar.enabled }}
+  pulsar        -> pulsar:6650 (broker), pulsar:8080 (admin)
+{{- end }}
+{{- if .Values.jaeger.enabled }}
+  jaeger        -> jaeger:16686 (UI), jaeger:4317 (OTLP gRPC)
+{{- end }}
+
+Port-forward shortcuts:
+  kubectl port-forward -n {{ include "bsc-devops.namespace" . }} svc/frontend 8080:80
+  kubectl port-forward -n {{ include "bsc-devops.namespace" . }} svc/jaeger 16686:16686
+
+Deploy with a specific image tag:
+  helm upgrade --install {{ .Release.Name }} ./infrastructure/helm/bsc-devops \
+    --namespace {{ include "bsc-devops.namespace" . }} --create-namespace \
+    --set imageTag=<tag>

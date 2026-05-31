@@ -1,0 +1,78 @@
+{{- if .Values.pulsar.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pulsar-sa
+  namespace: {{ include "bsc-devops.namespace" . }}
+  labels:
+    {{- include "bsc-devops.labels" . | nindent 4 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pulsar
+  namespace: {{ include "bsc-devops.namespace" . }}
+  labels:
+    {{- include "bsc-devops.labels" . | nindent 4 }}
+    app.kubernetes.io/component: pulsar
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pulsar
+  template:
+    metadata:
+      labels:
+        app: pulsar
+    spec:
+      serviceAccountName: pulsar-sa
+      containers:
+        - name: pulsar
+          image: {{ .Values.pulsar.image | quote }}
+          command:
+            - bin/pulsar
+            - standalone
+          ports:
+            - name: broker
+              containerPort: 6650
+            - name: admin
+              containerPort: 8080
+          env:
+            - name: PULSAR_MEM
+              value: {{ .Values.pulsar.mem | quote }}
+          resources:
+            {{- toYaml .Values.pulsar.resources | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: /admin/v2/brokers/ready
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            failureThreshold: 8
+          livenessProbe:
+            httpGet:
+              path: /admin/v2/brokers/ready
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pulsar
+  namespace: {{ include "bsc-devops.namespace" . }}
+  labels:
+    {{- include "bsc-devops.labels" . | nindent 4 }}
+    app.kubernetes.io/component: pulsar
+spec:
+  selector:
+    app: pulsar
+  ports:
+    - name: broker
+      port: 6650
+      targetPort: 6650
+    - name: admin
+      port: 8080
+      targetPort: 8080
+{{- end }}

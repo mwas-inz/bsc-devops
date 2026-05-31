@@ -1,0 +1,114 @@
+global:
+  namespace: bsc-devops
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Global image tag — overridden per-service via image.tag
+imageTag: "latest"
+
+observability:
+  pulsarServiceUrl: "pulsar://pulsar:6650"
+  otelEndpoint: "http://jaeger:4317"
+
+postgres:
+  enabled: true
+  image: "postgres:16-alpine"
+  credentials:
+    database: "todo"
+    username: "todo"
+    password: "todo"
+  storage:
+    size: "5Gi"
+    hostPath: "/data/postgresql"
+    storageClass: "manual"
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+pulsar:
+  enabled: true
+  image: "apachepulsar/pulsar:3.3.1"
+  mem: "-Xms256m -Xmx768m -XX:MaxDirectMemorySize=512m"
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "768Mi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+
+jaeger:
+  enabled: true
+  image: "jaegertracing/all-in-one:1.57"
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+users:
+  enabled: true
+  image:
+    repository: "docker.io/mateuszwas/users"
+    tag: ""
+  replicas: 1
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+tasks:
+  enabled: true
+  image:
+    repository: "docker.io/mateuszwas/tasks"
+    tag: ""
+  replicas: 1
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+taskArchiver:
+  enabled: true
+  image:
+    repository: "docker.io/mateuszwas/task-archiver"
+    tag: ""
+  replicas: 1
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+frontend:
+  enabled: true
+  image:
+    repository: "docker.io/mateuszwas/frontend"
+    tag: ""
+  replicas: 1
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "32Mi"
+    limits:
+      cpu: "200m"
+      memory: "64Mi"
+  ingress:
+    enabled: true
+    className: "nginx"
+    host: ""
