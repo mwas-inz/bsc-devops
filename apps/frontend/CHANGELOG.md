@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.2](https://github.com/mwas-inz/bsc-devops/compare/frontend-v1.2.1...frontend-v1.2.2) (2026-05-31)
+
+
+### Bug Fixes
+
+* **frontend:** fix service compont status ([f143779](https://github.com/mwas-inz/bsc-devops/commit/f14377917b5051d62a5b4191419b6ae33a6931e1))
+* **frontend:** fix service compont status ([5582ad7](https://github.com/mwas-inz/bsc-devops/commit/5582ad7b61c785f4c17c8ce63f22e28e3643672d))
+
 ## [1.2.1](https://github.com/mwas-inz/bsc-devops/compare/frontend-v1.2.0...frontend-v1.2.1) (2026-05-31)
 
 
