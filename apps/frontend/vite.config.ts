@@ -10,7 +10,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api\/users/, '/users'),
       },
       '/api/tasks': {
-        target: 'http://localhost:8081',
+        target: 'http://localhost:8080',
         rewrite: (path) => path.replace(/^\/api\/tasks/, ''),
       },
       '/health/users': {
@@ -18,7 +18,7 @@ export default defineConfig({
         rewrite: () => '/q/health',
       },
       '/health/tasks': {
-        target: 'http://localhost:8081',
+        target: 'http://localhost:8080',
         rewrite: () => '/q/health',
       },
     },
