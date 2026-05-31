@@ -83,7 +83,7 @@ kubectl rollout status deployment/tasks -n $NAMESPACE --timeout=120s
 kubectl rollout status deployment/task-archiver -n $NAMESPACE --timeout=120s
 kubectl rollout status deployment/frontend -n $NAMESPACE --timeout=120s
 
-$MINIKUBE_IP = minikube ip
+$driver = (minikube profile list --output=json 2>$null | ConvertFrom-Json).valid[0].Config.Driver
 Write-Host ""
 Write-Host "=== Deployment Complete ===" -ForegroundColor Green
 Write-Host ""
@@ -91,7 +91,14 @@ Write-Host "Pod status:"
 kubectl get pods -n $NAMESPACE
 Write-Host ""
 Write-Host "Access:"
-Write-Host "  Frontend:  http://$MINIKUBE_IP"
+if ($driver -eq 'docker') {
+    Write-Host "  Docker driver detected — minikube ip is not reachable from the host." -ForegroundColor Yellow
+    Write-Host "  Run in a separate terminal:  minikube tunnel"
+    Write-Host "  Then open:                   http://localhost"
+} else {
+    $MINIKUBE_IP = minikube ip
+    Write-Host "  Frontend:  http://$MINIKUBE_IP"
+}
 Write-Host "  Jaeger UI: kubectl port-forward svc/jaeger 16686:16686 -n $NAMESPACE"
 Write-Host "             then open http://localhost:16686"
 Write-Host ""
