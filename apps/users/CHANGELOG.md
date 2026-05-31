@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/mwas-inz/bsc-devops/compare/users-v1.1.0...users-v1.1.1) (2026-05-31)
+
+
+### Bug Fixes
+
+* **users,tasks:** register UserEvent for native image reflection ([4d12bab](https://github.com/mwas-inz/bsc-devops/commit/4d12babd37936dc872c299efc6bcf61829664c8d))
+
 ## [1.1.0](https://github.com/mwas-inz/bsc-devops/compare/users-v1.0.0...users-v1.1.0) (2026-05-28)
 
 

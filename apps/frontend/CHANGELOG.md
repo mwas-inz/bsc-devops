@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.1](https://github.com/mwas-inz/bsc-devops/compare/frontend-v1.2.0...frontend-v1.2.1) (2026-05-31)
+
+
+### Bug Fixes
+
+* **frontend:** mount emptyDir volumes for nginx cache and run directories ([ac07322](https://github.com/mwas-inz/bsc-devops/commit/ac07322576e5bd81f6d6178a9eaef85af70868a7))
+* **tasks,task-archiver,frontend:** unify service port to 8080 across configurations ([81e644c](https://github.com/mwas-inz/bsc-devops/commit/81e644c54fdc2c2c62daa71dfa124fe14135775e))
+
 ## [1.2.0](https://github.com/mwas-inz/bsc-devops/compare/frontend-v1.1.0...frontend-v1.2.0) (2026-05-31)
 
 
