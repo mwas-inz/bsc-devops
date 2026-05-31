@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/mwas-inz/bsc-devops/compare/frontend-v1.1.0...frontend-v1.2.0) (2026-05-31)
+
+
+### Features
+
+* **infrastructure:** add Kubernetes manifests for local Minikube deployment ([42b3857](https://github.com/mwas-inz/bsc-devops/commit/42b38574b44a333c3ddbaf02e3ad3bbaa43c5925))
+
+
+### Bug Fixes
+
+* **infrastructure:** use IMAGE_TAG placeholder and resolve from git SHA at deploy time ([2e41352](https://github.com/mwas-inz/bsc-devops/commit/2e41352d254d32d817aad9a3ec18fe6b6f51e299))
+
 ## [1.1.0](https://github.com/mwas-inz/bsc-devops/compare/frontend-v1.0.0...frontend-v1.1.0) (2026-05-31)
 
 
