@@ -44,6 +44,8 @@ spec:
             - configMapRef:
                 name: app-config
           env:
+            - name: QUARKUS_HTTP_PORT
+              value: "8081"
             - name: KUBERNETES_NAMESPACE
               valueFrom:
                 fieldRef:
