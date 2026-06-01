@@ -1,0 +1,84 @@
+{{- if .Values.taskArchiver.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: task-archiver-sa
+  namespace: {{ include "bsc-devops.namespace" . }}
+  labels:
+    {{- include "bsc-devops.labels" . | nindent 4 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-archiver
+  namespace: {{ include "bsc-devops.namespace" . }}
+  labels:
+    {{- include "bsc-devops.labels" . | nindent 4 }}
+    app.kubernetes.io/component: task-archiver
+spec:
+  replicas: {{ .Values.taskArchiver.replicas }}
+  selector:
+    matchLabels:
+      app: task-archiver
+  template:
+    metadata:
+      labels:
+        app: task-archiver
+    spec:
+      serviceAccountName: task-archiver-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+      containers:
+        - name: task-archiver
+          image: {{ include "bsc-devops.imageRef" (dict "repo" .Values.taskArchiver.image.repository "tag" .Values.taskArchiver.image.tag "ctx" .) }}
+          ports:
+            - name: http
+              containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+          resources:
+            {{- toYaml .Values.taskArchiver.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /q/health/live
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /q/health/ready
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          envFrom:
+            - secretRef:
+                name: db-secret
+            - configMapRef:
+                name: app-config
+          env:
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: task-archiver
+  namespace: {{ include "bsc-devops.namespace" . }}
+  labels:
+    {{- include "bsc-devops.labels" . | nindent 4 }}
+    app.kubernetes.io/component: task-archiver
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /q/metrics
+    prometheus.io/port: "8080"
+spec:
+  selector:
+    app: task-archiver
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+{{- end }}

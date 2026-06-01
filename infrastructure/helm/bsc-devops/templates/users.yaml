@@ -1,0 +1,82 @@
+{{- if .Values.users.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: users-sa
+  namespace: {{ include "bsc-devops.namespace" . }}
+  labels:
+    {{- include "bsc-devops.labels" . | nindent 4 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users
+  namespace: {{ include "bsc-devops.namespace" . }}
+  labels:
+    {{- include "bsc-devops.labels" . | nindent 4 }}
+    app.kubernetes.io/component: users
+spec:
+  replicas: {{ .Values.users.replicas }}
+  selector:
+    matchLabels:
+      app: users
+  template:
+    metadata:
+      labels:
+        app: users
+    spec:
+      serviceAccountName: users-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+      containers:
+        - name: users
+          image: {{ include "bsc-devops.imageRef" (dict "repo" .Values.users.image.repository "tag" .Values.users.image.tag "ctx" .) }}
+          ports:
+            - name: http
+              containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+          resources:
+            {{- toYaml .Values.users.resources | nindent 12 }}
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          envFrom:
+            - secretRef:
+                name: db-secret
+            - configMapRef:
+                name: app-config
+          env:
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: users
+  namespace: {{ include "bsc-devops.namespace" . }}
+  labels:
+    {{- include "bsc-devops.labels" . | nindent 4 }}
+    app.kubernetes.io/component: users
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /q/metrics
+    prometheus.io/port: "8080"
+spec:
+  selector:
+    app: users
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+{{- end }}

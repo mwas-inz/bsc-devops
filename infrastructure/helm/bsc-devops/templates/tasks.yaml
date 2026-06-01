@@ -1,0 +1,84 @@
+{{- if .Values.tasks.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tasks-sa
+  namespace: {{ include "bsc-devops.namespace" . }}
+  labels:
+    {{- include "bsc-devops.labels" . | nindent 4 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tasks
+  namespace: {{ include "bsc-devops.namespace" . }}
+  labels:
+    {{- include "bsc-devops.labels" . | nindent 4 }}
+    app.kubernetes.io/component: tasks
+spec:
+  replicas: {{ .Values.tasks.replicas }}
+  selector:
+    matchLabels:
+      app: tasks
+  template:
+    metadata:
+      labels:
+        app: tasks
+    spec:
+      serviceAccountName: tasks-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+      containers:
+        - name: tasks
+          image: {{ include "bsc-devops.imageRef" (dict "repo" .Values.tasks.image.repository "tag" .Values.tasks.image.tag "ctx" .) }}
+          ports:
+            - name: http
+              containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+          resources:
+            {{- toYaml .Values.tasks.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /q/health/live
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /q/health/ready
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          envFrom:
+            - secretRef:
+                name: db-secret
+            - configMapRef:
+                name: app-config
+          env:
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tasks
+  namespace: {{ include "bsc-devops.namespace" . }}
+  labels:
+    {{- include "bsc-devops.labels" . | nindent 4 }}
+    app.kubernetes.io/component: tasks
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /q/metrics
+    prometheus.io/port: "8080"
+spec:
+  selector:
+    app: tasks
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+{{- end }}
