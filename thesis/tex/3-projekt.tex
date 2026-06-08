@@ -3,7 +3,7 @@
 Niniejszy rozdział stanowi opis implementacji demonstracyjnego systemu informatycznego oraz towarzyszącego mu ekosystemu narzędziowego, zrealizowanego zgodnie z pryncypiami kultury DevOps oraz paradygmatem \textit{Cloud Native}. Głównym celem części praktycznej nie jest samo wytworzenie aplikacji, lecz zaprezentowanie kompleksowego procesu jej dostarczania, utrzymania i monitorowania w nowoczesnym środowisku chmurowym.
 
 \subsection{Architektura systemu}
-Projektowany system to „Portal do zarządzania zadaniami”, który służy jako poligon doświadczalny dla wdrażanych praktyk inżynierskich. System został zaprojektowany w architekturze mikroserwisowej, co pozwala na pełną demonstrację procesów DevOps w środowisku rozproszonym, w tym niezależnego budowania, testowania i wdrażania poszczególnych komponentów. Architektura aplikacji została oparta na wzorcu \textit{Clean Architecture}, co zapewnia separację logiki biznesowej od szczegółów technicznych i frameworków. Dzięki temu rdzeń każdego mikroserwisu pozostaje niezależny od infrastruktury.
+Projektowany system to „Portal do zarządzania zadaniami”, który służy jako poligon doświadczalny dla wdrażanych praktyk inżynierskich. System został zaprojektowany w architekturze mikroserwisowej, co pozwala na pełną demonstrację procesów DevOps w środowisku rozproszonym, w tym niezależnego budowania, testowania i wdrażania poszczególnych komponentów.
 
 W warstwie technologicznej zdecydowano się na wykorzystanie ekosystemu Java z frameworkiem \textit{Quarkus}. Wybór ten podyktowany był charakterem środowiska uruchomieniowego, jakim jest \textit{Kubernetes}. Quarkus, będący rozwiązaniem \textit{Kubernetes-native}, pozwala na znaczną optymalizację zużycia zasobów (pamięci RAM i procesora) oraz skrócenie czasu uruchamiania aplikacji dzięki kompilacji przed czasem (\textit{Ahead-of-Time} - AOT). Jest to kluczowe w architekturze mikroserwisowej, gdzie efektywność kosztowa i szybkość skalowania są priorytetem. Aplikacja została zaprojektowana zgodnie z wytycznymi \textit{Twelve-Factor App}, co gwarantuje jej pełną przenośność.
 
@@ -31,13 +31,25 @@ Poniższe sekcje szczegółowo opisują realizację kolejnych etapów pętli Dev
 Pierwsza faza cyklu DevOps obejmuje planowanie wymagań oraz wytwarzanie kodu źródłowego. W niniejszym projekcie etapy te są ze sobą ściśle zintegrowane, co pozwala na pełną identyfikowalność zmian — od zgłoszenia zadania po konkretną linię kodu.
 
 \subsubsection{Zarządzanie projektami: Jira}
-Do zarządzania wymaganiami funkcjonalnymi i planowania prac wykorzystano platformę \textbf{Jira}. Narzędzie to wybrano ze względu na jego status standardu rynkowego oraz zaawansowane możliwości wsparcia metodyk zwinnych (Agile).
+Do zarządzania wymaganiami i planowania prac wykorzystano platformę \textbf{Jira} (projekt \textit{INZ}). Narzędzie to wybrano ze względu na jego status standardu rynkowego oraz zaawansowane możliwości wsparcia metodyk zwinnych (Agile).
 
-\textbf{Rola w projekcie:}
-Jira służy do definiowania historyjek użytkownika (\textit{User Stories}), zarządzania backlogiem produktu oraz planowania iteracji (sprintów). Każde zadanie techniczne jest powiązane z konkretnym wymaganiem biznesowym, co umożliwia monitorowanie postępów prac.
+\textbf{Metodyka:}
+Agile to rodzina iteracyjnych metodyk wytwarzania oprogramowania, kładących nacisk na częste dostarczanie wartości i adaptację do zmian. Sprinty są podstawową jednostką iteracji w Agile — to ograniczone czasowo okresy pracy (zazwyczaj 1--4 tygodnie), po których dostarcza się działający przyrost produktu. Tablica Kanban to uproszczona alternatywa skupiona na wizualizacji przepływu zadań i ograniczaniu pracy w toku, bez sztywnych iteracji czasowych.
+
+Ponieważ projekt realizowany jest indywidualnie i w ograniczonym czasie, zadania podzielono logicznie na sprinty zgodnie z etapami pętli DevOps, lecz do bieżącego śledzenia pracy zastosowano tablicę Kanban — bardziej odpowiednią dla małych, jednoosobowych projektów.
+
+\textbf{Struktura backlogu:}
+Backlog projektu odwzorowuje etapy pętli DevOps. Zdefiniowano pięć Epics odpowiadających sprintom implementacyjnym: \textit{Build}, \textit{Release}, \textit{Deploy}, \textit{Monitor} i \textit{Polish}. W ramach każdego Epica utworzono zestaw zadań (\textit{Tasks}) pokrywających zarówno dostarczenie kodu infrastruktury, jak i uzupełnienie odpowiednich sekcji pracy inżynierskiej. Łącznie backlog liczy 29 zadań.
 
 \textbf{Integracja i dobre praktyki:}
-Zastosowano dwukierunkową integrację z systemem kontroli wersji GitHub. Dzięki temu, każda gałąź kodu (\textit{branch}) oraz każda zmiana (\textit{commit}) są automatycznie linkowane do odpowiedniego zgłoszenia w systemie Jira. Pozwala to na zachowanie pełnego kontekstu prac programistycznych bez konieczności ręcznego aktualizowania statusów zadań.
+Zastosowano integrację z systemem kontroli wersji GitHub. Każda gałąź kodu (\textit{branch}) jest nazwana według schematu \texttt{feature/INZ-XX-opis}, a wiadomości zatwierdzeń zawierają identyfikator zadania (np. \texttt{feat(helm): INZ-9 create umbrella chart}). Dzięki temu zmiany w kodzie są automatycznie powiązane z odpowiednim zgłoszeniem w Jira, co zapewnia pełną identyfikowalność — od wymagania po konkretną linię kodu.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{jira.png}
+    \caption{Tablica Kanban projektu INZ w Jira -- widok sprintów i zadań}
+    \label{fig:jira-board}
+\end{figure}
 
 \subsubsection{System kontroli wersji: GitHub}
 Jako system kontroli wersji i platformę współpracy wybrano \textbf{GitHub}, oparty na rozproszonym systemie Git. Jest on centralnym punktem prawdy (\textit{Single Source of Truth}) dla całego monorepozytorium.
@@ -49,14 +61,31 @@ Zgodnie z decyzją projektową \textit{ADR-0004}, wprowadzono standard \textbf{C
     \item \textbf{Rola w CI/CD:} Czytelna historia zmian umożliwia narzędziom automatyzującym precyzyjne określenie, które komponenty systemu wymagają przebudowania i wdrożenia po każdej zmianie w monorepozytorium.
 \end{itemize}
 
+Poniższy przykład ilustruje kompletną wiadomość zatwierdzenia zgodną ze standardem. Nagłówek zawiera typ, zakres oraz zwięzły opis zmiany, a stopka (\textit{footer}) powiązuje commit z konkretnym zadaniem w systemie Jira:
+
+\begin{lstlisting}[caption={Przykład wiadomości zatwierdzenia zgodnej ze standardem Conventional Commits}, label={lst:conventional-commit}]
+feat(helm): create umbrella chart for all 7 services
+
+Aggregates all microservice charts under a single parent
+chart, enabling one-command deployment of the full stack.
+
+Resolves: INZ-9
+\end{lstlisting}
+
 \subsubsection{Wytwarzanie oprogramowania: Stos technologiczny}
 Proces kodowania realizowany jest przy użyciu nowoczesnych środowisk programistycznych (\textit{IntelliJ IDEA}, \textit{VS Code}), a sama implementacja opiera się na technologiach wspierających paradygmat mikroserwisów.
 
-\textbf{Backend (Java i Quarkus):}
-Zastosowanie frameworka \textit{Quarkus} pozwala na realizację mikroserwisów w modelu \textit{Kubernetes-native}. Wykorzystuje on mechanizmy wstrzykiwania zależności (\textit{Dependency Injection}) oraz programowania reaktywnego, oferując jednocześnie bardzo niskie czasy startu aplikacji. Architektura kodu bazuje na zasadach \textit{Clean Architecture}, izolując domenę biznesową od zewnętrznych bibliotek.
+\textbf{Backend (Java i Quarkus — tryb GraalVM Native Image):}
+Mikroserwisy backendowe zbudowano z użyciem frameworka \textit{Quarkus} skompilowanego do natywnych plików wykonywalnych za pomocą \textit{GraalVM Native Image} (kompilacja \textit{Ahead-of-Time}, AOT). W trybie natywnym Quarkus analizuje ścieżki wykonania kodu w czasie kompilacji i wyklucza nieużywane klasy, co skutkuje:
+\begin{itemize}
+    \item \textbf{Błyskawicznym startem} — aplikacja jest gotowa do obsługi żądań w czasie poniżej 100 ms, co skraca czas wznowienia po awarii i przyspiesza skalowanie poziome w Kubernetes.
+    \item \textbf{Niskim zużyciem pamięci} — brak środowiska uruchomieniowego JVM zmniejsza footprint kontenera, co bezpośrednio przekłada się na efektywność kosztową w środowiskach chmurowych.
+    \item \textbf{Minimalnym obrazem kontenera} — obraz oparty na \texttt{ubi-minimal} zawiera wyłącznie system operacyjny i skompilowany binarny, bez JDK ani bibliotek środowiska uruchomieniowego.
+\end{itemize}
+Wstrzykiwanie zależności realizowane jest przez mechanizm CDI Quarkusa (\textit{ArC}), który w trybie AOT przetwarza wszystkie adnotacje w czasie kompilacji, a nie w czasie uruchomienia.
 
-\textbf{Frontend (React):}
-Warstwa prezentacji budowana jest w oparciu o bibliotekę \textit{React}. Pozwala to na tworzenie interaktywnych komponentów interfejsu użytkownika, które komunikują się z backendem poprzez wystandaryzowane interfejsy API (REST).
+\textbf{Frontend (Vue 3 + Vite):}
+Zgodnie z decyzją \textit{ADR-0014}, warstwę prezentacji zbudowano z użyciem frameworka \textit{Vue 3} i narzędzia budującego \textit{Vite}. Kod pisany jest w \textit{TypeScript}, a poprawność typów weryfikuje \textit{vue-tsc} przed każdym buildem produkcyjnym. Komponenty interfejsu komunikują się z mikroserwisami backendowymi przez REST API.
 
 \textbf{Pryncypia Twelve-Factor App:}
 Wszystkie komponenty systemu są projektowane zgodnie z zasadami \textit{Twelve-Factor App}. Kluczowe aspekty to:
@@ -70,91 +99,95 @@ Wszystkie komponenty systemu są projektowane zgodnie z zasadami \textit{Twelve-
 Faza budowania (\textit{Build}) odpowiada za przekształcenie kodu źródłowego w gotowe do wdrożenia artefakty. W architekturze \textit{Cloud Native} proces ten kończy się wytworzeniem obrazu kontenera.
 
 \subsubsection{Orkiestracja potoku: GitHub Actions}
-Do automatyzacji procesu budowania wykorzystano usługę \textbf{GitHub Actions}. Pozwala ona na definiowanie potoków CI/CD (\textit{pipelines}) w formie kodu YAML, co jest zgodne z zasadą \textit{Everything as Code}.
+Zgodnie z decyzją \textit{ADR-0009}, jako platformę CI/CD wybrano \textbf{GitHub Actions}. Pozwala ona na definiowanie potoków w formie kodu YAML bezpośrednio w repozytorium, co jest zgodne z zasadą \textit{Everything as Code} i eliminuje potrzebę utrzymywania zewnętrznego serwera CI.
 
 \textbf{Rola w projekcie:}
 GitHub Actions pełni funkcję silnika CI (\textit{Continuous Integration}), który reaguje na zdarzenia w repozytorium (np. \textit{pull request} lub \textit{push} do gałęzi głównej). Potok roboczy automatycznie uruchamia kompilację, testy oraz budowanie obrazów, zapewniając szybką pętlę informacji zwrotnej dla programisty.
 
-\begin{lstlisting}[language=yaml, caption={Fragment potoku CI -- etap budowania i testowania (.github/workflows/ci.yml)}, label={lst:github-actions-build}]
+\textbf{Struktura potoków:}
+Dla każdego mikroserwisu zdefiniowano oddzielny plik workflow (np. \texttt{ci-users.yml}), uruchamiany wyłącznie przy zmianach w katalogu danego serwisu. Takie podejście eliminuje zbędne uruchomienia pipeline'u dla komponentów, których kod nie uległ zmianie.
+
+\begin{lstlisting}[language=yaml, caption={Fragment potoku CI -- budowanie i push obrazu natywnego (.github/workflows/ci-users.yml)}, label={lst:github-actions-build}]
 jobs:
   build:
-    name: Build, Test, Scan & Push
+    name: Build, Test, Scan & Push -- users
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: [users, tasks, task-archiver]
+    permissions:
+      contents: read
+      id-token: write   # wymagane przez Cosign keyless signing
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '25'
           distribution: temurin
           cache: gradle
       - name: Run tests
-        run: ./gradlew :apps:${{ matrix.service }}:test --no-daemon
-      - name: Build Docker image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: apps/${{ matrix.service }}/Dockerfile
-          load: true
-          tags: ${{ matrix.service }}:${{ github.sha }}
+        run: ./gradlew :apps:users:test --no-daemon
+      - name: Build application and container image
+        run: |
+          ./gradlew :apps:users:imageBuild \
+            -Dquarkus.container-image.tag=${{ github.sha }} \
+            --no-daemon
 \end{lstlisting}
 
 \subsubsection{Budowanie artefaktów: Gradle i NPM}
 W zależności od komponentu, wykorzystywane są dedykowane narzędzia budujące:
 \begin{itemize}
     \item \textbf{Gradle (Backend):} Zarządza zależnościami projektu Java/Quarkus, kompiluje kod oraz uruchamia testy jednostkowe. Wybrano go ze względu na elastyczność i wydajność (mechanizm \textit{build cache}).
-    \item \textbf{NPM (Frontend):} Odpowiada za zarządzanie pakietami JavaScript oraz budowanie zoptymalizowanej paczki produkcyjnej aplikacji React.
+    \item \textbf{Vite (Frontend):} Odpowiada za budowanie zoptymalizowanej paczki produkcyjnej aplikacji Vue 3. Vite wykorzystuje natywne moduły ES podczas developmentu, co skraca czas przeładowania do milisekund, a NPM zarządza zależnościami projektu.
 \end{itemize}
 
 \subsubsection{Konteneryzacja: Dockerfile}
 Zgodnie z decyzją \textit{ADR-0005}, jako standard budowania obrazów wybrano pliki \textbf{Dockerfile}. Wybór ten podyktowany był chęcią zachowania pełnej przejrzystości procesu, co ma kluczowe znaczenie w pracy inżynierskiej.
 
-\textbf{Dobre praktyki:}
-Zastosowano mechanizm \textit{multi-stage builds}, który pozwala na oddzielenie środowiska kompilacji od lekkiego środowiska uruchomieniowego. Dzięki temu obrazy produkcyjne nie zawierają niepotrzebnych narzędzi (jak Gradle czy JDK), co zmniejsza ich rozmiar oraz powierzchnię ataku.
+\textbf{Dobre praktyki — kompilacja AOT i minimalne obrazy:}
+Quarkus generuje gotowe pliki \texttt{Dockerfile.native} przeznaczone dla obrazów zbudowanych w trybie GraalVM \textit{Ahead-of-Time} (AOT). Kompilacja natywna odbywa się wewnątrz kontenera Mandrel (dystrybucja GraalVM zoptymalizowana pod Quarkusa) uruchamianego przez Gradle w potoku CI, bez konieczności instalowania GraalVM bezpośrednio na maszynie CI. Konfigurację narzędzia budującego zawiera plik \texttt{build.gradle}:
 
-\begin{lstlisting}[language=docker, caption={Wieloetapowy Dockerfile dla mikroserwisu \textit{users} (apps/users/Dockerfile)}, label={lst:dockerfile-multistage}]
-# Etap 1: Budowanie -- pelny JDK + Gradle
-FROM gradle:9-jdk25-alpine AS build
-WORKDIR /workspace
-COPY settings.gradle gradle.properties ./
-COPY gradle/ gradle/
-COPY libs/ libs/
-COPY apps/users/ apps/users/
-RUN gradle :apps:users:build -x test --no-daemon
+\begin{lstlisting}[language=groovy, caption={Konfiguracja natywnego buildu Quarkusa w Gradle (apps/users/build.gradle)}, label={lst:quarkus-native-build}]
+quarkusBuild {
+    nativeArgs {
+        containerBuild = true
+        builderImage = "quay.io/quarkus/ubi10-quarkus-mandrel-builder-image:jdk-25"
+    }
+}
+\end{lstlisting}
 
-# Etap 2: Srodowisko uruchomieniowe -- minimalne JRE
-FROM eclipse-temurin:25-jre-alpine
-WORKDIR /deployments
-COPY --from=build /workspace/apps/users/build/quarkus-app/lib/ lib/
-COPY --from=build /workspace/apps/users/build/quarkus-app/*.jar ./
-COPY --from=build /workspace/apps/users/build/quarkus-app/app/ app/
-COPY --from=build /workspace/apps/users/build/quarkus-app/quarkus/ quarkus/
+Wynikiem kompilacji jest samodzielny plik wykonywalny (\texttt{build/*-runner}), który nie wymaga środowiska JVM. Dockerfile kopiuje go do minimalnego obrazu bazowego Red Hat UBI:
+
+\begin{lstlisting}[language=docker, caption={Quarkus native Dockerfile dla mikroserwisu \textit{users} (apps/users/src/main/docker/Dockerfile.native)}, label={lst:dockerfile-native}]
+FROM registry.access.redhat.com/ubi10/ubi-minimal:10.2
+WORKDIR /work/
+RUN chown 1001 /work \
+    && chmod "g+rwX" /work \
+    && chown 1001:root /work
+COPY --chown=1001:root --chmod=0755 build/*-runner /work/application
+
 EXPOSE 8080
 USER 1001
-ENTRYPOINT ["java", "-Dquarkus.http.host=0.0.0.0", \
-  "-Djava.util.logging.manager=org.jboss.logmanager.LogManager", \
-  "-jar", "/deployments/quarkus-run.jar"]
+
+ENTRYPOINT ["./application", "-Dquarkus.http.host=0.0.0.0"]
 \end{lstlisting}
+
+Obraz końcowy zawiera wyłącznie minimalny system operacyjny i skompilowany binarny plik aplikacji — bez JVM, JDK ani żadnych narzędzi budujących. Warstwa frontendowa (\textit{Vue 3}) stosuje klasyczny wzorzec wieloetapowy: etap kompilacji Vite produkujący statyczne pliki w katalogu \texttt{dist/}, a następnie serwowanie ich przez minimalny obraz \textit{nginx}.
 
 \textbf{Shift Left Security:}
 Bezpieczeństwo jest weryfikowane już na etapie budowania (\textit{Shift Left}):
 \begin{itemize}
-    \item \textbf{Trivy:} Każdy zbudowany obraz jest skanowany pod kątem znanych podatności (CVE) w bibliotekach systemowych i aplikacyjnych.
-\begin{lstlisting}[language=yaml, caption={Skanowanie obrazu narz\k{e}dziem Trivy w potoku CI (.github/workflows/ci.yml)}, label={lst:trivy-scan}]
+    \item \textbf{Trivy} (ADR-0010)\textbf{:} Każdy zbudowany obraz jest skanowany pod kątem znanych podatności (CVE) w bibliotekach systemowych i aplikacyjnych.
+\begin{lstlisting}[language=yaml, caption={Skanowanie obrazu narz\k{e}dziem Trivy w potoku CI (.github/workflows/ci-users.yml)}, label={lst:trivy-scan}]
 - name: Scan image with Trivy
   uses: aquasecurity/trivy-action@v0.36.0
   with:
-    image-ref: ${{ matrix.service }}:${{ github.sha }}
+    image-ref: mateuszwas/users:${{ github.sha }}
     format: table
     exit-code: '1'
     ignore-unfixed: true
     vuln-type: os,library
     severity: HIGH,CRITICAL
 \end{lstlisting}
-    \item \textbf{Cosign:} Obrazy są cyfrowo podpisywane, co gwarantuje ich integralność i pozwala na weryfikację pochodzenia artefaktu przed jego uruchomieniem w klastrze.
+    \item \textbf{Cosign} (ADR-0011)\textbf{:} Obrazy są cyfrowo podpisywane metodą \textit{keyless signing} (Sigstore), co gwarantuje ich integralność i pozwala na weryfikację pochodzenia artefaktu przed jego uruchomieniem w klastrze.
 \end{itemize}
 
 \subsection{Etap Test}
@@ -163,7 +196,7 @@ Automatyzacja testów jest fundamentem zaufania do procesu CI/CD. W projekcie te
 \subsubsection{Testy jednostkowe i integracyjne: JUnit}
 Podstawowym narzędziem weryfikacji poprawności logiki biznesowej jest framework \textbf{JUnit}.
 \begin{itemize}
-    \item \textbf{Zakres:} Testy pokrywają kluczowe komponenty domeny (zgodnie z \textit{Clean Architecture}) oraz integrację z bazą danych (przy użyciu biblioteki \textit{Testcontainers}).
+    \item \textbf{Zakres:} Testy pokrywają kluczowe komponenty domeny oraz integrację z bazą danych (przy użyciu biblioteki \textit{Testcontainers}).
     \item \textbf{Automatyzacja:} Każde uruchomienie potoku w GitHub Actions wymaga przejścia wszystkich testów. Niepowodzenie choćby jednego testu blokuje możliwość przejścia do kolejnych etapów (np. budowania obrazu lub wdrożenia).
 \end{itemize}
 
@@ -178,7 +211,7 @@ Jako centralne repozytorium obrazów kontenerowych wykorzystano platformę \text
 \end{itemize}
 
 \subsubsection{Pakietowanie dla Kubernetes: Helm}
-Zarządzanie manifestami YAML dla wielu mikroserwisów staje się trudne bez odpowiedniego narzędzia. W tym celu wykorzystano \textbf{Helm} — menedżer pakietów dla systemu Kubernetes.
+Zarządzanie manifestami YAML dla wielu mikroserwisów staje się trudne bez odpowiedniego narzędzia. Zgodnie z decyzją \textit{ADR-0012}, jako standard pakietowania dla Kubernetes wybrano \textbf{Helm} — menedżer pakietów pozwalający na szablonowanie i wersjonowanie konfiguracji infrastruktury.
 \begin{itemize}
     \item \textbf{Koncepcja Chartów:} Helm pozwala na definiowanie szablonów (\textit{Charts}), które opisują strukturę aplikacji w klastrze. Parametry specyficzne dla środowiska (np. liczba replik, limity zasobów) są wydzielone do plików \texttt{values.yaml}.
     \item \textbf{Wersjonowanie wdrożeń:} Dzięki Helm możliwe jest traktowanie całej definicji infrastrukturalnej aplikacji jako pojedynczej wersji artefaktu. Ułatwia to procesy wycofywania zmian (\textit{rollback}) oraz promowania konkretnych wersji aplikacji między środowiskami.
