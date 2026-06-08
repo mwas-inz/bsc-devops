@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/mwas-inz/bsc-devops/compare/frontend-v1.2.2...frontend-v1.3.0) (2026-06-08)
+
+
+### Features
+
+* **infra:** migrate local Kubernetes runtime from minikube to k3d ([4aa1759](https://github.com/mwas-inz/bsc-devops/commit/4aa1759a2ece3cbf923d6c2c018e616c77e607c5))
+
 ## [1.2.2](https://github.com/mwas-inz/bsc-devops/compare/frontend-v1.2.1...frontend-v1.2.2) (2026-05-31)
 
 
