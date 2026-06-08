@@ -38,6 +38,7 @@
 
 \usepackage{xurl} % Pozwala na łamanie URL w dowolnym miejscu
 
+\usepackage{float}
 \usepackage{listings}
 \usepackage{xcolor}
 
@@ -70,6 +71,24 @@
   keywordstyle=\color{blue}\bfseries,
   sensitive=true,
   comment=[l]{\#},
+  commentstyle=\color{gray}\ttfamily,
+  stringstyle=\color{teal}\ttfamily,
+  morestring=[b]',
+  morestring=[b]",
+}
+
+\lstdefinelanguage{groovy}{
+  keywords={def,class,interface,extends,implements,return,if,else,for,while,
+            try,catch,finally,throws,new,void,true,false,null,import,package,
+            static,public,private,protected,final,abstract,
+            plugins,dependencies,id,implementation,testImplementation,
+            runtimeOnly,compileOnly,annotationProcessor,
+            quarkusBuild,nativeArgs,containerBuild,builderImage,
+            repositories,mavenCentral,mavenLocal,group,version,apply},
+  keywordstyle=\color{blue}\bfseries,
+  sensitive=true,
+  comment=[l]{//},
+  comment=[s]{/*}{*/},
   commentstyle=\color{gray}\ttfamily,
   stringstyle=\color{teal}\ttfamily,
   morestring=[b]',
