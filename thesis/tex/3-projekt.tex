@@ -227,8 +227,8 @@ Do zarządzania zasobami infrastrukturalnymi wykorzystano narzędzie \textbf{Ter
     \item \textbf{Zalety:} Deklaratywność zapewnia powtarzalność środowisk oraz pozwala na wersjonowanie infrastruktury razem z kodem aplikacji.
 \end{itemize}
 
-\subsubsection{Środowisko uruchomieniowe: Kubernetes (kind/minikube)}
-Głównym środowiskiem, w którym pracują mikroserwisy, jest klaster \textbf{Kubernetes}. W części praktycznej wykorzystano narzędzia \textbf{kind} lub \textbf{minikube} do uruchomienia lokalnego klastra.
+\subsubsection{Środowisko uruchomieniowe: Kubernetes (k3d)}
+Głównym środowiskiem, w którym pracują mikroserwisy, jest klaster \textbf{Kubernetes}. W części praktycznej wykorzystano narzędzie \textbf{k3d} do uruchomienia lokalnego klastra.
 \begin{itemize}
     \item \textbf{Charakterystyka:} Lokalne instancje Kubernetes oferują niemal pełną kompatybilność z produkcyjnymi klastrami chmurowymi (EKS, GKE). Pozwalają one na testowanie manifestów, polityk sieciowych oraz mechanizmów skalowania bezpośrednio na maszynie programisty.
     \item \textbf{Zasoby:} Klastry te są zoptymalizowane pod kątem szybkiego tworzenia i usuwania, co idealnie wpisuje się w potrzeby cyklu deweloperskiego i demonstracyjnego.

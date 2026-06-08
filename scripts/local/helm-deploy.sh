@@ -6,6 +6,7 @@ set -euo pipefail
 RELEASE="bsc-devops"
 NAMESPACE="bsc-devops"
 CHART="infrastructure/helm/bsc-devops"
+CLUSTER="bsc-devops"
 TAG="${1:-$(git rev-parse HEAD)}"
 
 echo "=== BSC DevOps — Helm Deployment ==="
@@ -13,8 +14,8 @@ echo "Release:   $RELEASE"
 echo "Namespace: $NAMESPACE"
 echo "Image tag: $TAG"
 
-if ! command -v minikube &>/dev/null; then
-    echo "ERROR: minikube not found. Install it first: https://minikube.sigs.k8s.io/docs/start/"
+if ! command -v k3d &>/dev/null; then
+    echo "ERROR: k3d not found. Install it first: https://k3d.io/stable/#installation"
     exit 1
 fi
 
@@ -23,14 +24,15 @@ if ! command -v helm &>/dev/null; then
     exit 1
 fi
 
-if ! minikube status --format='{{.Host}}' 2>/dev/null | grep -q "Running"; then
-    echo "Starting minikube (4 CPUs, 4GB RAM)..."
-    minikube start --memory=4096 --cpus=4
+if ! k3d cluster list 2>/dev/null | grep -q "^$CLUSTER"; then
+    echo "Creating k3d cluster '$CLUSTER'..."
+    k3d cluster create "$CLUSTER" \
+        --agents 1 \
+        --port "80:80@loadbalancer" \
+        --port "443:443@loadbalancer"
 fi
 
-echo ""
-echo "Enabling ingress addon..."
-minikube addons enable ingress
+kubectl config use-context "k3d-$CLUSTER"
 
 echo ""
 echo "--- helm upgrade --install ---"
@@ -41,7 +43,6 @@ helm upgrade --install "$RELEASE" "$CHART" \
     --wait \
     --timeout 5m
 
-DRIVER=$(minikube profile list --output=json 2>/dev/null | grep -o '"Driver":"[^"]*"' | head -1 | cut -d'"' -f4)
 echo ""
 echo "=== Deployment Complete ==="
 echo ""
@@ -49,14 +50,7 @@ echo "Pod status:"
 kubectl get pods -n "$NAMESPACE"
 echo ""
 echo "Access:"
-if [ "$DRIVER" = "docker" ]; then
-    echo "  Docker driver detected — minikube ip is not reachable from the host."
-    echo "  Run in a separate terminal:  minikube tunnel"
-    echo "  Then open:                   http://localhost"
-else
-    MINIKUBE_IP=$(minikube ip)
-    echo "  Frontend:  http://$MINIKUBE_IP"
-fi
+echo "  Frontend:  http://localhost"
 echo "  Jaeger UI: kubectl port-forward svc/jaeger 16686:16686 -n $NAMESPACE"
 echo "             then open http://localhost:16686"
 echo ""

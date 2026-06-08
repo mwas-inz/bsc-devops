@@ -1,28 +1,30 @@
 #!/bin/bash
-# Usage: bash scripts/local/deploy-minikube.sh [IMAGE_TAG]
+# Usage: bash scripts/local/deploy-k3d.sh [IMAGE_TAG]
 # IMAGE_TAG defaults to the current git commit SHA (must be pushed to Docker Hub by CI).
 set -euo pipefail
 
 NAMESPACE="bsc-devops"
+CLUSTER="bsc-devops"
 INFRA="infrastructure/local"
 TAG="${1:-$(git rev-parse HEAD)}"
 
-echo "=== BSC DevOps — Minikube Deployment ==="
+echo "=== BSC DevOps — k3d Deployment ==="
 echo "Image tag: $TAG"
 
-if ! command -v minikube &>/dev/null; then
-    echo "ERROR: minikube not found. Install it first: https://minikube.sigs.k8s.io/docs/start/"
+if ! command -v k3d &>/dev/null; then
+    echo "ERROR: k3d not found. Install it first: https://k3d.io/stable/#installation"
     exit 1
 fi
 
-if ! minikube status --format='{{.Host}}' 2>/dev/null | grep -q "Running"; then
-    echo "Starting minikube (4 CPUs, 4GB RAM)..."
-    minikube start --memory=4096 --cpus=4
+if ! k3d cluster list 2>/dev/null | grep -q "^$CLUSTER"; then
+    echo "Creating k3d cluster '$CLUSTER'..."
+    k3d cluster create "$CLUSTER" \
+        --agents 1 \
+        --port "80:80@loadbalancer" \
+        --port "443:443@loadbalancer"
 fi
 
-echo ""
-echo "Enabling ingress addon..."
-minikube addons enable ingress
+kubectl config use-context "k3d-$CLUSTER"
 
 # Applies a manifest file after substituting IMAGE_TAG with $TAG.
 kapply() {
@@ -36,7 +38,6 @@ kubectl apply -f "$INFRA/namespace.yaml"
 echo ""
 echo "--- Postgres ---"
 kubectl apply -f "$INFRA/postgres/postgres-configmap.yaml"
-kubectl apply -f "$INFRA/postgres/postgres-pv.yaml"
 kubectl apply -f "$INFRA/postgres/postgres-pvc.yaml"
 kubectl apply -f "$INFRA/postgres/postgres-deployment.yaml"
 kubectl apply -f "$INFRA/postgres/postgres-service.yaml"
@@ -80,7 +81,6 @@ kubectl rollout status deployment/tasks -n "$NAMESPACE" --timeout=120s
 kubectl rollout status deployment/task-archiver -n "$NAMESPACE" --timeout=120s
 kubectl rollout status deployment/frontend -n "$NAMESPACE" --timeout=120s
 
-DRIVER=$(minikube profile list --output=json 2>/dev/null | grep -o '"Driver":"[^"]*"' | head -1 | cut -d'"' -f4)
 echo ""
 echo "=== Deployment Complete ==="
 echo ""
@@ -88,14 +88,7 @@ echo "Pod status:"
 kubectl get pods -n "$NAMESPACE"
 echo ""
 echo "Access:"
-if [ "$DRIVER" = "docker" ]; then
-    echo "  Docker driver detected — minikube ip is not reachable from the host."
-    echo "  Run in a separate terminal:  minikube tunnel"
-    echo "  Then open:                   http://localhost"
-else
-    MINIKUBE_IP=$(minikube ip)
-    echo "  Frontend:  http://$MINIKUBE_IP"
-fi
+echo "  Frontend:  http://localhost"
 echo "  Jaeger UI: kubectl port-forward svc/jaeger 16686:16686 -n $NAMESPACE"
 echo "             then open http://localhost:16686"
 echo ""

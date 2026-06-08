@@ -9,14 +9,15 @@ $ErrorActionPreference = 'Stop'
 $RELEASE   = "bsc-devops"
 $NAMESPACE = "bsc-devops"
 $CHART     = "infrastructure/helm/bsc-devops"
+$CLUSTER   = "bsc-devops"
 
 Write-Host "=== BSC DevOps — Helm Deployment ===" -ForegroundColor Cyan
 Write-Host "Release:   $RELEASE"
 Write-Host "Namespace: $NAMESPACE"
 Write-Host "Image tag: $Tag"
 
-if (-not (Get-Command minikube -ErrorAction SilentlyContinue)) {
-    Write-Host "ERROR: minikube not found. Install it first: https://minikube.sigs.k8s.io/docs/start/" -ForegroundColor Red
+if (-not (Get-Command k3d -ErrorAction SilentlyContinue)) {
+    Write-Host "ERROR: k3d not found. Install it first: https://k3d.io/stable/#installation" -ForegroundColor Red
     exit 1
 }
 
@@ -25,15 +26,16 @@ if (-not (Get-Command helm -ErrorAction SilentlyContinue)) {
     exit 1
 }
 
-$minikubeHost = minikube status --format='{{.Host}}' 2>$null
-if ($minikubeHost -ne 'Running') {
-    Write-Host "Starting minikube (4 CPUs, 4GB RAM)..."
-    minikube start --memory=4096 --cpus=4
+$clusterExists = k3d cluster list 2>$null | Select-String -Pattern "^$CLUSTER"
+if (-not $clusterExists) {
+    Write-Host "Creating k3d cluster '$CLUSTER'..."
+    k3d cluster create $CLUSTER `
+        --agents 1 `
+        --port "80:80@loadbalancer" `
+        --port "443:443@loadbalancer"
 }
 
-Write-Host ""
-Write-Host "Enabling ingress addon..."
-minikube addons enable ingress
+kubectl config use-context "k3d-$CLUSTER"
 
 Write-Host ""
 Write-Host "--- helm upgrade --install ---"
@@ -44,7 +46,6 @@ helm upgrade --install $RELEASE $CHART `
     --wait `
     --timeout 5m
 
-$driver = (minikube profile list --output=json 2>$null | ConvertFrom-Json).valid[0].Config.Driver
 Write-Host ""
 Write-Host "=== Deployment Complete ===" -ForegroundColor Green
 Write-Host ""
@@ -52,14 +53,7 @@ Write-Host "Pod status:"
 kubectl get pods -n $NAMESPACE
 Write-Host ""
 Write-Host "Access:"
-if ($driver -eq 'docker') {
-    Write-Host "  Docker driver detected — minikube ip is not reachable from the host." -ForegroundColor Yellow
-    Write-Host "  Run in a separate terminal:  minikube tunnel"
-    Write-Host "  Then open:                   http://localhost"
-} else {
-    $MINIKUBE_IP = minikube ip
-    Write-Host "  Frontend:  http://$MINIKUBE_IP"
-}
+Write-Host "  Frontend:  http://localhost"
 Write-Host "  Jaeger UI: kubectl port-forward svc/jaeger 16686:16686 -n $NAMESPACE"
 Write-Host "             then open http://localhost:16686"
 Write-Host ""

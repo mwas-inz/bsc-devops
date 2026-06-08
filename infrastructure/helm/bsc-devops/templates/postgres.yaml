@@ -30,21 +30,6 @@ stringData:
   POSTGRES_PASSWORD: {{ .Values.postgres.credentials.password | quote }}
 ---
 apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: postgres-volume
-  labels:
-    {{- include "bsc-devops.labels" . | nindent 4 }}
-spec:
-  storageClassName: {{ .Values.postgres.storage.storageClass }}
-  capacity:
-    storage: 10Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: {{ .Values.postgres.storage.hostPath | quote }}
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgres-pvc
