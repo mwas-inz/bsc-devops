@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.2](https://github.com/mwas-inz/bsc-devops/compare/users-v1.1.1...users-v1.1.2) (2026-06-08)
+
+
+### Bug Fixes
+
+* **config:** replace deprecated hibernate-orm schema generation property ([08fd403](https://github.com/mwas-inz/bsc-devops/commit/08fd40311577b2c6130ea5e91e28ec8678584364))
+* **config:** replace deprecated hibernate-orm schema generation property ([dbbcf94](https://github.com/mwas-inz/bsc-devops/commit/dbbcf94e49763672088227c4466d1ee0801d033d))
+
 ## [1.1.1](https://github.com/mwas-inz/bsc-devops/compare/users-v1.1.0...users-v1.1.1) (2026-05-31)
 
 
