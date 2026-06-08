@@ -1,4 +1,4 @@
-# Usage: .\scripts\local\deploy-minikube.ps1 [-Tag <IMAGE_TAG>]
+# Usage: .\scripts\local\deploy-k3d.ps1 [-Tag <IMAGE_TAG>]
 # Tag defaults to the current git commit SHA (must be pushed to Docker Hub by CI).
 #Requires -Version 5.1
 param(
@@ -7,25 +7,27 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $NAMESPACE = "bsc-devops"
-$INFRA = "infrastructure/local"
+$CLUSTER   = "bsc-devops"
+$INFRA     = "infrastructure/local"
 
-Write-Host "=== BSC DevOps — Minikube Deployment ===" -ForegroundColor Cyan
+Write-Host "=== BSC DevOps — k3d Deployment ===" -ForegroundColor Cyan
 Write-Host "Image tag: $Tag"
 
-if (-not (Get-Command minikube -ErrorAction SilentlyContinue)) {
-    Write-Host "ERROR: minikube not found. Install it first: https://minikube.sigs.k8s.io/docs/start/" -ForegroundColor Red
+if (-not (Get-Command k3d -ErrorAction SilentlyContinue)) {
+    Write-Host "ERROR: k3d not found. Install it first: https://k3d.io/stable/#installation" -ForegroundColor Red
     exit 1
 }
 
-$minikubeHost = minikube status --format='{{.Host}}' 2>$null
-if ($minikubeHost -ne 'Running') {
-    Write-Host "Starting minikube (4 CPUs, 4GB RAM)..."
-    minikube start --memory=4096 --cpus=4
+$clusterExists = k3d cluster list 2>$null | Select-String -Pattern "^$CLUSTER"
+if (-not $clusterExists) {
+    Write-Host "Creating k3d cluster '$CLUSTER'..."
+    k3d cluster create $CLUSTER `
+        --agents 1 `
+        --port "80:80@loadbalancer" `
+        --port "443:443@loadbalancer"
 }
 
-Write-Host ""
-Write-Host "Enabling ingress addon..."
-minikube addons enable ingress
+kubectl config use-context "k3d-$CLUSTER"
 
 # Applies a manifest file after substituting IMAGE_TAG with $Tag.
 function Invoke-KApply([string]$File) {
@@ -39,7 +41,6 @@ kubectl apply -f "$INFRA/namespace.yaml"
 Write-Host ""
 Write-Host "--- Postgres ---"
 kubectl apply -f "$INFRA/postgres/postgres-configmap.yaml"
-kubectl apply -f "$INFRA/postgres/postgres-pv.yaml"
 kubectl apply -f "$INFRA/postgres/postgres-pvc.yaml"
 kubectl apply -f "$INFRA/postgres/postgres-deployment.yaml"
 kubectl apply -f "$INFRA/postgres/postgres-service.yaml"
@@ -83,7 +84,6 @@ kubectl rollout status deployment/tasks -n $NAMESPACE --timeout=120s
 kubectl rollout status deployment/task-archiver -n $NAMESPACE --timeout=120s
 kubectl rollout status deployment/frontend -n $NAMESPACE --timeout=120s
 
-$driver = (minikube profile list --output=json 2>$null | ConvertFrom-Json).valid[0].Config.Driver
 Write-Host ""
 Write-Host "=== Deployment Complete ===" -ForegroundColor Green
 Write-Host ""
@@ -91,14 +91,7 @@ Write-Host "Pod status:"
 kubectl get pods -n $NAMESPACE
 Write-Host ""
 Write-Host "Access:"
-if ($driver -eq 'docker') {
-    Write-Host "  Docker driver detected — minikube ip is not reachable from the host." -ForegroundColor Yellow
-    Write-Host "  Run in a separate terminal:  minikube tunnel"
-    Write-Host "  Then open:                   http://localhost"
-} else {
-    $MINIKUBE_IP = minikube ip
-    Write-Host "  Frontend:  http://$MINIKUBE_IP"
-}
+Write-Host "  Frontend:  http://localhost"
 Write-Host "  Jaeger UI: kubectl port-forward svc/jaeger 16686:16686 -n $NAMESPACE"
 Write-Host "             then open http://localhost:16686"
 Write-Host ""

@@ -22,7 +22,7 @@
 
 * **Kubernetes** 🔲
   * Pozycja rynkowa i główne zalety (deklaratywność, self-healing, cloud-agnostic).
-  * Alternatywy i zarządzane klastry (GKE, EKS, AKS) -> łatwość deploymentu w chmurze i lokalnie (minikube, kind).
+  * Alternatywy i zarządzane klastry (GKE, EKS, AKS) -> łatwość deploymentu w chmurze i lokalnie (k3d, kind).
 
 ## II. Implementacja Systemu
 
@@ -32,7 +32,7 @@
 * **Plan & Code**
   * Zarządzanie wymaganiami (Jira), kontrola wersji (GitHub).
   * Aplikacja: serwis klient-serwer (Java backend, React frontend) w architekturze mikroserwisowej. Szczegóły implementacyjne poza zakresem — skupiamy się na procesie wdrożenia.
-  * Środowisko lokalne: *minikube* lub *kind* jako lokalny klaster Kubernetes.
+  * Środowisko lokalne: *k3d* jako lokalny klaster Kubernetes.
 
 * **Build**
   * Budowanie artefaktów: Gradle.

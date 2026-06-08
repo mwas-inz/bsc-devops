@@ -20,8 +20,7 @@ postgres:
     password: "todo"
   storage:
     size: "5Gi"
-    hostPath: "/data/postgresql"
-    storageClass: "manual"
+    storageClass: "local-path"
   resources:
     requests:
       cpu: "100m"
@@ -110,5 +109,5 @@ frontend:
       memory: "64Mi"
   ingress:
     enabled: true
-    className: "nginx"
+    className: "traefik"
     host: ""
