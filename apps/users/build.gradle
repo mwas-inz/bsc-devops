@@ -31,9 +31,6 @@ dependencies {
     implementation("org.apache.bookkeeper:cpu-affinity:4.17.3") {
         artifact { type = "jar" }
     }
-    // bookkeeper 4.17.3 dropped commons-lang (v2); Pulsar OAuth2 class references it
-    // at reflection-scan time during native image build
-    implementation("commons-lang:commons-lang:2.6")
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:rest-assured'
     testImplementation "io.quarkus:quarkus-observability-devservices-lgtm"

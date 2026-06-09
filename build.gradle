@@ -1,1 +1,13 @@
 // Root build — each service is configured in its own build.gradle
+
+// Quarkus BOM pins pulsar-client to 3.3.0, but smallrye-reactive-messaging-pulsar
+// 4.34.0 requires 4.1.1 and Pulsar 4.x dropped commons-lang (v2) entirely.
+// Force overrides the BOM constraint so CVE-2025-48924 in commons-lang:2.6 is avoided.
+subprojects {
+    configurations.all {
+        resolutionStrategy.force(
+            'org.apache.pulsar:pulsar-client-original:4.1.1',
+            'org.apache.pulsar:pulsar-client-messagecrypto-bc:4.1.1'
+        )
+    }
+}
