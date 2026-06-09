@@ -10,7 +10,61 @@ Jako centralne repozytorium obrazów kontenerowych wykorzystano platformę \text
 
 \subsubsection{Pakietowanie dla Kubernetes: Helm}
 Zarządzanie manifestami YAML dla wielu mikroserwisów staje się trudne bez odpowiedniego narzędzia. Zgodnie z decyzją \textit{ADR-0012}, jako standard pakietowania dla Kubernetes wybrano \textbf{Helm} — menedżer pakietów pozwalający na szablonowanie i wersjonowanie konfiguracji infrastruktury.
+
+\begin{techcard}{Helm}
+
+\textbf{Opis:} Helm to menedżer pakietów dla Kubernetes, analogiczny do \texttt{apt} czy \texttt{brew} w świecie systemów operacyjnych. Pozwala na definiowanie, instalowanie i aktualizowanie złożonych aplikacji Kubernetes jako pojedynczych, wersjonowanych pakietów zwanych \textbf{chartami}. Chart to zestaw szablonów YAML sparametryzowanych wartościami z pliku \texttt{values.yaml}. Helm śledzi historię wdrożeń jako kolejne rewizje, co umożliwia natychmiastowy rollback.
+
+\textbf{Dobre nawyki:}
 \begin{itemize}
-    \item \textbf{Koncepcja Chartów:} Helm pozwala na definiowanie szablonów (\textit{Charts}), które opisują strukturę aplikacji w klastrze. Parametry specyficzne dla środowiska (np. liczba replik, limity zasobów) są wydzielone do plików \texttt{values.yaml}.
-    \item \textbf{Wersjonowanie wdrożeń:} Dzięki Helm możliwe jest traktowanie całej definicji infrastrukturalnej aplikacji jako pojedynczej wersji artefaktu. Ułatwia to procesy wycofywania zmian (\textit{rollback}) oraz promowania konkretnych wersji aplikacji między środowiskami.
+  \item \textbf{Umbrella chart:} Grupowanie powiązanych mikroserwisów w jeden chart pozwala wdrożyć cały stos jednym poleceniem \texttt{helm install}, zachowując spójność wersji wszystkich komponentów.
+  \item \textbf{Parametryzacja przez values:} Wartości specyficzne dla środowiska (tagi obrazów, liczba replik, limity zasobów) powinny być wydzielone do dedykowanych plików \texttt{values-prod.yaml}, a nie zakodowane na sztywno w szablonach.
+  \item \textbf{Wersjonowanie releaseów:} Każda zmiana wprowadzona przez \texttt{helm upgrade} tworzy nową rewizję. Polecenie \texttt{helm rollback} natychmiast przywraca poprzedni stan klastra bez ręcznej edycji manifestów.
+  \item \textbf{Helpery szablonów (\texttt{\_helpers.tpl}):} Wspólne etykiety i selektory należy definiować jako nazwane szablony w \texttt{\_helpers.tpl}, aby zapewnić spójność i uniknąć powielania kodu YAML.
 \end{itemize}
+
+\textbf{Rola w projekcie:} Helm pełni rolę menedżera infrastruktury projektu. Umbrella chart \texttt{bsc-devops} opisuje wszystkie komponenty stosu w jednym, wersjonowanym pakiecie.
+
+\end{techcard}
+
+\textbf{Umbrella chart i parametryzacja środowisk:}
+W projekcie zastosowano wzorzec \textbf{umbrella chart}: jeden chart \texttt{bsc-devops} obejmuje wszystkie 7 komponentów stosu (serwisy \textit{users}, \textit{tasks}, \textit{task-archiver}, \textit{frontend}, bazę PostgreSQL, broker Pulsar oraz Jaeger). Każdy komponent może być niezależnie włączony lub wyłączony flagą \texttt{enabled}. Konfiguracja zasobów obliczeniowych i tagów obrazów jest wydzielona do \texttt{values.yaml}:
+
+\begin{lstlisting}[language=yaml, caption={Fragment \texttt{values.yaml} umbrella chartu -- parametryzacja serwisu \textit{users} (infrastructure/helm/bsc-devops/values.yaml)}, label={lst:helm-values}]
+users:
+  enabled: true
+  image:
+    repository: "docker.io/mateuszwas/users"
+    tag: ""          # nadpisywane przez --set w CI: --set users.image.tag=$SHA
+  replicas: 1
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+\end{lstlisting}
+
+\textbf{Szablony Go i helpery:}
+Szablony Helm korzystają z silnika Go \texttt{text/template}. Wyrażenia \texttt{\{\{~include~\}} wywołują nazwane helpery zdefiniowane w pliku \texttt{\_helpers.tpl}. Przykładowo, helper \texttt{bsc-devops.imageRef} scala repozytorium z tagiem obrazu, a globalny tag może nadpisywać wartość per-serwis:
+
+\begin{lstlisting}[language=yaml, caption={Fragment szablonu Deployment serwisu \textit{users} z interpolacją wartości (infrastructure/helm/bsc-devops/templates/users.yaml)}, label={lst:helm-template}]
+spec:
+  replicas: {{ .Values.users.replicas }}
+  template:
+    spec:
+      containers:
+        - name: users
+          image: {{ include "bsc-devops.imageRef"
+            (dict "repo" .Values.users.image.repository
+                  "tag"  .Values.users.image.tag
+                  "ctx"  .) }}
+          resources:
+            {{- toYaml .Values.users.resources | nindent 12 }}
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 20
+\end{lstlisting}
