@@ -41,6 +41,19 @@
 \usepackage{float}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable, skins}
+
+\newtcolorbox{techcard}[1]{
+    enhanced,
+    title={\textbf{Karta narzędzia: }#1},
+    colback=gray!5,
+    colframe=black!50,
+    coltitle=black,
+    fonttitle=\bfseries,
+    before skip=\medskipamount,
+    after skip=\medskipamount,
+}
 
 \lstset{
     basicstyle=\ttfamily\footnotesize,
@@ -53,6 +66,7 @@
     tabsize=2,
     showstringspaces=false,
     captionpos=b,
+    float=H,
 }
 
 \lstdefinelanguage{yaml}{
@@ -168,7 +182,8 @@ The thesis illustrates best practices in software design and implementation, tho
 \input{tex/2-teoria}
 \input{tex/3_0-projekt}
 \input{tex/3_1-architektura}
-\input{tex/3_2-plan-code}
+\input{tex/3_2_1-plan}
+\input{tex/3_2_2-code}
 \input{tex/3_3-build}
 \input{tex/3_4-test}
 \input{tex/3_5-release}
