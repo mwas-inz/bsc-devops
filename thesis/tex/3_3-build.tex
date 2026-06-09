@@ -45,7 +45,23 @@ W zależności od komponentu, wykorzystywane są dedykowane narzędzia budujące
 \subsubsection{Konteneryzacja: Docker + Dockerfile}
 Zgodnie z decyzją \textit{ADR-0005}, jako standard budowania obrazów wybrano pliki \textbf{Dockerfile}. Wybór ten podyktowany był chęcią zachowania pełnej przejrzystości procesu, co ma kluczowe znaczenie w pracy inżynierskiej.
 
-\textbf{Dobre praktyki — kompilacja AOT i minimalne obrazy:}
+\begin{techcard}{Docker}
+
+\textbf{Opis:} Docker to platforma konteneryzacji pozwalająca na pakowanie oprogramowania wraz z całym środowiskiem uruchomieniowym w lekkie, przenośne kontenery. Dzięki temu aplikacja działa identycznie niezależnie od maszyny docelowej.
+
+\textbf{Dobre nawyki:}
+\begin{itemize}
+  \item \textbf{Multi-stage builds:} Oddzielenie środowiska kompilacji od uruchomieniowego redukuje rozmiar końcowego obrazu i eliminuje narzędzia budujące z obrazu produkcyjnego.
+  \item \textbf{Zasada najniższych uprawnień:} Kontenery nie powinny działać jako użytkownik \texttt{root} -- należy zdefiniować dedykowanego użytkownika technicznego (patrz listing \ref{lst:dockerfile-native}).
+  \item \textbf{Precyzyjne tagowanie:} Unikanie tagu \texttt{latest} na rzecz konkretnych wersji (semantycznych lub hashów git) zapewnia powtarzalność wdrożeń.
+  \item \textbf{Plik \texttt{.dockerignore}:} Wykluczanie zbędnych plików (np. \texttt{node\_modules}, \texttt{.git}, \texttt{target/}) przyspiesza budowanie i zapobiega wyciekom danych wrażliwych.
+\end{itemize}
+
+\textbf{Rola w projekcie:} Docker pełni rolę "pakowacza" -- przed jego użyciem dysponujemy skompilowanym binarnym plikiem, po procesie budowania obrazu otrzymujemy gotowy do wdrożenia artefakt uruchamialny w dowolnym środowisku kontenerowym. Dockerfile dla trybu natywnego przedstawia listing \ref{lst:dockerfile-native}.
+
+\end{techcard}
+
+\textbf{Docker i Quarkus — kompilacja AOT i minimalne obrazy:}
 Quarkus generuje gotowe pliki \texttt{Dockerfile.native} przeznaczone dla obrazów zbudowanych w trybie GraalVM \textit{Ahead-of-Time} (AOT). Kompilacja natywna odbywa się wewnątrz kontenera Mandrel (dystrybucja GraalVM zoptymalizowana pod Quarkusa) uruchamianego przez Gradle w potoku CI, bez konieczności instalowania GraalVM bezpośrednio na maszynie CI. Konfigurację narzędzia budującego zawiera plik \texttt{build.gradle}:
 
 \begin{lstlisting}[language=groovy, caption={Konfiguracja natywnego buildu Quarkusa w Gradle (apps/users/build.gradle)}, label={lst:quarkus-native-build}]
@@ -74,22 +90,6 @@ ENTRYPOINT ["./application", "-Dquarkus.http.host=0.0.0.0"]
 \end{lstlisting}
 
 Obraz końcowy zawiera wyłącznie minimalny system operacyjny i skompilowany binarny plik aplikacji — bez JVM, JDK ani żadnych narzędzi budujących. Warstwa frontendowa (\textit{Vue 3}) stosuje klasyczny wzorzec wieloetapowy: etap kompilacji Vite produkujący statyczne pliki w katalogu \texttt{dist/}, a następnie serwowanie ich przez minimalny obraz \textit{nginx}.
-
-\begin{techcard}{Docker}
-
-\textbf{Opis:} Docker to platforma konteneryzacji pozwalająca na pakowanie oprogramowania wraz z całym środowiskiem uruchomieniowym w lekkie, przenośne kontenery. Dzięki temu aplikacja działa identycznie niezależnie od maszyny docelowej.
-
-\textbf{Dobre nawyki:}
-\begin{itemize}
-  \item \textbf{Multi-stage builds:} Oddzielenie środowiska kompilacji od uruchomieniowego redukuje rozmiar końcowego obrazu i eliminuje narzędzia budujące z obrazu produkcyjnego.
-  \item \textbf{Zasada najniższych uprawnień:} Kontenery nie powinny działać jako użytkownik \texttt{root} -- należy zdefiniować dedykowanego użytkownika technicznego (patrz listing \ref{lst:dockerfile-native}).
-  \item \textbf{Precyzyjne tagowanie:} Unikanie tagu \texttt{latest} na rzecz konkretnych wersji (semantycznych lub hashów git) zapewnia powtarzalność wdrożeń.
-  \item \textbf{Plik \texttt{.dockerignore}:} Wykluczanie zbędnych plików (np. \texttt{node\_modules}, \texttt{.git}, \texttt{target/}) przyspiesza budowanie i zapobiega wyciekom danych wrażliwych.
-\end{itemize}
-
-\textbf{Rola w projekcie:} Docker pełni rolę "pakowacza" -- przed jego użyciem dysponujemy skompilowanym binarnym plikiem, po procesie budowania obrazu otrzymujemy gotowy do wdrożenia artefakt uruchamialny w dowolnym środowisku kontenerowym. Dockerfile dla trybu natywnego przedstawia listing \ref{lst:dockerfile-native}.
-
-\end{techcard}
 
 \textbf{Shift Left Security:}
 Bezpieczeństwo jest weryfikowane już na etapie budowania (\textit{Shift Left}):
