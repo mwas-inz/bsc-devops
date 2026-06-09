@@ -65,7 +65,7 @@ W części praktycznej lokalny klaster uruchamia narzędzie \textbf{k3d} — cie
 
 \begin{lstlisting}[language=bash, caption={Tworzenie klastra k3d z mapowaniem portów Ingress (infrastructure/k3d/cluster-create.sh)}, label={lst:k3d-create}]
 k3d cluster create bsc-devops \
-  --agents 1 \
+  --agents 2 \
   --port "80:80@loadbalancer" \
   --port "443:443@loadbalancer"
 \end{lstlisting}

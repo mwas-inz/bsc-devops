@@ -27,7 +27,7 @@ fi
 if ! k3d cluster list 2>/dev/null | grep -q "^$CLUSTER"; then
     echo "Creating k3d cluster '$CLUSTER'..."
     k3d cluster create "$CLUSTER" \
-        --agents 1 \
+        --agents 2 \
         --port "80:80@loadbalancer" \
         --port "443:443@loadbalancer"
 fi
