@@ -1,0 +1,9 @@
+\subsection{Etap Test}
+Automatyzacja testów jest fundamentem zaufania do procesu CI/CD. W projekcie testy są integralną częścią każdego potoku budowania.
+
+\subsubsection{Testy jednostkowe i integracyjne: JUnit}
+Podstawowym narzędziem weryfikacji poprawności logiki biznesowej jest framework \textbf{JUnit}.
+\begin{itemize}
+    \item \textbf{Zakres:} Testy pokrywają kluczowe komponenty domeny oraz integrację z bazą danych (przy użyciu biblioteki \textit{Testcontainers}).
+    \item \textbf{Automatyzacja:} Każde uruchomienie potoku w GitHub Actions wymaga przejścia wszystkich testów. Niepowodzenie choćby jednego testu blokuje możliwość przejścia do kolejnych etapów (np. budowania obrazu lub wdrożenia).
+\end{itemize}

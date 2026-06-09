@@ -1,0 +1,18 @@
+\subsection{Etap Monitor + Feedback}
+Ostatni etap pętli DevOps zamyka cykl, dostarczając informacji zwrotnej o działaniu systemu. W nowoczesnych architekturach etap ten jest realizowany poprzez koncepcję \textit{Observability}.
+
+\subsubsection{Standard zbierania danych: OpenTelemetry}
+Zgodnie z decyzją \textit{ADR-0006}, w całym projekcie zaimplementowano standard \textbf{OpenTelemetry}.
+\begin{itemize}
+    \item \textbf{Jednolita instrumentacja:} Zamiast oddzielnych bibliotek dla logów, metryk i trace'ów, aplikacje wykorzystują ujednolicony protokół OTLP.
+    \item \textbf{OTel Collector:} Centralnym punktem zbierania danych jest komponent Collector, który odbiera telemetrię z aplikacji, przetwarza ją i wysyła do odpowiednich systemów bazodanowych. Pozwala to na całkowite odseparowanie aplikacji od konkretnych dostawców narzędzi monitorujących.
+\end{itemize}
+
+\subsubsection{Stos Observability: LGTM}
+Jako systemy przechowywania i wizualizacji danych wybrano stos \textbf{LGTM} (ADR-0007):
+\begin{itemize}
+    \item \textbf{Prometheus (Metrics):} Gromadzi dane numeryczne o wydajności systemu i aplikacji.
+    \item \textbf{Loki (Logs):} Przechowuje logi aplikacji w sposób zoptymalizowany pod kątem Kubernetes (wykorzystując te same etykiety co system orkiestracji).
+    \item \textbf{Tempo (Traces):} Umożliwia śledzenie rozproszonych zapytań między mikroserwisami, co jest kluczowe w diagnozowaniu problemów wydajnościowych w architekturze rozproszonej.
+    \item \textbf{Grafana (Visualization):} Stanowi wspólny interfejs (\textit{Single Pane of Glass}) dla wszystkich powyższych narzędzi. Pozwala na tworzenie interaktywnych pulpitów sterowniczych i korelację danych (np. przejście od wykresu błędu do logów konkretnego kontenera).
+\end{itemize}
