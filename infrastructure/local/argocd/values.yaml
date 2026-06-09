@@ -1,0 +1,72 @@
+# ArgoCD Helm values — local k3d cluster (resource-constrained single-node dev)
+# Chart: argo/argo-cd  https://argoproj.github.io/argo-helm
+
+crds:
+  install: true
+
+configs:
+  params:
+    # Disable TLS inside the pod — k3d port-forward or Traefik handles termination
+    server.insecure: true
+
+server:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+repoServer:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  volumes:
+    - name: ghcr-docker-config
+      secret:
+        secretName: ghcr-docker-config
+  volumeMounts:
+    - name: ghcr-docker-config
+      mountPath: /home/argocd/.docker
+      readOnly: true
+
+applicationSet:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+controller:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+redis:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+notifications:
+  enabled: false
+
+dex:
+  enabled: false
