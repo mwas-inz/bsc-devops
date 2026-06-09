@@ -21,3 +21,62 @@ Zamiast tradycyjnych narzędzi \textit{Configuration Management} (jak Ansible), 
     \item \textbf{Zasada działania:} GitOps zakłada, że repozytorium Git jest jedynym źródłem prawdy o stanie infrastruktury. ArgoCD stale monitoruje zmiany w plikach YAML (lub chartach Helm) i automatycznie synchronizuje stan klastra z definicją w kodzie.
     \item \textbf{Korzyści:} Eliminuje to potrzebę ręcznego wykonywania poleceń \texttt{kubectl} i zapewnia, że środowisko jest zawsze zgodne z zatwierdzoną konfiguracją.
 \end{itemize}
+
+\subsubsection{Stosowane technologie -- karty referencyjne}
+
+\begin{techcard}{Kubernetes}
+
+\textbf{Opis:} Kubernetes (K8s) to otwartoźródłowy system automatyzacji wdrażania, skalowania i zarządzania skonteneryzowanymi aplikacjami. Pełni rolę orkiestratora, dbając o to, aby zdefiniowana liczba instancji aplikacji (podów) była zawsze uruchomiona i dostępna dla użytkowników.
+
+\textbf{Dobre nawyki:}
+\begin{itemize}
+  \item \textbf{Zarządzanie zasobami:} Obowiązkowe definiowanie \texttt{requests} (zasoby gwarantowane) i \texttt{limits} (maksymalne zużycie) zapobiega wzajemnemu zagłuszaniu się usług (efekt \textit{noisy neighbor}).
+  \item \textbf{Sondy kondycji:} \texttt{livenessProbe} (czy kontener żyje) oraz \texttt{readinessProbe} (czy może przyjmować ruch) są kluczowe dla samonaprawialności klastra i bezprzestojowych wdrożeń (\textit{Rolling Updates}).
+  \item \textbf{Podejście deklaratywne (GitOps):} Konfiguracja przechowywana w repozytorium i nakładana przez \texttt{kubectl apply}, a nie komendy imperatywne.
+  \item \textbf{Network Policies:} Domyślne ograniczanie komunikacji między podami do niezbędnego minimum -- zasada \textit{Zero Trust}.
+\end{itemize}
+
+\textbf{Rola w projekcie:} Kubernetes stanowi docelowe środowisko uruchomieniowe. O ile Docker pozwala stworzyć obraz, o tyle Kubernetes odpowiada za to, by ten obraz "ożył" w klastrze, był dostępny pod konkretnym adresem i automatycznie restartował się w przypadku awarii.
+
+\end{techcard}
+
+\begin{lstlisting}[language=yaml, caption={Manifest Kubernetes Deployment z sondami kondycji i limitami zasobów (infrastructure/k8s/users-deployment.yaml)}, label={lst:k8s-deployment}]
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: users
+  template:
+    metadata:
+      labels:
+        app: users
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /q/metrics
+        prometheus.io/port: "8080"
+    spec:
+      containers:
+      - name: users
+        image: mateuszwas/users:1.0.0
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /q/health/live
+            port: 8080
+        readinessProbe:
+          httpGet:
+            path: /q/health/ready
+            port: 8080
+\end{lstlisting}

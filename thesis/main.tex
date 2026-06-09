@@ -41,6 +41,20 @@
 \usepackage{float}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable, skins}
+
+\newtcolorbox{techcard}[1]{
+    enhanced,
+    title={\textbf{Karta narzędzia: }#1},
+    colback=gray!5,
+    colframe=black!50,
+    coltitle=black,
+    fonttitle=\bfseries,
+    breakable,
+    before skip=\medskipamount,
+    after skip=\medskipamount,
+}
 
 \lstset{
     basicstyle=\ttfamily\footnotesize,

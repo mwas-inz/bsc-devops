@@ -16,3 +16,183 @@ Jako systemy przechowywania i wizualizacji danych wybrano stos \textbf{LGTM} (AD
     \item \textbf{Tempo (Traces):} Umożliwia śledzenie rozproszonych zapytań między mikroserwisami, co jest kluczowe w diagnozowaniu problemów wydajnościowych w architekturze rozproszonej.
     \item \textbf{Grafana (Visualization):} Stanowi wspólny interfejs (\textit{Single Pane of Glass}) dla wszystkich powyższych narzędzi. Pozwala na tworzenie interaktywnych pulpitów sterowniczych i korelację danych (np. przejście od wykresu błędu do logów konkretnego kontenera).
 \end{itemize}
+
+\subsubsection{Stosowane technologie -- karty referencyjne}
+Poniższe karty zbierają kluczowe informacje o narzędziach tworzących stos obserwowalności projektu.
+
+\begin{techcard}{OpenTelemetry Collector}
+
+\textbf{Opis:} OpenTelemetry Collector to niezależny od dostawcy komponent pośredniczący (\textit{vendor-agnostic proxy}) w potoku telemetrii. Odbiera dane z aplikacji (logi, metryki, ślady), przetwarza je i przekazuje do skonfigurowanych backendów. Zmiana backendu wymaga jedynie modyfikacji konfiguracji Collectora, nie kodu aplikacji.
+
+\textbf{Dobre nawyki:}
+\begin{itemize}
+  \item \textbf{Processor \texttt{batch}:} Grupowanie danych przed wysłaniem do backendów redukuje liczbę połączeń sieciowych i obciążenie CPU po obu stronach.
+  \item \textbf{Trzy niezależne pipeline'y:} Osobne pipeline'y dla logów, metryk i śladów umożliwiają niezależne skalowanie i wyłączanie poszczególnych kanałów.
+  \item \textbf{Processor \texttt{resource}:} Wzbogacanie telemetrii o atrybuty środowiskowe (np. \texttt{deployment.environment}) na poziomie Collectora eliminuje konieczność kodowania ich w każdej aplikacji osobno.
+  \item \textbf{DaemonSet w Kubernetes:} Collector działa najczęściej jako jeden agent per węzeł klastra, opcjonalnie z centralnym gateway'em agregującym dane z agentów.
+\end{itemize}
+
+\textbf{Rola w projekcie:} OTel Collector jest centralnym węzłem potoku telemetrii. Aplikacja Java z OTel Java Agent wysyła logi, metryki i ślady na jeden adres (Collector), który kieruje je dalej do Loki, Prometheus i Tempo, zapewniając całkowitą niezależność aplikacji od konkretnych narzędzi monitoringowych.
+
+\end{techcard}
+
+\begin{lstlisting}[language=yaml, caption={Konfiguracja OpenTelemetry Collector -- trzy niezale\. zne pipeline'y obserwowalno\'{s}ci (infrastructure/otel-collector-config.yaml)}, label={lst:otel-collector-config}]
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+  resource:
+    attributes:
+      - key: deployment.environment
+        value: production
+        action: insert
+
+exporters:
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+  prometheus:
+    endpoint: 0.0.0.0:8889
+  otlp/tempo:
+    endpoint: http://tempo:4317
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [batch, resource]
+      exporters: [loki]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus]
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/tempo]
+\end{lstlisting}
+
+\begin{techcard}{Prometheus}
+
+\textbf{Opis:} Prometheus to system monitorowania i baza danych szeregów czasowych (\textit{time-series database}), będący projektem CNCF o statusie \textit{graduated}. Zbiera metryki poprzez aktywne odpytywanie (\textit{scraping}) endpointów HTTP eksponowanych przez aplikacje i infrastrukturę. Dane odpytywane są językiem PromQL.
+
+\textbf{Dobre nawyki:}
+\begin{itemize}
+  \item \textbf{Metoda RED:} Dla każdego serwisu definiować co najmniej: \textit{rate} (żądania/s), \textit{errors} (odsetek błędów) i \textit{duration} (czas odpowiedzi) -- minimum pozwalające ocenić stan usługi.
+  \item \textbf{Konwencje nazewnictwa:} Notacja \texttt{snake\_case}; metryki licznikowe kończą się na \texttt{\_total} (np. \texttt{http\_requests\_total}).
+  \item \textbf{Unikanie wysokiej kardynalności etykiet:} Etykiety z dużą liczbą unikalnych wartości (URL z parametrami, ID użytkownika) powodują eksplozję serii czasowych i degradację wydajności.
+  \item \textbf{Service Discovery w Kubernetes:} Automatyczne wykrywanie podów z adnotacją \texttt{prometheus.io/scrape: "true"} eliminuje ręczną aktualizację konfiguracji przy każdym nowym serwisie.
+\end{itemize}
+
+\textbf{Rola w projekcie:} Prometheus zbiera metryki z endpointu \texttt{/actuator/prometheus} eksponowanego przez Micrometer oraz z infrastruktury Kubernetes (kube-state-metrics, node-exporter). Po jego wdrożeniu metryki są dostępne w Grafanie i stanowią podstawę definiowania alertów.
+
+\end{techcard}
+
+\begin{lstlisting}[language=yaml, caption={Konfiguracja Prometheus -- scraping aplikacji i autodiscovery Kubernetes (infrastructure/prometheus.yml)}, label={lst:prometheus-config}]
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'bsc-app-backend'
+    static_configs:
+      - targets: ['bsc-app-backend:8080']
+    metrics_path: /actuator/prometheus
+
+  - job_name: 'kubernetes-pods'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: "true"
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+\end{lstlisting}
+
+\begin{techcard}{Loki}
+
+\textbf{Opis:} Loki to system agregacji logów stworzony przez Grafana Labs, zaprojektowany z myślą o środowiskach Kubernetes. W odróżnieniu od Elasticsearch, Loki indeksuje wyłącznie \textbf{etykiety} (\textit{labels}), a nie treść logów, co czyni go znacznie bardziej wydajnym pamięciowo i obliczeniowo.
+
+\textbf{Dobre nawyki:}
+\begin{itemize}
+  \item \textbf{Ograniczanie kardynalności etykiet:} Etykiety o wysokiej liczbie unikalnych wartości (np. \texttt{user\_id}, \texttt{request\_id}) drastycznie zwiększają zużycie pamięci -- powinny trafiać do treści logu, nie do etykiet.
+  \item \textbf{Strukturalne logowanie (JSON):} Logi w formacie JSON umożliwiają filtrowanie w Grafanie po zawartości (np. \texttt{| json | level="error"}).
+  \item \textbf{Spójne etykiety z Prometheusem:} Stosowanie tych samych nazw etykiet (\texttt{job}, \texttt{instance}, \texttt{namespace}) ułatwia korelację logów z metrykami.
+\end{itemize}
+
+\textbf{Rola w projekcie:} Loki odbiera logi przesyłane przez OTel Collector i przechowuje je z etykietami kontekstowymi (nazwa serwisu, namespace Kubernetes). Logi są przeszukiwalne językiem LogQL i dostępne w Grafanie obok metryk i śladów dla tej samej aplikacji.
+
+\end{techcard}
+
+\begin{techcard}{Tempo}
+
+\textbf{Opis:} Tempo to backend przechowywania śladów rozproszonych (\textit{distributed traces}) stworzony przez Grafana Labs. Ślad (\textit{trace}) to zapis podróży jednego żądania przez wszystkie serwisy systemu -- od wejścia do API aż do odpowiedzi. Tempo działa jako magazyn \textit{trace-only}, celowo bez indeksowania treści śladów, co czyni je bardzo oszczędnym w zasobach. Odpytywanie odbywa się językiem TraceQL lub po \textit{trace ID}.
+
+\textbf{Dobre nawyki:}
+\begin{itemize}
+  \item \textbf{Propagacja Trace ID do logów:} OTel Java Agent automatycznie wstrzykuje \texttt{trace\_id} i \texttt{span\_id} do logów -- format JSON musi zawierać te pola, a Grafana powinna mieć skonfigurowane łącze Loki $\rightarrow$ Tempo.
+  \item \textbf{Strategia próbkowania (\textit{sampling}):} Zbieranie 100\% śladów w systemie produkcyjnym generuje duże koszty. Próbkowanie \textit{head-based} (np. 10\% żądań) jest wystarczające dla projektów akademickich.
+  \item \textbf{Metrics Generator:} Tempo może automatycznie generować metryki RED ze śladów i eksportować je do Prometheusa, eliminując duplikowanie instrumentacji.
+\end{itemize}
+
+\textbf{Rola w projekcie:} Tempo odbiera ślady od OTel Java Agent (przez Collector). W Grafanie umożliwia przejście od wykresu metryki (wzrost czasu odpowiedzi) bezpośrednio do konkretnego śladu, a stamtąd do logów z tego samego żądania -- zamykając pętlę obserwowalności.
+
+\end{techcard}
+
+\begin{techcard}{Grafana}
+
+\textbf{Opis:} Grafana to platforma wizualizacji danych obserwacyjnych, pełniąca rolę \textit{single pane of glass} -- jednego interfejsu do przeglądania metryk (Prometheus), logów (Loki) i śladów (Tempo) bez przełączania się między narzędziami. Umożliwia korelację danych z różnych źródeł: kliknięcie anomalii na wykresie metryki otwiera logi z dokładnie tego samego przedziału czasu.
+
+\textbf{Dobre nawyki:}
+\begin{itemize}
+  \item \textbf{Dashboard as Code:} Dashboardy jako pliki JSON w repozytorium Git ładowane przez mechanizm \textit{provisioning}. Ręczne tworzenie przez UI jest podatne na utratę przy restarcie kontenera.
+  \item \textbf{Korelacja źródeł danych:} Pola \texttt{derivedFields} w Loki (link do Tempo) i \texttt{tracesToLogsV2} w Tempo (link do Loki) są niezbędne do efektywnej nawigacji między filarami obserwowalności.
+  \item \textbf{Unified Alerting:} Centralny system alertów na regułach PromQL i LogQL umożliwia zarządzanie alertami z jednego miejsca, zamiast konfigurowania ich osobno w Prometheusie i Loki.
+  \item \textbf{Zmienne dashboardu:} Używanie \texttt{\$namespace}, \texttt{\$job} zamiast zakodowanych wartości pozwala filtrować widok bez duplikowania dashboardów dla każdego środowiska.
+\end{itemize}
+
+\textbf{Rola w projekcie:} Grafana jest końcowym punktem interfejsu obserwowalności. Inżynier może przejść od alertu (metryka) przez ślad (Tempo) do konkretnego logu błędu (Loki), zamykając cykl diagnozy incydentu. Konfigurację źródeł danych z korelacją przedstawia listing \ref{lst:grafana-datasources}.
+
+\end{techcard}
+
+\begin{lstlisting}[language=yaml, caption={Konfiguracja \'{z}r\'{o}de\l{} danych Grafana z w\l{}\k{a}czon\k{a} korelacj\k{a} metryk-log\'{o}w-\'{s}lad\'{o}w (infrastructure/grafana/provisioning/datasources/datasources.yaml)}, label={lst:grafana-datasources}]
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    url: http://prometheus:9090
+    isDefault: true
+
+  - name: Loki
+    type: loki
+    url: http://loki:3100
+    jsonData:
+      derivedFields:
+        - name: TraceID
+          matcherRegex: '"trace_id":"(\w+)"'
+          url: '${__value.raw}'
+          datasourceUid: tempo
+
+  - name: Tempo
+    type: tempo
+    uid: tempo
+    url: http://tempo:3200
+    jsonData:
+      tracesToLogsV2:
+        datasourceUid: loki
+        filterByTraceID: true
+      serviceMap:
+        datasourceUid: prometheus
+\end{lstlisting}
