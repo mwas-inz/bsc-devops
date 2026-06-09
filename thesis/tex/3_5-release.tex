@@ -68,3 +68,42 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 20
 \end{lstlisting}
+
+\subsubsection{Dystrybucja chartu: GitHub Container Registry}
+Gotowy chart Helm jest publikowany jako artefakt OCI w rejestrze \textbf{GitHub Container Registry} (GHCR). Dzięki natywnej obsłudze formatu OCI w Helm 3.8+ możliwe jest traktowanie rejestru kontenerów jako uniwersalnego magazynu artefaktów -- bez potrzeby utrzymywania zewnętrznych repozytoriów chartów (np. ChartMuseum czy ArtifactHub).
+
+\textbf{Uzasadnienie wyboru GHCR:}
+\begin{itemize}
+    \item \textbf{Brak zewnętrznych zależności:} GHCR jest integralną częścią GitHub -- nie wymaga dodatkowych usług ani konfiguracji.
+    \item \textbf{Jednolite logowanie:} Autentykacja odbywa się przez \texttt{GITHUB\_TOKEN} z uprawnieniem \texttt{packages:write}, ten sam mechanizm co w przypadku obrazów Docker.
+    \item \textbf{Wersjonowanie OCI:} Tag artefaktu odpowiada wersji semantycznej chartu z \texttt{Chart.yaml}, co zapewnia pełną identyfikowalność.
+\end{itemize}
+
+\textbf{Dwuetapowy łańcuch publikacji:}
+Dystrybucja chartu realizowana jest przez dwa oddzielne łańcuchy CI/CD, powiązane zdarzeniem git tag. Podejście to rozdziela walidację od publikacji:
+
+\begin{lstlisting}[language=yaml, caption={Łańcuch CD publikujący chart do GHCR (.github/workflows/cd-helm.yml)}, label={lst:cd-helm}]
+on:
+  push:
+    tags:
+      - 'chart-*'
+
+jobs:
+  publish:
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: azure/setup-helm@v5
+      - name: Log in to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io \
+            --username ${{ github.actor }} --password-stdin
+      - name: Package chart
+        run: helm package infrastructure/helm/bsc-devops
+      - name: Push chart to GHCR
+        run: helm push bsc-devops-*.tgz oci://ghcr.io/${{ github.repository_owner }}
+\end{lstlisting}
+
+Łańcuch \texttt{ci-helm} waliduje chart i -- przy każdym pushu na gałąź \texttt{main} -- odczytuje wersję z \texttt{Chart.yaml} i tworzy git tag \texttt{chart-<wersja>}. Tag ten wyzwala łańcuch \texttt{cd-helm}, który pakuje chart poleceniem \texttt{helm package} i publikuje artefakt OCI pod adresem \texttt{ghcr.io/mwas-inz/bsc-devops:<wersja>}.
