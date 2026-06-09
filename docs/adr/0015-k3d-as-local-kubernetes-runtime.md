@@ -33,7 +33,7 @@ Cluster is created with:
 
 ```sh
 k3d cluster create bsc-devops \
-  --agents 1 \
+  --agents 2 \
   --port "80:80@loadbalancer" \
   --port "443:443@loadbalancer"
 ```
