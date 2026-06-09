@@ -139,37 +139,6 @@ quarkus.datasource.username=quarkus
 quarkus.datasource.password=quarkus
 \end{lstlisting}
 
-\begin{techcard}{Spring Boot}
-
-\textbf{Opis:} Spring Boot to popularny framework Java umożliwiający tworzenie samodzielnych aplikacji produkcyjnych z wbudowanym serwerem aplikacji (np. Tomcat). Upraszcza konfigurację i wdrażanie dzięki mechanizmowi \textit{auto-configuration}.
-
-\textbf{Dobre nawyki:}
-\begin{itemize}
-  \item \textbf{Zewnętrzna konfiguracja:} Stosowanie zmiennych środowiskowych i profili (np. \texttt{application-prod.yml}) zamiast wartości zakodowanych realizuje zasadę \textit{build once, run anywhere}.
-  \item \textbf{Spring Boot Actuator:} Włączenie endpointów \texttt{/health} i \texttt{/metrics} umożliwia monitoring aplikacji przez Kubernetes i Prometheusa.
-  \item \textbf{Warstwowe pliki JAR:} Format warstwowy w obrazach Docker pozwala na cache'owanie bibliotek -- obraz jest przebudowywany szybciej, gdy zmienia się wyłącznie kod biznesowy.
-  \item \textbf{Wstrzykiwanie przez konstruktor:} Ułatwia testowanie jednostkowe i gwarantuje niemutowalność komponentów.
-\end{itemize}
-
-\textbf{Rola w projekcie:} Spring Boot stanowi fundament usług biznesowych projektu, zapewniając dojrzałe mechanizmy integracji z bazami danych oraz wystawiania punktów końcowych monitoringu (Actuator), niezbędnych do współpracy z Prometheusem wewnątrz klastra Kubernetes.
-
-\end{techcard}
-
-\begin{lstlisting}[language=yaml, caption={Konfiguracja Spring Boot z włączonym Actuatorem (application.yml)}, label={lst:spring-boot-application-yml}]
-spring:
-  application:
-    name: bsc-service
-  datasource:
-    url: jdbc:postgresql://localhost:5432/db
-    driver-class-name: org.postgresql.Driver
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics
-\end{lstlisting}
-
 \begin{techcard}{Vue~3}
 
 \textbf{Opis:} Vue~3 to progresywny framework JavaScript do budowania interfejsów użytkownika. Wprowadza \textit{Composition API} -- umożliwiające organizowanie logiki komponentu według funkcjonalności. Projekt kompilowany jest narzędziem Vite, które wykorzystuje natywne moduły ES podczas developmentu i Rollup podczas produkcyjnego budowania.
