@@ -1,28 +1,8 @@
 \subsection{Etap Deploy}
 Faza wdrożenia (\textit{Deploy}) odpowiada za przeniesienie artefaktów na środowisko uruchomieniowe oraz zapewnienie odpowiedniej infrastruktury.
 
-\subsubsection{Infrastruktura jako Kod: Terraform}
-Do zarządzania zasobami infrastrukturalnymi wykorzystano narzędzie \textbf{Terraform}. Pozwala ono na definicję infrastruktury w sposób deklaratywny (\textit{Infrastructure as Code} - IaC).
-\begin{itemize}
-    \item \textbf{Rola w projekcie:} Terraform służy do automatycznego tworzenia i konfigurowania zasobów niezbędnych do działania klastra oraz usług pomocniczych. Mimo skupienia na środowisku lokalnym, wykorzystanie Terraform pozwala na łatwe przeniesienie projektu do chmury publicznej (np. AWS) poprzez zmianę dostawcy (\textit{provider}).
-    \item \textbf{Zalety:} Deklaratywność zapewnia powtarzalność środowisk oraz pozwala na wersjonowanie infrastruktury razem z kodem aplikacji.
-\end{itemize}
-
 \subsubsection{Środowisko uruchomieniowe: Kubernetes (k3d)}
-Głównym środowiskiem, w którym pracują mikroserwisy, jest klaster \textbf{Kubernetes}. W części praktycznej wykorzystano narzędzie \textbf{k3d} do uruchomienia lokalnego klastra.
-\begin{itemize}
-    \item \textbf{Charakterystyka:} Lokalne instancje Kubernetes oferują niemal pełną kompatybilność z produkcyjnymi klastrami chmurowymi (EKS, GKE). Pozwalają one na testowanie manifestów, polityk sieciowych oraz mechanizmów skalowania bezpośrednio na maszynie programisty.
-    \item \textbf{Zasoby:} Klastry te są zoptymalizowane pod kątem szybkiego tworzenia i usuwania, co idealnie wpisuje się w potrzeby cyklu deweloperskiego i demonstracyjnego.
-\end{itemize}
-
-\subsubsection{Automatyzacja wdrożeń: GitOps (ArgoCD)}
-Zamiast tradycyjnych narzędzi \textit{Configuration Management} (jak Ansible), zdecydowano się na podejście \textbf{GitOps} przy użyciu narzędzia \textbf{ArgoCD}.
-\begin{itemize}
-    \item \textbf{Zasada działania:} GitOps zakłada, że repozytorium Git jest jedynym źródłem prawdy o stanie infrastruktury. ArgoCD stale monitoruje zmiany w plikach YAML (lub chartach Helm) i automatycznie synchronizuje stan klastra z definicją w kodzie.
-    \item \textbf{Korzyści:} Eliminuje to potrzebę ręcznego wykonywania poleceń \texttt{kubectl} i zapewnia, że środowisko jest zawsze zgodne z zatwierdzoną konfiguracją.
-\end{itemize}
-
-\subsubsection{Stosowane technologie -- karty referencyjne}
+Głównym środowiskiem uruchomieniowym mikroserwisów jest klaster \textbf{Kubernetes} (K8s) — otwartoźródłowy system automatyzacji wdrażania, skalowania i zarządzania skonteneryzowanymi aplikacjami. Pełni rolę orkiestratora: dba o to, aby zdefiniowana liczba instancji aplikacji (podów) była zawsze uruchomiona i dostępna, a w przypadku awarii automatycznie je restartuje. Lokalne klastry Kubernetes oferują niemal pełną kompatybilność z produkcyjnymi klastrami chmurowymi (EKS, GKE), co pozwala testować manifesty, polityki sieciowe i mechanizmy skalowania bezpośrednio na maszynie programisty.
 
 \begin{techcard}{Kubernetes}
 
@@ -31,12 +11,12 @@ Zamiast tradycyjnych narzędzi \textit{Configuration Management} (jak Ansible), 
 \textbf{Dobre nawyki:}
 \begin{itemize}
   \item \textbf{Zarządzanie zasobami:} Obowiązkowe definiowanie \texttt{requests} (zasoby gwarantowane) i \texttt{limits} (maksymalne zużycie) zapobiega wzajemnemu zagłuszaniu się usług (efekt \textit{noisy neighbor}).
-  \item \textbf{Sondy kondycji:} \texttt{livenessProbe} (czy kontener żyje) oraz \texttt{readinessProbe} (czy może przyjmować ruch) są kluczowe dla samonaprawialności klastra i bezprzestojowych wdrożeń (\textit{Rolling Updates}).
+  \item \textbf{Sondy stanu podów:} \texttt{livenessProbe} (czy kontener żyje) oraz \texttt{readinessProbe} (czy może przyjmować ruch) są kluczowe dla samonaprawialności klastra i bezprzestojowych wdrożeń (\textit{Rolling Updates}).
   \item \textbf{Podejście deklaratywne (GitOps):} Konfiguracja przechowywana w repozytorium i nakładana przez \texttt{kubectl apply}, a nie komendy imperatywne.
   \item \textbf{Network Policies:} Domyślne ograniczanie komunikacji między podami do niezbędnego minimum -- zasada \textit{Zero Trust}.
 \end{itemize}
 
-\textbf{Rola w projekcie:} Kubernetes stanowi docelowe środowisko uruchomieniowe. O ile Docker pozwala stworzyć obraz, o tyle Kubernetes odpowiada za to, by ten obraz "ożył" w klastrze, był dostępny pod konkretnym adresem i automatycznie restartował się w przypadku awarii.
+\textbf{Rola w projekcie:} Kubernetes stanowi docelowe środowisko uruchomieniowe. O ile Docker pozwala stworzyć obraz, o tyle Kubernetes odpowiada za to, by ten obraz funkcjonował w klastrze, był dostępny pod konkretnym adresem i automatycznie restartował się w przypadku awarii.
 
 \end{techcard}
 
@@ -80,3 +60,43 @@ spec:
             path: /q/health/ready
             port: 8080
 \end{lstlisting}
+
+W części praktycznej lokalny klaster uruchamia narzędzie \textbf{k3d} — cienka warstwa opakowująca \textbf{k3s} (certyfikowaną przez CNCF dystrybucję Kubernetes) działającą wewnątrz kontenerów Docker. Kluczowym wymaganiem było dotarcie do Ingressu bezpośrednio z hosta bez dodatkowych komend. Alternatywa — \textbf{minikube} z driverem Docker — wymaga uruchomienia \texttt{minikube tunnel} w osobnym terminalu, by ruch z hosta docierał do zasobów Ingress. k3d rozwiązuje ten problem przez mapowanie portów już na etapie tworzenia klastra:
+
+\begin{lstlisting}[language=bash, caption={Tworzenie klastra k3d z mapowaniem portów Ingress (infrastructure/k3d/cluster-create.sh)}, label={lst:k3d-create}]
+k3d cluster create bsc-devops \
+  --agents 1 \
+  --port "80:80@loadbalancer" \
+  --port "443:443@loadbalancer"
+\end{lstlisting}
+
+Powyższe polecenie mapuje port 80 hosta na load balancer k3d, dzięki czemu każdy zasób Ingress jest natychmiast dostępny pod adresem \texttt{http://localhost}. Klaster startuje w czasie poniżej 30 sekund (w porównaniu do 1--2 minut dla minikube).
+
+\begin{itemize}
+    \item \textbf{Wbudowany kontroler Ingress:} k3s domyślnie instaluje \textbf{Traefik} jako kontroler Ingress — nie wymaga ręcznego instalowania dodatków.
+    \item \textbf{Wiele węzłów:} Flaga \texttt{--agents N} pozwala tworzyć klastry wielowęzłowe, umożliwiając testowanie zachowania schedulera zbliżonego do środowisk produkcyjnych.
+    \item \textbf{Import obrazów lokalnych:} Polecenie \texttt{k3d image import <obraz> -c bsc-devops} ładuje lokalne obrazy Docker bezpośrednio do klastra bez potrzeby wypychania ich do zewnętrznego rejestru.
+\end{itemize}
+
+\begin{techcard}{k3d}
+
+\textbf{Opis:} k3d to narzędzie uruchamiające klastry \textbf{k3s} (lekkiej dystrybucji Kubernetes certyfikowanej przez CNCF) wewnątrz kontenerów Docker. Każdy węzeł klastra jest osobnym kontenerem, a porty load balancera są mapowane na host już w momencie tworzenia klastra. Rozwiązuje to główną bolączkę alternatywnych narzędzi lokalnych -- konieczność uruchamiania dodatkowych procesów tunelujących ruch Ingress.
+
+\textbf{Dobre nawyki:}
+\begin{itemize}
+  \item \textbf{Mapowanie portów przy tworzeniu:} Flagi \texttt{--port} należy podać w poleceniu \texttt{k3d cluster create} -- nie da się ich dodać do działającego klastra bez jego rekonstrukcji.
+  \item \textbf{Import obrazów lokalnych:} Zamiast wypychać obraz do zewnętrznego rejestru podczas iteracji deweloperskiej, należy użyć \texttt{k3d image import <obraz> -c <klaster>} -- ładuje obraz bezpośrednio do containerd w węzłach klastra.
+  \item \textbf{Domyślny Ingress: Traefik:} k3s dostarcza Traefik zamiast nginx; manifesty Ingress muszą używać \texttt{ingressClassName: traefik}.
+  \item \textbf{Wielowęzłowość:} Dla testów zbliżonych do produkcji warto dodać agentów (\texttt{--agents 2}), by sprawdzić zachowanie schedulera przy ograniczeniach \texttt{affinity}/\texttt{tolerations}.
+\end{itemize}
+
+\textbf{Rola w projekcie:} k3d stanowi lokalne środowisko deweloperskie i demonstracyjne dla całego stosu mikroserwisów. Zastąpił minikube ze względu na natywne mapowanie portów Ingress (brak \texttt{minikube tunnel}), czas startu klastra poniżej 30 sekund oraz pełną skryptowalność tworzenia klastra jedną komendą CLI.
+
+\end{techcard}
+
+\subsubsection{Automatyzacja wdrożeń: GitOps (ArgoCD)}
+Zamiast tradycyjnych narzędzi \textit{Configuration Management} (jak Ansible), zdecydowano się na podejście \textbf{GitOps} przy użyciu narzędzia \textbf{ArgoCD}.
+\begin{itemize}
+    \item \textbf{Zasada działania:} GitOps zakłada, że repozytorium Git jest jedynym źródłem prawdy o stanie infrastruktury. ArgoCD stale monitoruje zmiany w plikach YAML (lub chartach Helm) i automatycznie synchronizuje stan klastra z definicją w kodzie.
+    \item \textbf{Korzyści:} Eliminuje to potrzebę ręcznego wykonywania poleceń \texttt{kubectl} i zapewnia, że środowisko jest zawsze zgodne z zatwierdzoną konfiguracją.
+\end{itemize}
