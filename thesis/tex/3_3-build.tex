@@ -42,7 +42,7 @@ W zależności od komponentu, wykorzystywane są dedykowane narzędzia budujące
     \item \textbf{Vite (Frontend):} Odpowiada za budowanie zoptymalizowanej paczki produkcyjnej aplikacji Vue 3. Vite wykorzystuje natywne moduły ES podczas developmentu, co skraca czas przeładowania do milisekund, a NPM zarządza zależnościami projektu.
 \end{itemize}
 
-\subsubsection{Konteneryzacja: Dockerfile}
+\subsubsection{Konteneryzacja: Docker + Dockerfile}
 Zgodnie z decyzją \textit{ADR-0005}, jako standard budowania obrazów wybrano pliki \textbf{Dockerfile}. Wybór ten podyktowany był chęcią zachowania pełnej przejrzystości procesu, co ma kluczowe znaczenie w pracy inżynierskiej.
 
 \textbf{Dobre praktyki — kompilacja AOT i minimalne obrazy:}
@@ -75,27 +75,6 @@ ENTRYPOINT ["./application", "-Dquarkus.http.host=0.0.0.0"]
 
 Obraz końcowy zawiera wyłącznie minimalny system operacyjny i skompilowany binarny plik aplikacji — bez JVM, JDK ani żadnych narzędzi budujących. Warstwa frontendowa (\textit{Vue 3}) stosuje klasyczny wzorzec wieloetapowy: etap kompilacji Vite produkujący statyczne pliki w katalogu \texttt{dist/}, a następnie serwowanie ich przez minimalny obraz \textit{nginx}.
 
-\textbf{Shift Left Security:}
-Bezpieczeństwo jest weryfikowane już na etapie budowania (\textit{Shift Left}):
-\begin{itemize}
-    \item \textbf{Trivy} (ADR-0010)\textbf{:} Każdy zbudowany obraz jest skanowany pod kątem znanych podatności (CVE) w bibliotekach systemowych i aplikacyjnych.
-\begin{lstlisting}[language=yaml, caption={Skanowanie obrazu narz\k{e}dziem Trivy w potoku CI (.github/workflows/ci-users.yml)}, label={lst:trivy-scan}]
-- name: Scan image with Trivy
-  uses: aquasecurity/trivy-action@v0.36.0
-  with:
-    image-ref: mateuszwas/users:${{ github.sha }}
-    format: table
-    exit-code: '1'
-    ignore-unfixed: true
-    vuln-type: os,library
-    severity: HIGH,CRITICAL
-\end{lstlisting}
-    \item \textbf{Cosign} (ADR-0011)\textbf{:} Obrazy są cyfrowo podpisywane metodą \textit{keyless signing} (Sigstore), co gwarantuje ich integralność i pozwala na weryfikację pochodzenia artefaktu przed jego uruchomieniem w klastrze.
-\end{itemize}
-
-\subsubsection{Stosowane technologie -- karty referencyjne}
-Poniższe karty zbierają kluczowe informacje o technologiach stosowanych na etapie \textit{Build} -- ich konfigurację, dobre nawyki oraz rolę w projekcie.
-
 \begin{techcard}{Docker}
 
 \textbf{Opis:} Docker to platforma konteneryzacji pozwalająca na pakowanie oprogramowania wraz z całym środowiskiem uruchomieniowym w lekkie, przenośne kontenery. Dzięki temu aplikacja działa identycznie niezależnie od maszyny docelowej.
@@ -111,3 +90,21 @@ Poniższe karty zbierają kluczowe informacje o technologiach stosowanych na eta
 \textbf{Rola w projekcie:} Docker pełni rolę "pakowacza" -- przed jego użyciem dysponujemy skompilowanym binarnym plikiem, po procesie budowania obrazu otrzymujemy gotowy do wdrożenia artefakt uruchamialny w dowolnym środowisku kontenerowym. Dockerfile dla trybu natywnego przedstawia listing \ref{lst:dockerfile-native}.
 
 \end{techcard}
+
+\textbf{Shift Left Security:}
+Bezpieczeństwo jest weryfikowane już na etapie budowania (\textit{Shift Left}):
+\begin{itemize}
+    \item \textbf{Trivy} (ADR-0010)\textbf{:} Każdy zbudowany obraz jest skanowany pod kątem znanych podatności (CVE) w bibliotekach systemowych i aplikacyjnych.
+\begin{lstlisting}[language=yaml, caption={Skanowanie obrazu narz\k{e}dziem Trivy w potoku CI (.github/workflows/ci-users.yml)}, label={lst:trivy-scan}]
+- name: Scan image with Trivy
+  uses: aquasecurity/trivy-action@v0.36.0
+  with:
+    image-ref: mateuszwas/users:${{ github.sha }}
+    format: table
+    exit-code: '1'
+    ignore-unfixed: true
+    vuln-type: os,library
+    severity: HIGH,CRITICAL
+\end{lstlisting}
+    \item \textbf{Cosign} (ADR-0011)\textbf{:} Obrazy są cyfrowo podpisywane metodą \textit{keyless signing} (Sigstore), co gwarantuje jej integralność i pozwala na weryfikację pochodzenia artefaktu przed jego uruchomieniem w klastrze.
+\end{itemize}

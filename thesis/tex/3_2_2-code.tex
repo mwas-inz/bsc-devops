@@ -25,7 +25,6 @@ Resolves: INZ-9
 \subsubsection{Wytwarzanie oprogramowania: Stos technologiczny}
 Proces kodowania realizowany jest przy użyciu nowoczesnych środowisk programistycznych (\textit{IntelliJ IDEA}, \textit{VS Code}), a sama implementacja opiera się na technologiach wspierających paradygmat mikroserwisów.
 
-\textbf{Pryncypia Twelve-Factor App:}
 Wszystkie komponenty systemu są projektowane zgodnie z zasadami \textit{Twelve-Factor App}. Kluczowe aspekty to:
 \begin{itemize}
     \item \textbf{Konfiguracja:} Cała konfiguracja specyficzna dla środowiska jest wstrzykiwana przez zmienne środowiskowe, a nie zaszyta w kodzie.
@@ -33,7 +32,7 @@ Wszystkie komponenty systemu są projektowane zgodnie z zasadami \textit{Twelve-
     \item \textbf{Logowanie:} Logi są traktowane jako strumień zdarzeń wysyłany na standardowe wyjście, co umożliwia ich centralizację przez narzędzia observability.
 \end{itemize}
 
-\textbf{Backend (Java i Quarkus -- tryb GraalVM Native Image):}
+\textbf{Backend (Java + Quarkus + Native Image):}
 Mikroserwisy backendowe zbudowano z użyciem frameworka \textit{Quarkus} skompilowanego do natywnych plików wykonywalnych za pomocą \textit{GraalVM Native Image} (kompilacja \textit{Ahead-of-Time}, AOT). W trybie natywnym Quarkus analizuje ścieżki wykonania kodu w czasie kompilacji i wyklucza nieużywane klasy, co skutkuje:
 \begin{itemize}
     \item \textbf{Błyskawicznym startem} -- aplikacja jest gotowa do obsługi żądań w czasie poniżej 100 ms, co skraca czas wznowienia po awarii i przyspiesza skalowanie poziome w Kubernetes.
