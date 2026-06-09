@@ -32,4 +32,4 @@ jobs:
 
       - name: Push chart to GHCR
         run: |
-          helm push bsc-devops-*.tgz oci://ghcr.io/${{ github.repository_owner }}
+          helm push bsc-devops-*.tgz oci://ghcr.io/${{ github.repository_owner }}/charts
