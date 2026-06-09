@@ -69,7 +69,7 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v6
         with:
-          token: ${{ secrets.RELEASE_PAT }}
+          token: ${{ secrets.GHCR_TOKEN }}
 
       - name: Read chart version
         id: chart
