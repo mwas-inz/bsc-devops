@@ -12,7 +12,6 @@ jobs:
 
     permissions:
       contents: read
-      packages: write
 
     steps:
       - name: Checkout source
@@ -23,7 +22,7 @@ jobs:
 
       - name: Log in to GHCR
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io \
+          echo "${{ secrets.GHCR_TOKEN }}" | helm registry login ghcr.io \
             --username ${{ github.actor }} \
             --password-stdin
 
