@@ -25,18 +25,6 @@ Resolves: INZ-9
 \subsubsection{Wytwarzanie oprogramowania: Stos technologiczny}
 Proces kodowania realizowany jest przy użyciu nowoczesnych środowisk programistycznych (\textit{IntelliJ IDEA}, \textit{VS Code}), a sama implementacja opiera się na technologiach wspierających paradygmat mikroserwisów.
 
-\textbf{Backend (Java i Quarkus -- tryb GraalVM Native Image):}
-Mikroserwisy backendowe zbudowano z użyciem frameworka \textit{Quarkus} skompilowanego do natywnych plików wykonywalnych za pomocą \textit{GraalVM Native Image} (kompilacja \textit{Ahead-of-Time}, AOT). W trybie natywnym Quarkus analizuje ścieżki wykonania kodu w czasie kompilacji i wyklucza nieużywane klasy, co skutkuje:
-\begin{itemize}
-    \item \textbf{Błyskawicznym startem} -- aplikacja jest gotowa do obsługi żądań w czasie poniżej 100 ms, co skraca czas wznowienia po awarii i przyspiesza skalowanie poziome w Kubernetes.
-    \item \textbf{Niskim zużyciem pamięci} -- brak środowiska uruchomieniowego JVM zmniejsza footprint kontenera, co bezpośrednio przekłada się na efektywność kosztową w środowiskach chmurowych.
-    \item \textbf{Minimalnym obrazem kontenera} -- obraz oparty na \texttt{ubi-minimal} zawiera wyłącznie system operacyjny i skompilowany binarny, bez JDK ani bibliotek środowiska uruchomieniowego.
-\end{itemize}
-Wstrzykiwanie zależności realizowane jest przez mechanizm CDI Quarkusa (\textit{ArC}), który w trybie AOT przetwarza wszystkie adnotacje w czasie kompilacji, a nie w czasie uruchomienia.
-
-\textbf{Frontend (Vue 3 + Vite):}
-Zgodnie z decyzją \textit{ADR-0014}, warstwę prezentacji zbudowano z użyciem frameworka \textit{Vue 3} i narzędzia budującego \textit{Vite}. Kod pisany jest w \textit{TypeScript}, a poprawność typów weryfikuje \textit{vue-tsc} przed każdym buildem produkcyjnym. Komponenty interfejsu komunikują się z mikroserwisami backendowymi przez REST API.
-
 \textbf{Pryncypia Twelve-Factor App:}
 Wszystkie komponenty systemu są projektowane zgodnie z zasadami \textit{Twelve-Factor App}. Kluczowe aspekty to:
 \begin{itemize}
@@ -45,7 +33,14 @@ Wszystkie komponenty systemu są projektowane zgodnie z zasadami \textit{Twelve-
     \item \textbf{Logowanie:} Logi są traktowane jako strumień zdarzeń wysyłany na standardowe wyjście, co umożliwia ich centralizację przez narzędzia observability.
 \end{itemize}
 
-\subsubsection{Stosowane technologie -- karty referencyjne}
+\textbf{Backend (Java i Quarkus -- tryb GraalVM Native Image):}
+Mikroserwisy backendowe zbudowano z użyciem frameworka \textit{Quarkus} skompilowanego do natywnych plików wykonywalnych za pomocą \textit{GraalVM Native Image} (kompilacja \textit{Ahead-of-Time}, AOT). W trybie natywnym Quarkus analizuje ścieżki wykonania kodu w czasie kompilacji i wyklucza nieużywane klasy, co skutkuje:
+\begin{itemize}
+    \item \textbf{Błyskawicznym startem} -- aplikacja jest gotowa do obsługi żądań w czasie poniżej 100 ms, co skraca czas wznowienia po awarii i przyspiesza skalowanie poziome w Kubernetes.
+    \item \textbf{Niskim zużyciem pamięci} -- brak środowiska uruchomieniowego JVM zmniejsza footprint kontenera, co bezpośrednio przekłada się na efektywność kosztową w środowiskach chmurowych.
+    \item \textbf{Minimalnym obrazem kontenera} -- obraz oparty na \texttt{ubi-minimal} zawiera wyłącznie system operacyjny i skompilowany binarny, bez JDK ani bibliotek środowiska uruchomieniowego.
+\end{itemize}
+Wstrzykiwanie zależności realizowane jest przez mechanizm CDI Quarkusa (\textit{ArC}), który w trybie AOT przetwarza wszystkie adnotacje w czasie kompilacji, a nie w czasie uruchomienia.
 
 \begin{techcard}{Quarkus}
 
@@ -73,6 +68,9 @@ quarkus.datasource.db-kind=postgresql
 quarkus.datasource.username=quarkus
 quarkus.datasource.password=quarkus
 \end{lstlisting}
+
+\textbf{Frontend (Vue 3 + Vite):}
+Zgodnie z decyzją \textit{ADR-0014}, warstwę prezentacji zbudowano z użyciem frameworka \textit{Vue 3} i narzędzia budującego \textit{Vite}. Kod pisany jest w \textit{TypeScript}, a poprawność typów weryfikuje \textit{vue-tsc} przed każdym buildem produkcyjnym. Komponenty interfejsu komunikują się z mikroserwisami backendowymi przez REST API.
 
 \begin{techcard}{Vue~3}
 
