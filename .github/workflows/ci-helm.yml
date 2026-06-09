@@ -55,3 +55,33 @@ jobs:
               --ignore-missing-schemas \
               --kubernetes-version ${{ env.K8S_VERSION }} \
               --summary
+
+  tag:
+    name: Tag — chart-<version>
+    needs: validate
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - name: Read chart version
+        id: chart
+        run: |
+          VERSION=$(grep '^version:' infrastructure/helm/bsc-devops/Chart.yaml | awk '{print $2}')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Create and push git tag
+        env:
+          TAG: chart-${{ steps.chart.outputs.version }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" > /dev/null 2>&1; then
+            echo "Tag ${TAG} already exists — skipping"
+          else
+            git tag "${TAG}"
+            git push origin "${TAG}"
+          fi

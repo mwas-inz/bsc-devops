@@ -1,0 +1,35 @@
+name: CD — Helm chart
+
+on:
+  push:
+    tags:
+      - 'chart-*'
+
+jobs:
+  publish:
+    name: Package & Push — GHCR
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v5
+
+      - name: Log in to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io \
+            --username ${{ github.actor }} \
+            --password-stdin
+
+      - name: Package chart
+        run: helm package infrastructure/helm/bsc-devops
+
+      - name: Push chart to GHCR
+        run: |
+          helm push bsc-devops-*.tgz oci://ghcr.io/${{ github.repository_owner }}
