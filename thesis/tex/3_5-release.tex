@@ -1,0 +1,16 @@
+\subsection{Etap Release}
+Faza wydania (\textit{Release}) koncentruje się na bezpiecznym przechowywaniu artefaktów oraz ich wersji, gotowych do wdrożenia na środowiska docelowe.
+
+\subsubsection{Rejestr obrazów: Docker Hub}
+Jako centralne repozytorium obrazów kontenerowych wykorzystano platformę \textbf{Docker Hub}.
+\begin{itemize}
+    \item \textbf{Rola w projekcie:} Po pomyślnym zakończeniu etapu budowania i testowania, obrazy mikroserwisów są wysyłane (\textit{push}) do prywatnych lub publicznych repozytoriów w Docker Hub. Każdy obraz jest oznaczony unikalnym tagiem (np. skrótem \textit{commit SHA} lub numerem wersji semantycznej), co zapewnia pełną identyfikowalność.
+    \item \textbf{Uzasadnienie:} Docker Hub jest natywnie wspierany przez większość narzędzi CI/CD oraz klastry Kubernetes, co upraszcza proces pobierania obrazów podczas wdrożenia.
+\end{itemize}
+
+\subsubsection{Pakietowanie dla Kubernetes: Helm}
+Zarządzanie manifestami YAML dla wielu mikroserwisów staje się trudne bez odpowiedniego narzędzia. Zgodnie z decyzją \textit{ADR-0012}, jako standard pakietowania dla Kubernetes wybrano \textbf{Helm} — menedżer pakietów pozwalający na szablonowanie i wersjonowanie konfiguracji infrastruktury.
+\begin{itemize}
+    \item \textbf{Koncepcja Chartów:} Helm pozwala na definiowanie szablonów (\textit{Charts}), które opisują strukturę aplikacji w klastrze. Parametry specyficzne dla środowiska (np. liczba replik, limity zasobów) są wydzielone do plików \texttt{values.yaml}.
+    \item \textbf{Wersjonowanie wdrożeń:} Dzięki Helm możliwe jest traktowanie całej definicji infrastrukturalnej aplikacji jako pojedynczej wersji artefaktu. Ułatwia to procesy wycofywania zmian (\textit{rollback}) oraz promowania konkretnych wersji aplikacji między środowiskami.
+\end{itemize}

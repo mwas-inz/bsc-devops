@@ -1,0 +1,23 @@
+\subsection{Etap Deploy}
+Faza wdrożenia (\textit{Deploy}) odpowiada za przeniesienie artefaktów na środowisko uruchomieniowe oraz zapewnienie odpowiedniej infrastruktury.
+
+\subsubsection{Infrastruktura jako Kod: Terraform}
+Do zarządzania zasobami infrastrukturalnymi wykorzystano narzędzie \textbf{Terraform}. Pozwala ono na definicję infrastruktury w sposób deklaratywny (\textit{Infrastructure as Code} - IaC).
+\begin{itemize}
+    \item \textbf{Rola w projekcie:} Terraform służy do automatycznego tworzenia i konfigurowania zasobów niezbędnych do działania klastra oraz usług pomocniczych. Mimo skupienia na środowisku lokalnym, wykorzystanie Terraform pozwala na łatwe przeniesienie projektu do chmury publicznej (np. AWS) poprzez zmianę dostawcy (\textit{provider}).
+    \item \textbf{Zalety:} Deklaratywność zapewnia powtarzalność środowisk oraz pozwala na wersjonowanie infrastruktury razem z kodem aplikacji.
+\end{itemize}
+
+\subsubsection{Środowisko uruchomieniowe: Kubernetes (k3d)}
+Głównym środowiskiem, w którym pracują mikroserwisy, jest klaster \textbf{Kubernetes}. W części praktycznej wykorzystano narzędzie \textbf{k3d} do uruchomienia lokalnego klastra.
+\begin{itemize}
+    \item \textbf{Charakterystyka:} Lokalne instancje Kubernetes oferują niemal pełną kompatybilność z produkcyjnymi klastrami chmurowymi (EKS, GKE). Pozwalają one na testowanie manifestów, polityk sieciowych oraz mechanizmów skalowania bezpośrednio na maszynie programisty.
+    \item \textbf{Zasoby:} Klastry te są zoptymalizowane pod kątem szybkiego tworzenia i usuwania, co idealnie wpisuje się w potrzeby cyklu deweloperskiego i demonstracyjnego.
+\end{itemize}
+
+\subsubsection{Automatyzacja wdrożeń: GitOps (ArgoCD)}
+Zamiast tradycyjnych narzędzi \textit{Configuration Management} (jak Ansible), zdecydowano się na podejście \textbf{GitOps} przy użyciu narzędzia \textbf{ArgoCD}.
+\begin{itemize}
+    \item \textbf{Zasada działania:} GitOps zakłada, że repozytorium Git jest jedynym źródłem prawdy o stanie infrastruktury. ArgoCD stale monitoruje zmiany w plikach YAML (lub chartach Helm) i automatycznie synchronizuje stan klastra z definicją w kodzie.
+    \item \textbf{Korzyści:} Eliminuje to potrzebę ręcznego wykonywania poleceń \texttt{kubectl} i zapewnia, że środowisko jest zawsze zgodne z zatwierdzoną konfiguracją.
+\end{itemize}

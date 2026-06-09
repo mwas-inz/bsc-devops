@@ -164,9 +164,18 @@ The thesis illustrates best practices in software design and implementation, tho
 \cleardoublepage % Zaczynamy od nieparzystej strony
 \pagestyle{headings}
 
-\input{tex/1-wstep}         
-\input{tex/2-teoria}    
-\input{tex/3-projekt}
+\input{tex/1-wstep}
+\input{tex/2-teoria}
+\input{tex/3_0-projekt}
+\input{tex/3_1-architektura}
+\input{tex/3_2-plan-code}
+\input{tex/3_3-build}
+\input{tex/3_4-test}
+\input{tex/3_5-release}
+\input{tex/3_6-deploy}
+\input{tex/3_7-operate}
+\input{tex/3_8-monitor}
+\input{tex/3_9-podsumowanie}
 \input{tex/99-podsumowanie}
 
 %--------------------------------------------
@@ -193,12 +202,28 @@ The thesis illustrates best practices in software design and implementation, tho
 % //AB
 \vspace{0.8cm}
 \acronymlist
-\acronym{Dev}{ang. development}
-\acronym{DORA}{DevOps Research and Assessment}
+\acronym{ADR}{ang. \textit{Architectural Decision Record} -- zapis decyzji architektonicznej}
+\acronym{API}{ang. \textit{Application Programming Interface} -- interfejs programowania aplikacji}
+\acronym{AOT}{ang. \textit{Ahead-of-Time} -- kompilacja przed czasem wykonania}
+\acronym{CD}{ang. \textit{Continuous Delivery} / \textit{Continuous Deployment} -- ciągłe dostarczanie / wdrażanie}
+\acronym{CDI}{ang. \textit{Contexts and Dependency Injection} -- wstrzykiwanie zależności}
+\acronym{CI}{ang. \textit{Continuous Integration} -- ciągła integracja}
+\acronym{CVE}{ang. \textit{Common Vulnerabilities and Exposures} -- rejestr znanych podatności}
+\acronym{Dev}{ang. \textit{development} -- wytwarzanie oprogramowania}
+\acronym{DORA}{ang. \textit{DevOps Research and Assessment}}
 \acronym{EiTI}{Wydział Elektroniki i Technik Informacyjnych}
-\acronym{IT}{Information Technology}
-\acronym{Ops}{ang. operations}
+\acronym{IaC}{ang. \textit{Infrastructure as Code} -- infrastruktura jako kod}
+\acronym{IT}{ang. \textit{Information Technology} -- technologie informacyjne}
+\acronym{JDK}{ang. \textit{Java Development Kit} -- zestaw narzędzi deweloperskich Java}
+\acronym{JVM}{ang. \textit{Java Virtual Machine} -- wirtualna maszyna Java}
+\acronym{K8s}{Kubernetes (skrót od: \textit{K}ubernete\textit{s}, 8 liter pomiędzy K i s)}
+\acronym{LGTM}{Loki, Grafana, Tempo, Mimir -- stos narzędzi obserwacyjności}
+\acronym{Ops}{ang. \textit{operations} -- operacje, utrzymanie systemów}
+\acronym{OTLP}{ang. \textit{OpenTelemetry Protocol} -- protokół OpenTelemetry}
 \acronym{PW}{Politechnika Warszawska}
+\acronym{REST}{ang. \textit{Representational State Transfer} -- styl architektury API}
+\acronym{SRE}{ang. \textit{Site Reliability Engineering} -- inżynieria niezawodności}
+\acronym{YAML}{ang. \textit{YAML Ain't Markup Language} -- format serializacji danych}
 
 \listoffigurestoc     % Spis rysunków.
 \vspace{1cm}          % vertical space
