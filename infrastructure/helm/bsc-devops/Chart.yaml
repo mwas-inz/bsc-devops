@@ -1,5 +1,5 @@
 apiVersion: v2
-name: bsc-devops-chart
+name: bsc-devops
 description: Helm chart for the bsc-devops thesis microservices platform
 type: application
 version: 0.4.0
