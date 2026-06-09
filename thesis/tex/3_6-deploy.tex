@@ -95,8 +95,46 @@ Powyższe polecenie mapuje port 80 hosta na load balancer k3d, dzięki czemu ka�
 \end{techcard}
 
 \subsubsection{Automatyzacja wdrożeń: GitOps (ArgoCD)}
-Zamiast tradycyjnych narzędzi \textit{Configuration Management} (jak Ansible), zdecydowano się na podejście \textbf{GitOps} przy użyciu narzędzia \textbf{ArgoCD}.
+Zamiast tradycyjnych narzędzi \textit{Configuration Management} (jak Ansible), zdecydowano się na podejście \textbf{GitOps} przy użyciu narzędzia \textbf{ArgoCD} (ADR-0013). GitOps zakłada, że repozytorium Git jest jedynym źródłem prawdy o stanie infrastruktury -- kontroler stale monitoruje zmiany w chartach Helm i automatycznie synchronizuje stan klastra z definicją w kodzie, eliminując potrzebę ręcznego wykonywania poleceń \texttt{kubectl} z poziomu CI/CD.
+
+\begin{techcard}{ArgoCD}
+
+\textbf{Opis:} ArgoCD to deklaratywny kontroler GitOps dla Kubernetes, będący projektem CNCF o statusie \textit{graduated}. Działa w modelu \textbf{pull-based}: nasłuchuje zmian w repozytorium Git lub rejestrze OCI i automatycznie synchronizuje stan klastra do zdefiniowanego tam stanu docelowego. Centralną abstrakcją jest zasób \texttt{Application}, który wiąże źródło (chart Helm, katalog manifestów) z docelowym klastrem i przestrzenią nazw. Wbudowany interfejs webowy pozwala w czasie rzeczywistym obserwować drzewo zasobów aplikacji oraz historię wdrożeń.
+
+\textbf{Dobre nawyki:}
 \begin{itemize}
-    \item \textbf{Zasada działania:} GitOps zakłada, że repozytorium Git jest jedynym źródłem prawdy o stanie infrastruktury. ArgoCD stale monitoruje zmiany w plikach YAML (lub chartach Helm) i automatycznie synchronizuje stan klastra z definicją w kodzie.
-    \item \textbf{Korzyści:} Eliminuje to potrzebę ręcznego wykonywania poleceń \texttt{kubectl} i zapewnia, że środowisko jest zawsze zgodne z zatwierdzoną konfiguracją.
+  \item \textbf{Automated sync z \texttt{selfHeal}:} Włączenie \texttt{selfHeal: true} gwarantuje, że każda ręczna zmiana w klastrze zostanie natychmiast cofnięta -- klaster jest zawsze zgodny z tym, co opisuje Git.
+  \item \textbf{\texttt{prune: true} z rozwagą:} Automatyczne usuwanie zasobów odłączonych od charta skraca dług konfiguracyjny, ale wymaga pewności, że wszystkie zasoby są zarządzane przez ArgoCD.
+  \item \textbf{Application CRD w Git:} Plik \texttt{gitops/application.yaml} powinien być przechowywany w repozytorium obok charta -- cały opis dostawy jest wówczas wersjonowany i audytowalny.
+  \item \textbf{Pinowanie \texttt{targetRevision}:} Używanie konkretnego numeru wersji charta (nie \texttt{latest}) zapewnia powtarzalność wdrożeń i pełną historię zmian.
 \end{itemize}
+
+\textbf{Rola w projekcie:} ArgoCD zamyka pętlę CI/CD: GitHub Actions buduje obraz, publikuje chart do GHCR, a ArgoCD automatycznie wykrywa nową wersję charta i synchronizuje klaster k3d. Zasób \texttt{Application} wskazuje na chart \texttt{bsc-devops} w GHCR i celuje w lokalny klaster k3d. Wbudowany interfejs webowy dostarcza wizualizację drzewa zasobów przydatną jako materiał ilustracyjny pracy.
+
+\end{techcard}
+
+\begin{lstlisting}[language=yaml, caption={ArgoCD Application CRD -- deklaracja dostawy charta \texttt{bsc-devops} z GHCR do klastra k3d (gitops/application.yaml)}, label={lst:argocd-application}]
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bsc-devops
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/mateuszwas/charts   # OCI Helm registry (GHCR)
+    chart: bsc-devops
+    targetRevision: "0.5.0"
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: bsc-devops
+  syncPolicy:
+    automated:
+      prune: true      # usuwa zasoby usunięte z charta
+      selfHeal: true   # cofa ręczne zmiany niezgodne z Gitem
+    syncOptions:
+      - CreateNamespace=true
+\end{lstlisting}
