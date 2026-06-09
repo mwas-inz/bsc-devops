@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bsc-devops
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/mwas-inz/charts
+    chart: bsc-devops
+    targetRevision: "0.5.0"
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: bsc-devops
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
