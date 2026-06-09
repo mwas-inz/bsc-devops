@@ -1,16 +1,16 @@
 \subsection{Etap Build}
 Faza budowania (\textit{Build}) odpowiada za przekształcenie kodu źródłowego w gotowe do wdrożenia artefakty. W architekturze \textit{Cloud Native} proces ten kończy się wytworzeniem obrazu kontenera.
 
-\subsubsection{Orkiestracja potoku: GitHub Actions}
-Zgodnie z decyzją \textit{ADR-0009}, jako platformę CI/CD wybrano \textbf{GitHub Actions}. Pozwala ona na definiowanie potoków w formie kodu YAML bezpośrednio w repozytorium, co jest zgodne z zasadą \textit{Everything as Code} i eliminuje potrzebę utrzymywania zewnętrznego serwera CI.
+\subsubsection{Orkiestracja łańcucha CI/CD: GitHub Actions}
+Zgodnie z decyzją \textit{ADR-0009}, jako platformę CI/CD wybrano \textbf{GitHub Actions}. Pozwala ona na definiowanie łańcuchów CI/CD w formie kodu YAML bezpośrednio w repozytorium, co jest zgodne z zasadą \textit{Everything as Code} i eliminuje potrzebę utrzymywania zewnętrznego serwera CI.
 
 \textbf{Rola w projekcie:}
-GitHub Actions pełni funkcję silnika CI (\textit{Continuous Integration}), który reaguje na zdarzenia w repozytorium (np. \textit{pull request} lub \textit{push} do gałęzi głównej). Potok roboczy automatycznie uruchamia kompilację, testy oraz budowanie obrazów, zapewniając szybką pętlę informacji zwrotnej dla programisty.
+GitHub Actions pełni funkcję silnika CI (\textit{Continuous Integration}), który reaguje na zdarzenia w repozytorium (np. \textit{pull request} lub \textit{push} do gałęzi głównej). Łańcuch CI/CD automatycznie uruchamia kompilację, testy oraz budowanie obrazów, zapewniając szybką pętlę informacji zwrotnej dla programisty.
 
-\textbf{Struktura potoków:}
+\textbf{Struktura łańcuchów CI/CD:}
 Dla każdego mikroserwisu zdefiniowano oddzielny plik workflow (np. \texttt{ci-users.yml}), uruchamiany wyłącznie przy zmianach w katalogu danego serwisu. Takie podejście eliminuje zbędne uruchomienia pipeline'u dla komponentów, których kod nie uległ zmianie.
 
-\begin{lstlisting}[language=yaml, caption={Fragment potoku CI -- budowanie i push obrazu natywnego (.github/workflows/ci-users.yml)}, label={lst:github-actions-build}]
+\begin{lstlisting}[language=yaml, caption={Fragment łańcucha CI -- budowanie i push obrazu natywnego (.github/workflows/ci-users.yml)}, label={lst:github-actions-build}]
 jobs:
   build:
     name: Build, Test, Scan & Push -- users
@@ -62,7 +62,7 @@ Zgodnie z decyzją \textit{ADR-0005}, jako standard budowania obrazów wybrano p
 \end{techcard}
 
 \textbf{Docker i Quarkus — kompilacja AOT i minimalne obrazy:}
-Quarkus generuje gotowe pliki \texttt{Dockerfile.native} przeznaczone dla obrazów zbudowanych w trybie GraalVM \textit{Ahead-of-Time} (AOT). Kompilacja natywna odbywa się wewnątrz kontenera Mandrel (dystrybucja GraalVM zoptymalizowana pod Quarkusa) uruchamianego przez Gradle w potoku CI, bez konieczności instalowania GraalVM bezpośrednio na maszynie CI. Konfigurację narzędzia budującego zawiera plik \texttt{build.gradle}:
+Quarkus generuje gotowe pliki \texttt{Dockerfile.native} przeznaczone dla obrazów zbudowanych w trybie GraalVM \textit{Ahead-of-Time} (AOT). Kompilacja natywna odbywa się wewnątrz kontenera Mandrel (dystrybucja GraalVM zoptymalizowana pod Quarkusa) uruchamianego przez Gradle w łańcuchu CI, bez konieczności instalowania GraalVM bezpośrednio na maszynie CI. Konfigurację narzędzia budującego zawiera plik \texttt{build.gradle}:
 
 \begin{lstlisting}[language=groovy, caption={Konfiguracja natywnego buildu Quarkusa w Gradle (apps/users/build.gradle)}, label={lst:quarkus-native-build}]
 quarkusBuild {
@@ -95,7 +95,7 @@ Obraz końcowy zawiera wyłącznie minimalny system operacyjny i skompilowany bi
 Bezpieczeństwo jest weryfikowane już na etapie budowania (\textit{Shift Left}):
 \begin{itemize}
     \item \textbf{Trivy} (ADR-0010)\textbf{:} Każdy zbudowany obraz jest skanowany pod kątem znanych podatności (CVE) w bibliotekach systemowych i aplikacyjnych.
-\begin{lstlisting}[language=yaml, caption={Skanowanie obrazu narz\k{e}dziem Trivy w potoku CI (.github/workflows/ci-users.yml)}, label={lst:trivy-scan}]
+\begin{lstlisting}[language=yaml, caption={Skanowanie obrazu narz\k{e}dziem Trivy w łańcuchu CI (.github/workflows/ci-users.yml)}, label={lst:trivy-scan}]
 - name: Scan image with Trivy
   uses: aquasecurity/trivy-action@v0.36.0
   with:

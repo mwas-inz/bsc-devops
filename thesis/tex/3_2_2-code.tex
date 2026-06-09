@@ -1,28 +1,6 @@
 \subsection{Etap Code}
-Faza wytwarzania (\textit{Code}) obejmuje implementację wymagań przy zachowaniu standardów jakości kodu i spójności historii zmian. Fundamentem tego etapu jest rozproszony system kontroli wersji Git, a konwencje nazewnictwa zatwierdzeń są wymuszane na poziomie potoku CI.
+Faza wytwarzania (\textit{Code}) obejmuje implementację wymagań przy zachowaniu standardów jakości kodu i spójności historii zmian. Fundamentem tego etapu jest rozproszony system kontroli wersji Git, a konwencje nazewnictwa zatwierdzeń są wymuszane na poziomie łańcucha CI.
 
-\subsubsection{System kontroli wersji: GitHub}
-Jako system kontroli wersji i platformę współpracy wybrano \textbf{GitHub}, oparty na rozproszonym systemie Git. Jest on centralnym punktem prawdy (\textit{Single Source of Truth}) dla całego monorepozytorium.
-
-\textbf{Standard Conventional Commits:}
-Zgodnie z decyzją projektową \textit{ADR-0004}, wprowadzono standard \textbf{Conventional Commits}. Polega on na nadawaniu wiadomościom zatwierdzeń ustrukturyzowanej formy (np. \texttt{feat:}, \texttt{fix:}, \texttt{chore:}).
-\begin{itemize}
-    \item \textbf{Uzasadnienie:} Standaryzacja pozwala na automatyczne generowanie list zmian (\textit{changelogs}) oraz automatyzację wersjonowania semantycznego (\textit{Semantic Versioning}).
-    \item \textbf{Rola w CI/CD:} Czytelna historia zmian umożliwia narzędziom automatyzującym precyzyjne określenie, które komponenty systemu wymagają przebudowania i wdrożenia po każdej zmianie w monorepozytorium.
-\end{itemize}
-
-Poniższy przykład ilustruje kompletną wiadomość zatwierdzenia zgodną ze standardem. Nagłówek zawiera typ, zakres oraz zwięzły opis zmiany, a stopka (\textit{footer}) powiązuje commit z konkretnym zadaniem w systemie Jira:
-
-\begin{lstlisting}[caption={Przykład wiadomości zatwierdzenia zgodnej ze standardem Conventional Commits}, label={lst:conventional-commit}]
-feat(helm): create umbrella chart for all 7 services
-
-Aggregates all microservice charts under a single parent
-chart, enabling one-command deployment of the full stack.
-
-Resolves: INZ-9
-\end{lstlisting}
-
-\subsubsection{Wytwarzanie oprogramowania: Stos technologiczny}
 Proces kodowania realizowany jest przy użyciu nowoczesnych środowisk programistycznych (\textit{IntelliJ IDEA}, \textit{VS Code}), a sama implementacja opiera się na technologiach wspierających paradygmat mikroserwisów.
 
 Wszystkie komponenty systemu są projektowane zgodnie z zasadami \textit{Twelve-Factor App}. Kluczowe aspekty to:
@@ -32,7 +10,8 @@ Wszystkie komponenty systemu są projektowane zgodnie z zasadami \textit{Twelve-
     \item \textbf{Logowanie:} Logi są traktowane jako strumień zdarzeń wysyłany na standardowe wyjście, co umożliwia ich centralizację przez narzędzia observability.
 \end{itemize}
 
-\textbf{Backend (Java + Quarkus + Native Image):}
+
+\subsubsection{Backend (Java + Quarkus + Native Image)}
 Mikroserwisy backendowe zbudowano z użyciem frameworka \textit{Quarkus} skompilowanego do natywnych plików wykonywalnych za pomocą \textit{GraalVM Native Image} (kompilacja \textit{Ahead-of-Time}, AOT). W trybie natywnym Quarkus analizuje ścieżki wykonania kodu w czasie kompilacji i wyklucza nieużywane klasy, co skutkuje:
 \begin{itemize}
     \item \textbf{Błyskawicznym startem} -- aplikacja jest gotowa do obsługi żądań w czasie poniżej 100 ms, co skraca czas wznowienia po awarii i przyspiesza skalowanie poziome w Kubernetes.
@@ -68,7 +47,8 @@ quarkus.datasource.username=quarkus
 quarkus.datasource.password=quarkus
 \end{lstlisting}
 
-\textbf{Frontend (Vue 3 + Vite):}
+
+\subsubsection{Frontend (Vue 3 + Vite)}
 Zgodnie z decyzją \textit{ADR-0014}, warstwę prezentacji zbudowano z użyciem frameworka \textit{Vue 3} i narzędzia budującego \textit{Vite}. Kod pisany jest w \textit{TypeScript}, a poprawność typów weryfikuje \textit{vue-tsc} przed każdym buildem produkcyjnym. Komponenty interfejsu komunikują się z mikroserwisami backendowymi przez REST API.
 
 \begin{techcard}{Vue~3}
@@ -82,7 +62,7 @@ Zgodnie z decyzją \textit{ADR-0014}, warstwę prezentacji zbudowano z użyciem 
   \item \textbf{Multi-stage w Dockerze:} Etap \texttt{npm ci \&\& vite build} produkuje statyczne pliki; obraz docelowy zawiera wyłącznie \texttt{nginx} bez środowiska Node.js.
 \end{itemize}
 
-\textbf{Rola w projekcie:} Vue~3 pełni rolę cienkiej warstwy prezentacji (\textit{thin client}) nad REST API mikroserwisów. Warstwa frontendowa wdrażana jest jako osobny mikroserwis w Kubernetes z własnym potokiem CI/CD, analogicznie do serwisów backendowych.
+\textbf{Rola w projekcie:} Vue~3 pełni rolę cienkiej warstwy prezentacji (\textit{thin client}) nad REST API mikroserwisów. Warstwa frontendowa wdrażana jest jako osobny mikroserwis w Kubernetes z własnym łańcuchem CI/CD, analogicznie do serwisów backendowych.
 
 \end{techcard}
 
@@ -102,3 +82,26 @@ export default defineConfig({
   },
 })
 \end{lstlisting}
+
+
+\subsubsection{System kontroli wersji: GitHub}
+Jako system kontroli wersji i platformę współpracy wybrano \textbf{GitHub}, oparty na rozproszonym systemie Git. Jest on centralnym punktem prawdy (\textit{Single Source of Truth}) dla całego monorepozytorium.
+
+\textbf{Standard Conventional Commits:}
+Zgodnie z decyzją projektową \textit{ADR-0004}, wprowadzono standard \textbf{Conventional Commits}. Polega on na nadawaniu wiadomościom zatwierdzeń ustrukturyzowanej formy (np. \texttt{feat:}, \texttt{fix:}, \texttt{chore:}).
+\begin{itemize}
+    \item \textbf{Uzasadnienie:} Standaryzacja pozwala na automatyczne generowanie list zmian (\textit{changelogs}) oraz automatyzację wersjonowania semantycznego (\textit{Semantic Versioning}).
+    \item \textbf{Rola w CI/CD:} Czytelna historia zmian umożliwia narzędziom automatyzującym precyzyjne określenie, które komponenty systemu wymagają przebudowania i wdrożenia po każdej zmianie w monorepozytorium.
+\end{itemize}
+
+Poniższy przykład ilustruje kompletną wiadomość zatwierdzenia zgodną ze standardem. Nagłówek zawiera typ, zakres oraz zwięzły opis zmiany, a stopka (\textit{footer}) powiązuje commit z konkretnym zadaniem w systemie Jira:
+
+\begin{lstlisting}[caption={Przykład wiadomości zatwierdzenia zgodnej ze standardem Conventional Commits}, label={lst:conventional-commit}]
+feat(helm): create umbrella chart for all 7 services
+
+Aggregates all microservice charts under a single parent
+chart, enabling one-command deployment of the full stack.
+
+Resolves: INZ-9
+\end{lstlisting}
+
