@@ -97,6 +97,8 @@ Powyższe polecenie mapuje port 80 hosta na load balancer k3d, dzięki czemu ka�
 \subsubsection{Automatyzacja wdrożeń: GitOps (ArgoCD)}
 Zamiast tradycyjnych narzędzi \textit{Configuration Management} (jak Ansible), zdecydowano się na podejście \textbf{GitOps} przy użyciu narzędzia \textbf{ArgoCD} (ADR-0013). GitOps zakłada, że repozytorium Git jest jedynym źródłem prawdy o stanie infrastruktury -- kontroler stale monitoruje zmiany w chartach Helm i automatycznie synchronizuje stan klastra z definicją w kodzie, eliminując potrzebę ręcznego wykonywania poleceń \texttt{kubectl} z poziomu CI/CD.
 
+Model \textbf{pull-based} odwraca klasyczny przepływ CI/CD: zamiast rurociągu aktywnie wypychającego zmiany do klastra (\textit{push}), to \textbf{kontroler ArgoCD działający wewnątrz klastra} cyklicznie odpytuje źródło prawdy -- repozytorium Git lub rejestr OCI Helm -- i porównuje \textit{stan pożądany} ze \textit{stanem faktycznym} zasobów Kubernetes. Wykrytą rozbieżność (\textit{drift}) kontroler niweluje przez operację \textbf{uzgadniania} (\textit{reconciliation}) -- bez ingerencji człowieka i bez otwierania połączenia z zewnątrz do klastra. \textbf{Deklaratywna synchronizacja} (\textit{declarative sync}) oznacza, że operator opisuje \textit{co} ma działać w klastrze -- a nie \textit{jak} to wdrożyć -- i to ArgoCD odpowiada za doprowadzenie stanu aktualnego do opisanego stanu pożądanego.
+
 \begin{techcard}{ArgoCD}
 
 \textbf{Opis:} ArgoCD to deklaratywny kontroler GitOps dla Kubernetes, będący projektem CNCF o statusie \textit{graduated}. Działa w modelu \textbf{pull-based}: nasłuchuje zmian w repozytorium Git lub rejestrze OCI i automatycznie synchronizuje stan klastra do zdefiniowanego tam stanu docelowego. Centralną abstrakcją jest zasób \texttt{Application}, który wiąże źródło (chart Helm, katalog manifestów) z docelowym klastrem i przestrzenią nazw. Wbudowany interfejs webowy pozwala w czasie rzeczywistym obserwować drzewo zasobów aplikacji oraz historię wdrożeń.
@@ -138,3 +140,42 @@ spec:
     syncOptions:
       - CreateNamespace=true
 \end{lstlisting}
+
+Zasób \texttt{Application} (listing~\ref{lst:argocd-application}) skupia w jednym pliku YAML trzy elementy niezbędne do opisania pełnego cyklu dostawy. Sekcja \texttt{source} wskazuje chart \texttt{bsc-devops} w rejestrze OCI GHCR -- pole \texttt{repoURL} przyjmuje adres rejestru, nie repozytorium Git, gdyż chart jest publikowany jako artefakt OCI przez rurociąg CD (listing~\ref{lst:cd-helm}). Wersja \texttt{targetRevision: "0.5.0"} jest jawnie przypięta: ten sam commit Git zawsze wdroży identyczną wersję aplikacji, co zapewnia pełną powtarzalność i audytowalność wdrożeń. Sekcja \texttt{destination} celuje w klaster lokalny przez wewnętrzny adres serwera API (\texttt{kubernetes.default.svc}), eliminując potrzebę rejestrowania zewnętrznych klastrów w ArgoCD. Sekcja \texttt{syncPolicy.automated} z \texttt{prune: true} i \texttt{selfHeal: true} czyni ArgoCD autonomicznym kontrolerem: usuwa zasoby odłączone od charta po każdej aktualizacji oraz cofa każdy ręczny \textit{drift} wymuszony bezpośrednio przez \texttt{kubectl}.
+
+\subsubsection{Zarządzanie sekretami w modelu GitOps: Sealed Secrets}
+Model GitOps wymaga, aby wszystkie zasoby konfiguracyjne -- łącznie z sekretami -- były przechowywane w repozytorium Git. Natywny zasób Kubernetes \texttt{Secret} koduje dane jedynie w Base64, co czyni jego publiczne przechowywanie równoważnym ujawnieniu haseł w jawnym tekście. Narzędzie \textbf{Bitnami Sealed Secrets} rozwiązuje ten problem przez \textbf{szyfrowanie asymetryczne}: kontroler działający w przestrzeni nazw \texttt{kube-system} generuje parę kluczy RSA i udostępnia klucz publiczny; lokalne narzędzie \texttt{kubeseal} szyfruje \texttt{Secret} tym kluczem przed committem, a kontroler odszyfrowuje wynikowy zasób \texttt{SealedSecret} kluczem prywatnym w czasie działania klastra. Zaszyfrowany plik jest bezpieczny w publicznym repozytorium -- bez klucza prywatnego klastra jest kryptograficznie bezużyteczny.
+
+\begin{techcard}{Sealed Secrets}
+
+\textbf{Opis:} Bitnami Sealed Secrets to mechanizm bezpiecznego przechowywania sekretów Kubernetes w repozytorium Git. Narzędzie \texttt{kubeseal} szyfruje zasób \texttt{Secret} kluczem publicznym kontrolera klastra, tworząc zasób \texttt{SealedSecret} bezpieczny do commitowania. Kontroler w przestrzeni \texttt{kube-system} odszyfrowuje go kluczem prywatnym i materializuje oryginalny \texttt{Secret} w docelowej przestrzeni nazw -- bez żadnej interwencji operatora.
+
+\textbf{Dobre nawyki:}
+\begin{itemize}
+  \item \textbf{Powiązanie z przestrzenią nazw:} Zaszyfrowany tekst jest ściśle powiązany ze wskazaną przestrzenią nazw -- \texttt{SealedSecret} zaszyfrowany dla \texttt{argocd} nie może zostać odszyfrowany w \texttt{bsc-devops}.
+  \item \textbf{Kopia zapasowa klucza:} Przed usunięciem klastra należy wykonać kopię klucza prywatnego kontrolera (\texttt{kubectl get secret -n kube-system -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml}). Bez niej wszystkie \texttt{SealedSecret} trzeba ponownie zaszyfrować nowym kluczem.
+  \item \textbf{Rotacja tokenów:} Po zmianie tokenu wystarczy ponownie uruchomić skrypt uszczelniający i zaktualizować plik w Git -- kontroler automatycznie zaktualizuje \texttt{Secret} w klastrze.
+\end{itemize}
+
+\textbf{Rola w projekcie:} Dwa \texttt{SealedSecret} umożliwiają beztokenowy bootstrap klastra: \texttt{ghcr-docker-config} w przestrzeni \texttt{argocd} zawiera konfigurację Docker uprawniającą repo-serwer ArgoCD do pobierania chartów OCI z GHCR; \texttt{dockerhub-pull-secret} w przestrzeni \texttt{bsc-devops} uprawnia węzły klastra do pobierania obrazów z Docker Hub. Oba są aplikowane przed instalacją ArgoCD -- kontroler Sealed Secrets odszyfrowuje je synchronicznie, więc ArgoCD startuje z gotowymi sekretami i natychmiast pobiera chart bez ręcznego podawania tokenów.
+
+\end{techcard}
+
+\begin{lstlisting}[language=bash, caption={Uszczelnianie sekretu GHCR narzędziem \texttt{kubeseal} (scripts/local/seal-secrets.sh)}, label={lst:kubeseal}]
+# Zakoduj token GHCR jako Docker auth JSON
+DOCKER_AUTH=$(echo -n "mwas-inz:${GHCR_TOKEN}" | base64 -w0)
+DOCKER_JSON=$(printf '{"auths":{"ghcr.io":{"auth":"%s"}}}' "$DOCKER_AUTH")
+
+# Wygeneruj Secret (--dry-run), zaszyfruj kubeseal i zapisz SealedSecret
+kubectl create secret generic ghcr-docker-config \
+    --namespace argocd \
+    --from-literal=config.json="$DOCKER_JSON" \
+    --dry-run=client -o yaml \
+| kubeseal \
+    --controller-namespace kube-system \
+    --controller-name sealed-secrets \
+    --format yaml \
+    > gitops/secrets/ghcr-docker-config.sealed.yaml
+\end{lstlisting}
+
+Zaszyfrowany plik \texttt{ghcr-docker-config.sealed.yaml} jest commitowany do repozytorium obok pozostałych manifestów GitOps. Skrypt \texttt{scripts/local/gitops-bootstrap.sh} aplikuje go do klastra \textbf{przed} instalacją ArgoCD -- kontroler Sealed Secrets odszyfrowuje go synchronicznie, tworząc gotowy \texttt{Secret} w przestrzeni \texttt{argocd}. Dzięki temu ArgoCD nie wymaga żadnego ręcznego przekazywania tokenów przy odtwarzaniu środowiska.
