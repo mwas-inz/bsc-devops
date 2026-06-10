@@ -97,7 +97,7 @@ Powyższe polecenie mapuje port 80 hosta na load balancer k3d, dzięki czemu ka�
 \subsubsection{Automatyzacja wdrożeń: GitOps (ArgoCD)}
 Zamiast tradycyjnych narzędzi \textit{Configuration Management} (jak Ansible), zdecydowano się na podejście \textbf{GitOps} przy użyciu narzędzia \textbf{ArgoCD} (ADR-0013). GitOps zakłada, że repozytorium Git jest jedynym źródłem prawdy o stanie infrastruktury -- kontroler stale monitoruje zmiany w chartach Helm i automatycznie synchronizuje stan klastra z definicją w kodzie, eliminując potrzebę ręcznego wykonywania poleceń \texttt{kubectl} z poziomu CI/CD.
 
-Model \textbf{pull-based} odwraca klasyczny przepływ CI/CD: zamiast rurociągu aktywnie wypychającego zmiany do klastra (\textit{push}), to \textbf{kontroler ArgoCD działający wewnątrz klastra} cyklicznie odpytuje źródło prawdy -- repozytorium Git lub rejestr OCI Helm -- i porównuje \textit{stan pożądany} ze \textit{stanem faktycznym} zasobów Kubernetes. Wykrytą rozbieżność (\textit{drift}) kontroler niweluje przez operację \textbf{uzgadniania} (\textit{reconciliation}) -- bez ingerencji człowieka i bez otwierania połączenia z zewnątrz do klastra. \textbf{Deklaratywna synchronizacja} (\textit{declarative sync}) oznacza, że operator opisuje \textit{co} ma działać w klastrze -- a nie \textit{jak} to wdrożyć -- i to ArgoCD odpowiada za doprowadzenie stanu aktualnego do opisanego stanu pożądanego.
+Model \textbf{pull-based} odwraca klasyczny przepływ CI/CD: zamiast procesu aktywnie wypychającego zmiany do klastra (\textit{push}), to \textbf{kontroler ArgoCD działający wewnątrz klastra} cyklicznie odpytuje źródło prawdy -- repozytorium Git lub rejestr OCI Helm -- i porównuje \textit{stan pożądany} ze \textit{stanem faktycznym} zasobów Kubernetes. Wykrytą rozbieżność (\textit{drift}) kontroler niweluje przez operację \textbf{uzgadniania} (\textit{reconciliation}) -- bez ingerencji człowieka i bez otwierania połączenia z zewnątrz do klastra. \textbf{Deklaratywna synchronizacja} (\textit{declarative sync}) oznacza, że operator opisuje \textit{co} ma działać w klastrze -- a nie \textit{jak} to wdrożyć -- i to ArgoCD odpowiada za doprowadzenie stanu aktualnego do opisanego stanu pożądanego.
 
 \begin{techcard}{ArgoCD}
 
@@ -107,15 +107,15 @@ Model \textbf{pull-based} odwraca klasyczny przepływ CI/CD: zamiast rurociągu 
 \begin{itemize}
   \item \textbf{Automated sync z \texttt{selfHeal}:} Włączenie \texttt{selfHeal: true} gwarantuje, że każda ręczna zmiana w klastrze zostanie natychmiast cofnięta -- klaster jest zawsze zgodny z tym, co opisuje Git.
   \item \textbf{\texttt{prune: true} z rozwagą:} Automatyczne usuwanie zasobów odłączonych od charta skraca dług konfiguracyjny, ale wymaga pewności, że wszystkie zasoby są zarządzane przez ArgoCD.
-  \item \textbf{Application CRD w Git:} Plik \texttt{gitops/application.yaml} powinien być przechowywany w repozytorium obok charta -- cały opis dostawy jest wówczas wersjonowany i audytowalny.
+  \item \textbf{Application CRD w Git:} Plik \texttt{gitops/application.yaml} powinien być przechowywany w repozytorium obok charta -- cały opis wdrożenia jest wówczas wersjonowany i audytowalny.
   \item \textbf{Pinowanie \texttt{targetRevision}:} Używanie konkretnego numeru wersji charta (nie \texttt{latest}) zapewnia powtarzalność wdrożeń i pełną historię zmian.
 \end{itemize}
 
-\textbf{Rola w projekcie:} ArgoCD zamyka pętlę CI/CD: GitHub Actions buduje obraz, publikuje chart do GHCR, a ArgoCD automatycznie wykrywa nową wersję charta i synchronizuje klaster k3d. Zasób \texttt{Application} wskazuje na chart \texttt{bsc-devops} w GHCR i celuje w lokalny klaster k3d. Wbudowany interfejs webowy dostarcza wizualizację drzewa zasobów przydatną jako materiał ilustracyjny pracy.
+\textbf{Rola w projekcie:} ArgoCD zamyka pętlę CI/CD: GitHub Actions buduje obraz, publikuje chart do GHCR, a ArgoCD automatycznie wykrywa nową wersję charta i synchronizuje klaster k3d. Zasób \texttt{Application} wskazuje na chart \texttt{bsc-devops} w GHCR i wskazuje na lokalny klaster k3d. Wbudowany interfejs webowy dostarcza wizualizację drzewa zasobów przydatną jako materiał ilustracyjny pracy.
 
 \end{techcard}
 
-\begin{lstlisting}[language=yaml, caption={ArgoCD Application CRD -- deklaracja dostawy charta \texttt{bsc-devops} z GHCR do klastra k3d (gitops/application.yaml)}, label={lst:argocd-application}]
+\begin{lstlisting}[language=yaml, caption={ArgoCD Application CRD -- deklaracja wdrożenia charta \texttt{bsc-devops} z GHCR do klastra k3d (gitops/application.yaml)}, label={lst:argocd-application}]
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -135,13 +135,20 @@ spec:
     namespace: bsc-devops
   syncPolicy:
     automated:
-      prune: true      # usuwa zasoby usunięte z charta
-      selfHeal: true   # cofa ręczne zmiany niezgodne z Gitem
+      prune: true      # usuwa zasoby skasowane z charta
+      selfHeal: true   # cofa manualne zmiany niezgodne z Gitem
     syncOptions:
       - CreateNamespace=true
 \end{lstlisting}
 
-Zasób \texttt{Application} (listing~\ref{lst:argocd-application}) skupia w jednym pliku YAML trzy elementy niezbędne do opisania pełnego cyklu dostawy. Sekcja \texttt{source} wskazuje chart \texttt{bsc-devops} w rejestrze OCI GHCR -- pole \texttt{repoURL} przyjmuje adres rejestru, nie repozytorium Git, gdyż chart jest publikowany jako artefakt OCI przez rurociąg CD (listing~\ref{lst:cd-helm}). Wersja \texttt{targetRevision: "0.5.0"} jest jawnie przypięta: ten sam commit Git zawsze wdroży identyczną wersję aplikacji, co zapewnia pełną powtarzalność i audytowalność wdrożeń. Sekcja \texttt{destination} celuje w klaster lokalny przez wewnętrzny adres serwera API (\texttt{kubernetes.default.svc}), eliminując potrzebę rejestrowania zewnętrznych klastrów w ArgoCD. Sekcja \texttt{syncPolicy.automated} z \texttt{prune: true} i \texttt{selfHeal: true} czyni ArgoCD autonomicznym kontrolerem: usuwa zasoby odłączone od charta po każdej aktualizacji oraz cofa każdy ręczny \textit{drift} wymuszony bezpośrednio przez \texttt{kubectl}.
+Zasób \texttt{Application} (listing~\ref{lst:argocd-application}) skupia w jednym pliku YAML trzy elementy niezbędne do opisania pełnego cyklu wdrożenia.
+
+Sekcja \texttt{source} wskazuje chart \texttt{bsc-devops} w rejestrze OCI GHCR -- pole \texttt{repoURL} przyjmuje adres rejestru, nie repozytorium Git, gdyż chart jest publikowany jako artefakt OCI przez rurociąg CD (listing~\ref{lst:cd-helm}). Wersja \texttt{targetRevision: "0.5.0"} jest jawnie przypięta: ten sam commit Git zawsze wdroży identyczną wersję aplikacji, co zapewnia pełną powtarzalność i audytowalność wdrożeń.
+
+Sekcja \texttt{destination} wskazuje klaster lokalny przez wewnętrzny adres serwera API (\texttt{kubernetes.default.svc}), eliminując potrzebę rejestrowania zewnętrznych klastrów w ArgoCD.
+
+Sekcja \texttt{syncPolicy.automated} z \texttt{prune: true} i \texttt{selfHeal: true} czyni ArgoCD autonomicznym kontrolerem: usuwa zasoby odłączone od charta po każdej aktualizacji oraz cofa każdy ręczny \textit{drift} wymuszony bezpośrednio przez \texttt{kubectl}.
+
 
 \subsubsection{Zarządzanie sekretami w modelu GitOps: Sealed Secrets}
 Model GitOps wymaga, aby wszystkie zasoby konfiguracyjne -- łącznie z sekretami -- były przechowywane w repozytorium Git. Natywny zasób Kubernetes \texttt{Secret} koduje dane jedynie w Base64, co czyni jego publiczne przechowywanie równoważnym ujawnieniu haseł w jawnym tekście. Narzędzie \textbf{Bitnami Sealed Secrets} rozwiązuje ten problem przez \textbf{szyfrowanie asymetryczne}: kontroler działający w przestrzeni nazw \texttt{kube-system} generuje parę kluczy RSA i udostępnia klucz publiczny; lokalne narzędzie \texttt{kubeseal} szyfruje \texttt{Secret} tym kluczem przed committem, a kontroler odszyfrowuje wynikowy zasób \texttt{SealedSecret} kluczem prywatnym w czasie działania klastra. Zaszyfrowany plik jest bezpieczny w publicznym repozytorium -- bez klucza prywatnego klastra jest kryptograficznie bezużyteczny.
