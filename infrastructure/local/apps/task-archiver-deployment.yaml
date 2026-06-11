@@ -6,6 +6,9 @@ metadata:
   labels:
     app.kubernetes.io/name: task-archiver
     app.kubernetes.io/part-of: bsc-devops
+automountServiceAccountToken: false
+imagePullSecrets:
+  - name: dockerhub-pull-secret
 ---
 apiVersion: apps/v1
 kind: Deployment
