@@ -1,7 +1,7 @@
 \newpage
 
 % =====================================================================
-% Załączniki A–O: Architecture Decision Records (skrócone)
+% Załączniki A–P: Architecture Decision Records (skrócone)
 % Pełne wersje (format MADR) w repozytorium: docs/adr/
 % =====================================================================
 
@@ -253,8 +253,24 @@
   \item[$-$] k3s pomija część rzadko używanych API; domyślny Ingress to Traefik (manifesty muszą używać \texttt{ingressClassName: traefik}).
 \end{itemize}
 
+\appendix{ADR-0016: Sealed Secrets do zarządzania sekretami Kubernetes}
+
+\textbf{Status:} zaakceptowany (data: 2026-06-11).
+
+\textbf{Kontekst.} Model GitOps (ADR-0013) wymaga przechowywania wszystkich zasobów w repozytorium Git, lecz natywny \texttt{Secret} koduje dane jedynie w Base64 --- jego commit jest równoznaczny z ujawnieniem haseł. Potrzebny był sposób utrzymania sekretów w postaci zaszyfrowanej w repozytorium, uzgadnialny przez ArgoCD bez zewnętrznego systemu i bez ręcznych kroków poza pętlą GitOps.
+
+\textbf{Decyzja.} Wybrano Bitnami Sealed Secrets --- kontroler działający w klastrze szyfruje \texttt{Secret} kluczem publicznym do zasobu \texttt{SealedSecret} bezpiecznego do commitowania, a klucz prywatny nigdy nie opuszcza klastra. W konsekwencji chart Helm przestał renderować jakikolwiek zasób \texttt{Secret}: dane niewrażliwe trafiają do \texttt{ConfigMap}, a hasła pochodzą wyłącznie z odszyfrowanych \texttt{SealedSecret}.
+
+\textbf{Rozważane alternatywy:} External Secrets Operator (synchronizacja z zewnętrznego magazynu); HashiCorp Vault; SOPS (szyfrowanie plików kluczem age/GPG).
+
+\textbf{Konsekwencje:}
+\begin{itemize}
+  \item[$+$] sekrety zaszyfrowane w Git i uzgadnialne przez ArgoCD bez zewnętrznych zależności; brak haseł w jawnym tekście w \texttt{values.yaml},
+  \item[$-$] klucz prywatny kontrolera stanowi pojedynczy punkt zaufania (wymaga kopii zapasowej), a rotacja sekretu oznacza ręczne ponowne uszczelnienie i commit.
+\end{itemize}
+
 % =====================================================================
-% Załącznik P: skorowidz kart narzędzi
+% Załącznik Q: skorowidz kart narzędzi
 % Pełne karty znajdują się w treści rozdziału 3; źródła w docs/tech-card/
 % =====================================================================
 
