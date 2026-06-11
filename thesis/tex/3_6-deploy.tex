@@ -186,3 +186,55 @@ kubectl create secret generic ghcr-docker-config \
 \end{lstlisting}
 
 Zaszyfrowany plik \texttt{ghcr-docker-config.sealed.yaml} jest commitowany do repozytorium obok pozostałych manifestów GitOps. Skrypt \texttt{scripts/local/gitops-bootstrap.sh} aplikuje go do klastra \textbf{przed} instalacją ArgoCD -- kontroler Sealed Secrets odszyfrowuje go synchronicznie, tworząc gotowy \texttt{Secret} w przestrzeni \texttt{argocd}. Dzięki temu ArgoCD nie wymaga żadnego ręcznego przekazywania tokenów przy odtwarzaniu środowiska.
+
+Ten sam mechanizm zabezpiecza poświadczenia aplikacyjne. Hasło bazy danych PostgreSQL oraz hasło źródła danych mikroserwisów nie występują w pliku \texttt{values.yaml} charta Helm -- dostarczają je dwa zasoby \texttt{SealedSecret} (\texttt{db-secret} oraz \texttt{postgres-secret} w przestrzeni \texttt{bsc-devops}). Chart Helm nie renderuje już żadnego zasobu \texttt{Secret}: dane niewrażliwe (adres JDBC, nazwa użytkownika) trafiają do \texttt{ConfigMap}, a poufne hasła pochodzą wyłącznie z odszyfrowanych \texttt{SealedSecret}. W rezultacie repozytorium nie zawiera żadnego hasła w jawnym tekście (decyzja \textit{ADR-0016}).
+
+\subsubsection{Izolacja przestrzeni nazw, RBAC i konta usług}
+Bezpieczeństwo środowiska uruchomieniowego opiera się na zasadzie \textbf{minimalnych uprawnień} (\textit{least privilege}) realizowanej na trzech poziomach: izolacji przestrzeni nazw, dedykowanych kont usług oraz ściśle ograniczonego dostępu do serwera API Kubernetes.
+
+Wszystkie zasoby platformy działają w wydzielonej przestrzeni nazw \texttt{bsc-devops}, odseparowanej od komponentów systemowych klastra oraz od kontrolera GitOps w przestrzeni \texttt{argocd}. Każdy mikroserwis otrzymuje \textbf{własne konto usługi} (\texttt{ServiceAccount}) zamiast współdzielonego konta domyślnego -- dzięki temu naruszenie jednego poda nie daje dostępu do tożsamości pozostałych usług.
+
+Ponieważ mikroserwisy nie komunikują się z serwerem API Kubernetes, ich kontom usług wyłączono automatyczne montowanie tokenu (\texttt{automountServiceAccountToken: false}). Token, który nie trafia do poda, nie może zostać z niego wykradziony -- jest to forma obrony w głąb (\textit{defense in depth}). Uzupełnia ją minimalna rola \texttt{Role}, powiązana ze wszystkimi kontami usług przez \texttt{RoleBinding} i nadająca wyłącznie prawo odczytu zasobów \texttt{ConfigMap} w obrębie przestrzeni nazw.
+
+\begin{lstlisting}[language=yaml, caption={Minimalna rola i powiązanie RBAC dla kont usług (infrastructure/helm/bsc-devops/templates/rbac.yaml)}, label={lst:rbac}]
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: bsc-devops-app
+  namespace: bsc-devops
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bsc-devops-app
+  namespace: bsc-devops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: bsc-devops-app
+subjects:
+  - kind: ServiceAccount
+    name: users-sa
+    namespace: bsc-devops
+  # ... pozostałe konta usług
+\end{lstlisting}
+
+Poprawność ograniczeń potwierdza polecenie \texttt{kubectl auth can-i}, które dla każdego konta usługi wskazuje operacje dozwolone i zabronione -- konto może jedynie odczytywać \texttt{ConfigMap}, a wszystkie pozostałe operacje są odrzucane:
+
+\begin{lstlisting}[language=bash, caption={Weryfikacja minimalnych uprawnień konta usługi \texttt{users-sa}}, label={lst:authcani}]
+$ kubectl auth can-i list configmaps \
+    --as=system:serviceaccount:bsc-devops:users-sa
+yes
+$ kubectl auth can-i get secrets \
+    --as=system:serviceaccount:bsc-devops:users-sa
+no
+$ kubectl auth can-i delete pods \
+    --as=system:serviceaccount:bsc-devops:users-sa
+no
+\end{lstlisting}
+
+Tożsamość konta usługi pełni również rolę nośnika poświadczeń do rejestru obrazów. Zamiast powielać sekcję \texttt{imagePullSecrets} w każdym zasobie \texttt{Deployment}, dołączono ją bezpośrednio do każdego \texttt{ServiceAccount} -- sekret \texttt{dockerhub-pull-secret} jest wówczas automatycznie stosowany do wszystkich podów uruchamianych przez dane konto. Ogranicza to powielanie konfiguracji i ryzyko pominięcia poświadczeń przy dodawaniu nowej usługi.
