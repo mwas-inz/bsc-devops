@@ -149,6 +149,12 @@ Sekcja \texttt{destination} wskazuje klaster lokalny przez wewnętrzny adres ser
 
 Sekcja \texttt{syncPolicy.automated} z \texttt{prune: true} i \texttt{selfHeal: true} czyni ArgoCD autonomicznym kontrolerem: usuwa zasoby odłączone od charta po każdej aktualizacji oraz cofa każdy ręczny \textit{drift} wymuszony bezpośrednio przez \texttt{kubectl}.
 
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{img/argocd.png}
+  \caption{Interfejs webowy ArgoCD -- zasób \texttt{Application} \texttt{bsc-devops} w stanie \textit{Healthy} i \textit{Synced}: chart \texttt{0.5.0} zsynchronizowany z rejestru OCI GHCR do klastra lokalnego (\texttt{in-cluster}, przestrzeń nazw \texttt{bsc-devops}).}
+  \label{fig:argocd-ui}
+\end{figure}
 
 \subsubsection{Zarządzanie sekretami w modelu GitOps: Sealed Secrets}
 Model GitOps wymaga, aby wszystkie zasoby konfiguracyjne -- łącznie z sekretami -- były przechowywane w repozytorium Git. Natywny zasób Kubernetes \texttt{Secret} koduje dane jedynie w Base64, co czyni jego publiczne przechowywanie równoważnym ujawnieniu haseł w jawnym tekście. Narzędzie \textbf{Bitnami Sealed Secrets} rozwiązuje ten problem przez \textbf{szyfrowanie asymetryczne}: kontroler działający w przestrzeni nazw \texttt{kube-system} generuje parę kluczy RSA i udostępnia klucz publiczny; lokalne narzędzie \texttt{kubeseal} szyfruje \texttt{Secret} tym kluczem przed committem, a kontroler odszyfrowuje wynikowy zasób \texttt{SealedSecret} kluczem prywatnym w czasie działania klastra. Zaszyfrowany plik jest bezpieczny w publicznym repozytorium -- bez klucza prywatnego klastra jest kryptograficznie bezużyteczny.
