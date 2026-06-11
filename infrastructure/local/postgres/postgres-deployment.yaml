@@ -5,6 +5,9 @@ metadata:
   namespace: bsc-devops
   labels:
     app: postgres
+automountServiceAccountToken: false
+imagePullSecrets:
+  - name: dockerhub-pull-secret
 ---
 apiVersion: apps/v1
 kind: Deployment

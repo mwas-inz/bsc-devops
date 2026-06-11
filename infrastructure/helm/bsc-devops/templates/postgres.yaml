@@ -6,6 +6,8 @@ metadata:
   namespace: {{ include "bsc-devops.namespace" . }}
   labels:
     {{- include "bsc-devops.labels" . | nindent 4 }}
+automountServiceAccountToken: false
+{{- include "bsc-devops.imagePullSecrets" . | nindent 0 }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -16,18 +18,7 @@ metadata:
     {{- include "bsc-devops.labels" . | nindent 4 }}
 data:
   POSTGRES_DB: {{ .Values.postgres.credentials.database | quote }}
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: postgres-secret
-  namespace: {{ include "bsc-devops.namespace" . }}
-  labels:
-    {{- include "bsc-devops.labels" . | nindent 4 }}
-type: Opaque
-stringData:
   POSTGRES_USER: {{ .Values.postgres.credentials.username | quote }}
-  POSTGRES_PASSWORD: {{ .Values.postgres.credentials.password | quote }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

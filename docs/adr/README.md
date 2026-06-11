@@ -19,3 +19,4 @@ This folder stores architecture decision records for the repository.
 * [ADR-0013: ArgoCD as GitOps Delivery Tool](0013-argocd-as-gitops-delivery-tool.md)
 * [ADR-0014: Choose Vue 3 as Frontend Framework](0014-choose-vue3-as-frontend-framework.md)
 * [ADR-0015: k3d as Local Kubernetes Runtime](0015-k3d-as-local-kubernetes-runtime.md)
+* [ADR-0016: Sealed Secrets for Kubernetes Secrets Management](0016-sealed-secrets-for-secrets-management.md)

@@ -8,3 +8,5 @@ metadata:
 data:
   MP_MESSAGING_CONNECTOR_SMALLRYE_PULSAR_SERVICEURL: {{ .Values.observability.pulsarServiceUrl | quote }}
   QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT: {{ .Values.observability.otelEndpoint | quote }}
+  QUARKUS_DATASOURCE_JDBC_URL: {{ printf "jdbc:postgresql://postgres:5432/%s" .Values.postgres.credentials.database | quote }}
+  QUARKUS_DATASOURCE_USERNAME: {{ .Values.postgres.credentials.username | quote }}

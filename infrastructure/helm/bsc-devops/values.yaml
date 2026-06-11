@@ -7,6 +7,21 @@ fullnameOverride: ""
 # Global image tag — overridden per-service via image.tag
 imageTag: "latest"
 
+# Pull secret attached to every ServiceAccount (auto-applied to all pods).
+# Materialized in-cluster from gitops/secrets/dockerhub-pull-secret.sealed.yaml
+imagePullSecrets:
+  - name: dockerhub-pull-secret
+
+rbac:
+  # Minimal namespaced Role bound to all app ServiceAccounts.
+  # Workloads do not call the Kubernetes API (automountServiceAccountToken: false),
+  # so this grants only read on ConfigMaps to demonstrate least privilege.
+  create: true
+  rules:
+    - apiGroups: [""]
+      resources: ["configmaps"]
+      verbs: ["get", "list", "watch"]
+
 observability:
   pulsarServiceUrl: "pulsar://pulsar:6650"
   otelEndpoint: "http://jaeger:4317"
@@ -17,7 +32,9 @@ postgres:
   credentials:
     database: "todo"
     username: "todo"
-    password: "todo"
+    # password is NOT stored here — provided via sealed Secrets:
+    #   gitops/secrets/db-secret.sealed.yaml       (QUARKUS_DATASOURCE_PASSWORD)
+    #   gitops/secrets/postgres-secret.sealed.yaml (POSTGRES_PASSWORD)
   storage:
     size: "5Gi"
     storageClass: "local-path"

@@ -67,3 +67,14 @@ Usage:
 {{- $tag := .tag | default .ctx.Values.imageTag | default "latest" -}}
 {{- printf "%s:%s" .repo $tag -}}
 {{- end }}
+
+{{/*
+Render imagePullSecrets list for attachment to a ServiceAccount.
+Usage: {{- include "bsc-devops.imagePullSecrets" . | nindent 0 }}
+*/}}
+{{- define "bsc-devops.imagePullSecrets" -}}
+{{- with .Values.imagePullSecrets -}}
+imagePullSecrets:
+{{ toYaml . | trimSuffix "\n" }}
+{{- end -}}
+{{- end -}}
