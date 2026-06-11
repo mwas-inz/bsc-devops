@@ -1,6 +1,6 @@
 # bsc-devops
 
-Monorepository for an engineering thesis focused on modern DevOps and cloud-native SDLC practices.
+Monorepository for an engineering thesis on modern DevOps and cloud-native SDLC practices.
 
 This repository combines Java application development, infrastructure as code, technical documentation, and thesis assets in one structure.
 
@@ -13,18 +13,25 @@ This repository combines Java application development, infrastructure as code, t
 
 ## Repository Structure
 
-- `apps/` - executable services (for example Spring Boot applications)
-- `infrastructure/` - infrastructure as code (Docker, Kubernetes, Terraform/Pulumi)
-- `docs/` - ADRs, diagrams, and technical documentation
-- `docs/adr/` - architecture decision records
-- `docs/diagrams/` - shared architecture and flow diagrams
-- `cicd/` - CI/CD planning and workflow notes
-- `gitops/` - GitOps planning and delivery notes
-- `observability/` - monitoring, logging, and tracing notes
-- `thesis/` - thesis text and academic assets
-- `scripts/` - shared helper scripts and developer workflow notes
+- `apps/` — three Quarkus microservices (`users`, `tasks`, `task-archiver`) and a Vue 3 frontend
+- `infrastructure/` — Helm umbrella chart (v0.6.0) and local Kubernetes manifests
+- `docs/adr/` — 16 architecture decision records (MADR format)
+- `docs/tech-card/` — 13 technology reference cards
+- `docs/diagrams/` — shared architecture and flow diagrams (planned)
+- `.github/workflows/` — GitHub Actions CI/CD (per-service CI, Helm CD, release signing, thesis PDF)
+- `gitops/` — ArgoCD Application manifest and Sealed Secrets for cluster bootstrap
+- `observability/` — observability strategy notes
+- `thesis/` — LaTeX thesis source, bibliography, and compilation scripts
+- `scripts/` — developer workflow scripts (local cluster, GitOps bootstrap, thesis compilation)
 
 ## Status
 
-This is a work in progress.
-The structure is being defined and initial content is being drafted. The focus is on creating a clear, maintainable organization for both the technical implementation and the thesis documentation.
+Three Quarkus microservices (`users`, `tasks`, `task-archiver`) and a Vue 3 frontend are built,
+containerised, and published to GHCR.
+A Helm umbrella chart (v0.6.0) packages all services and is published via the `cd-helm` workflow.
+A GitOps bootstrap script provisions a k3d cluster, installs Sealed Secrets and ArgoCD, and lets
+ArgoCD reconcile the chart from GHCR.
+GitHub Actions provides per-service CI (build, test, Trivy image scan, Cosign keyless signing),
+Helm lint/validate, and automated chart tagging.
+The thesis is under active authoring in LaTeX across chapters covering DevOps theory and the full
+SDLC implementation.
