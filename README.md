@@ -13,10 +13,10 @@ This repository combines Java application development, infrastructure as code, t
 
 ## Repository Structure
 
-- `apps/` — three Quarkus microservices (`users`, `tasks`, `task-archiver`) and a Vue 3 frontend
-- `infrastructure/` — Helm umbrella chart (v0.6.0) and local Kubernetes manifests
-- `docs/adr/` — 16 architecture decision records (MADR format)
-- `docs/tech-card/` — 13 technology reference cards
+- `apps/` — Quarkus microservices (`users`, `tasks`, `task-archiver`) and a Vue 3 frontend
+- `infrastructure/` — Helm umbrella chart and local Kubernetes manifests
+- `docs/adr/` — architecture decision records (MADR format)
+- `docs/tech-card/` — technology reference cards
 - `docs/diagrams/` — shared architecture and flow diagrams (planned)
 - `.github/workflows/` — GitHub Actions CI/CD (per-service CI, Helm CD, release signing, thesis PDF)
 - `gitops/` — ArgoCD Application manifest and Sealed Secrets for cluster bootstrap
@@ -26,12 +26,12 @@ This repository combines Java application development, infrastructure as code, t
 
 ## Status
 
-Three Quarkus microservices (`users`, `tasks`, `task-archiver`) and a Vue 3 frontend are built,
-containerised, and published to GHCR.
-A Helm umbrella chart (v0.6.0) packages all services and is published via the `cd-helm` workflow.
-A GitOps bootstrap script provisions a k3d cluster, installs Sealed Secrets and ArgoCD, and lets
-ArgoCD reconcile the chart from GHCR.
-GitHub Actions provides per-service CI (build, test, Trivy image scan, Cosign keyless signing),
-Helm lint/validate, and automated chart tagging.
-The thesis is under active authoring in LaTeX across chapters covering DevOps theory and the full
-SDLC implementation.
+- Quarkus microservices (`users`, `tasks`, `task-archiver`) and a Vue 3 frontend are built,
+  containerised, and published to GHCR
+- A Helm umbrella chart packages all services and is published via the `cd-helm` workflow
+- A GitOps bootstrap script provisions a k3d cluster, installs Sealed Secrets and ArgoCD,
+  and lets ArgoCD reconcile the chart from GHCR
+- GitHub Actions provides per-service CI (build, test, Trivy image scan, Cosign keyless signing),
+  Helm lint/validate, and automated chart tagging
+- The thesis is under active authoring in LaTeX across chapters covering DevOps theory and the
+  full SDLC implementation
