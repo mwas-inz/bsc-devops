@@ -1,7 +1,7 @@
 \subsection{Etap Code}
 Faza wytwarzania (\textit{Code}) obejmuje implementację wymagań przy zachowaniu standardów jakości kodu i spójności historii zmian. Fundamentem tego etapu jest rozproszony system kontroli wersji Git, a konwencje nazewnictwa zatwierdzeń są wymuszane na poziomie łańcucha CI.
 
-Proces kodowania realizowany jest przy użyciu nowoczesnych środowisk programistycznych (\textit{IntelliJ IDEA}, \textit{VS Code}), a sama implementacja opiera się na technologiach wspierających paradygmat mikroserwisów.
+Proces kodowania realizowany jest przy użyciu nowoczesnych środowisk programistycznych (\textit{IntelliJ IDEA}, \textit{VS Code}), a sama implementacja opiera się na technologiach realizujących paradygmat mikroserwisów.
 
 Wszystkie komponenty systemu są projektowane zgodnie z zasadami \textit{Twelve-Factor App}. Kluczowe aspekty to:
 \begin{itemize}
@@ -15,8 +15,8 @@ Wszystkie komponenty systemu są projektowane zgodnie z zasadami \textit{Twelve-
 Mikroserwisy backendowe zbudowano z użyciem frameworka \textit{Quarkus} skompilowanego do natywnych plików wykonywalnych za pomocą \textit{GraalVM Native Image} (kompilacja \textit{Ahead-of-Time}, AOT). W trybie natywnym Quarkus analizuje ścieżki wykonania kodu w czasie kompilacji i wyklucza nieużywane klasy, co skutkuje:
 \begin{itemize}
     \item \textbf{Błyskawicznym startem} -- aplikacja jest gotowa do obsługi żądań w czasie poniżej 100 ms, co skraca czas wznowienia po awarii i przyspiesza skalowanie poziome w Kubernetes.
-    \item \textbf{Niskim zużyciem pamięci} -- brak środowiska uruchomieniowego JVM zmniejsza footprint kontenera, co bezpośrednio przekłada się na efektywność kosztową w środowiskach chmurowych.
-    \item \textbf{Minimalnym obrazem kontenera} -- obraz oparty na \texttt{ubi-minimal} zawiera wyłącznie system operacyjny i skompilowany binarny, bez JDK ani bibliotek środowiska uruchomieniowego.
+    \item \textbf{Niskim zużyciem pamięci} -- brak środowiska uruchomieniowego JVM zmniejsza ślad pamięciowy kontenera, co bezpośrednio przekłada się na opłacalność w środowiskach chmurowych.
+    \item \textbf{Minimalnym obrazem kontenera} -- obraz oparty na \texttt{ubi-minimal} zawiera wyłącznie system operacyjny i skompilowany plik binarny, bez JDK ani bibliotek środowiska uruchomieniowego.
 \end{itemize}
 Wstrzykiwanie zależności realizowane jest przez mechanizm CDI Quarkusa (\textit{ArC}), który w trybie AOT przetwarza wszystkie adnotacje w czasie kompilacji, a nie w czasie uruchomienia.
 
@@ -27,8 +27,8 @@ Wstrzykiwanie zależności realizowane jest przez mechanizm CDI Quarkusa (\texti
 \textbf{Dobre nawyki:}
 \begin{itemize}
   \item \textbf{Testowanie natywne (\texttt{@NativeImageTest}):} Testy w trybie natywnym weryfikują, czy optymalizacje AOT nie usunęły elementów wymaganych przez refleksję.
-  \item \textbf{Dev Services:} Automatyczne podnoszenie baz danych i brokerów w kontenerach podczas developmentu zapewnia spójność środowisk u wszystkich programistów.
-  \item \textbf{Umiar w refleksji:} Należy preferować rozwiązania wspierające indeksowanie Jandex i unikać bibliotek intensywnie korzystających z dynamicznego ładowania klas.
+  \item \textbf{Dev Services:} Automatyczne podnoszenie baz danych i brokerów w kontenerach podczas prac programistycznych zapewnia spójność środowisk u wszystkich programistów.
+  \item \textbf{Umiar w refleksji:} Należy preferować rozwiązania obsługujące indeksowanie Jandex i unikać bibliotek intensywnie korzystających z dynamicznego ładowania klas.
   \item \textbf{Continuous Testing:} Tryb ciągłego testowania w konsoli zapewnia natychmiastową informację zwrotną podczas pisania kodu.
 \end{itemize}
 
@@ -53,7 +53,7 @@ Zgodnie z decyzją \textit{ADR-0014}, warstwę prezentacji zbudowano z użyciem 
 
 \begin{techcard}{Vue~3}
 
-\textbf{Opis:} Vue~3 to progresywny framework JavaScript do budowania interfejsów użytkownika. Wprowadza \textit{Composition API} -- umożliwiające organizowanie logiki komponentu według funkcjonalności. Projekt kompilowany jest narzędziem Vite, które wykorzystuje natywne moduły ES podczas developmentu i Rollup podczas produkcyjnego budowania.
+\textbf{Opis:} Vue~3 to progresywny framework JavaScript do budowania interfejsów użytkownika. Wprowadza \textit{Composition API} -- umożliwiające organizowanie logiki komponentu według funkcjonalności. Projekt kompilowany jest narzędziem Vite, które wykorzystuje natywne moduły ES podczas prac programistycznych i Rollup podczas produkcyjnego budowania.
 
 \textbf{Dobre nawyki:}
 \begin{itemize}

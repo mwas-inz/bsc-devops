@@ -4,7 +4,7 @@ Ostatni etap pętli DevOps zamyka cykl, dostarczając informacji zwrotnej o dzia
 \subsubsection{Standard zbierania danych: OpenTelemetry}
 Zgodnie z decyzją \textit{ADR-0006}, w całym projekcie zaimplementowano standard \textbf{OpenTelemetry}.
 \begin{itemize}
-    \item \textbf{Jednolita instrumentacja:} Zamiast oddzielnych bibliotek dla logów, metryk i trace'ów, aplikacje wykorzystują ujednolicony protokół OTLP.
+    \item \textbf{Jednolita instrumentacja:} Zamiast oddzielnych bibliotek dla logów, metryk i śladów, aplikacje wykorzystują ujednolicony protokół OTLP.
     \item \textbf{OTel Collector:} Centralnym punktem zbierania danych jest komponent Collector, który odbiera telemetrię z aplikacji, przetwarza ją i wysyła do odpowiednich systemów bazodanowych. Pozwala to na całkowite odseparowanie aplikacji od konkretnych dostawców narzędzi monitorujących.
 \end{itemize}
 
@@ -14,7 +14,7 @@ Jako systemy przechowywania i wizualizacji danych wybrano stos \textbf{LGTM} (AD
     \item \textbf{Prometheus (Metrics):} Gromadzi dane numeryczne o wydajności systemu i aplikacji.
     \item \textbf{Loki (Logs):} Przechowuje logi aplikacji w sposób zoptymalizowany pod kątem Kubernetes (wykorzystując te same etykiety co system orkiestracji).
     \item \textbf{Tempo (Traces):} Umożliwia śledzenie rozproszonych zapytań między mikroserwisami, co jest kluczowe w diagnozowaniu problemów wydajnościowych w architekturze rozproszonej.
-    \item \textbf{Grafana (Visualization):} Stanowi wspólny interfejs (\textit{Single Pane of Glass}) dla wszystkich powyższych narzędzi. Pozwala na tworzenie interaktywnych pulpitów sterowniczych i korelację danych (np. przejście od wykresu błędu do logów konkretnego kontenera).
+    \item \textbf{Grafana (Visualization):} Stanowi wspólny interfejs (\textit{Single Pane of Glass}) dla wszystkich powyższych narzędzi. Pozwala na tworzenie interaktywnych pulpitów (dashboardów) i korelację danych (np. przejście od wykresu błędu do logów konkretnego kontenera).
 \end{itemize}
 
 \subsubsection{Stosowane technologie -- karty referencyjne}
@@ -29,7 +29,7 @@ Poniższe karty zbierają kluczowe informacje o narzędziach tworzących stos ob
   \item \textbf{Processor \texttt{batch}:} Grupowanie danych przed wysłaniem do backendów redukuje liczbę połączeń sieciowych i obciążenie CPU po obu stronach.
   \item \textbf{Trzy niezależne pipeline'y:} Osobne pipeline'y dla logów, metryk i śladów umożliwiają niezależne skalowanie i wyłączanie poszczególnych kanałów.
   \item \textbf{Processor \texttt{resource}:} Wzbogacanie telemetrii o atrybuty środowiskowe (np. \texttt{deployment.environment}) na poziomie Collectora eliminuje konieczność kodowania ich w każdej aplikacji osobno.
-  \item \textbf{DaemonSet w Kubernetes:} Collector działa najczęściej jako jeden agent per węzeł klastra, opcjonalnie z centralnym gateway'em agregującym dane z agentów.
+  \item \textbf{DaemonSet w Kubernetes:} Collector działa najczęściej jako jeden agent na węzeł klastra, opcjonalnie z centralnym gateway'em agregującym dane z agentów.
 \end{itemize}
 
 \textbf{Rola w projekcie:} OTel Collector jest centralnym węzłem potoku telemetrii. Aplikacja Java z OTel Java Agent wysyła logi, metryki i ślady na jeden adres (Collector), który kieruje je dalej do Loki, Prometheus i Tempo, zapewniając całkowitą niezależność aplikacji od konkretnych narzędzi monitoringowych.
@@ -83,13 +83,13 @@ service:
 
 \begin{techcard}{Prometheus}
 
-\textbf{Opis:} Prometheus to system monitorowania i baza danych szeregów czasowych (\textit{time-series database}), będący projektem CNCF o statusie \textit{graduated}. Zbiera metryki poprzez aktywne odpytywanie (\textit{scraping}) endpointów HTTP eksponowanych przez aplikacje i infrastrukturę. Dane odpytywane są językiem PromQL.
+\textbf{Opis:} Prometheus to system monitorowania i baza danych szeregów czasowych (\textit{time-series database}), będący projektem CNCF o statusie \textit{graduated}. Zbiera metryki poprzez aktywne odpytywanie (\textit{scraping}) endpointów HTTP eksponowanych przez aplikacje i infrastrukturę. Dane odpytuje się za pomocą języka PromQL.
 
 \textbf{Dobre nawyki:}
 \begin{itemize}
   \item \textbf{Metoda RED:} Dla każdego serwisu definiować co najmniej: \textit{rate} (żądania/s), \textit{errors} (odsetek błędów) i \textit{duration} (czas odpowiedzi) -- minimum pozwalające ocenić stan usługi.
   \item \textbf{Konwencje nazewnictwa:} Notacja \texttt{snake\_case}; metryki licznikowe kończą się na \texttt{\_total} (np. \texttt{http\_requests\_total}).
-  \item \textbf{Unikanie wysokiej kardynalności etykiet:} Etykiety z dużą liczbą unikalnych wartości (URL z parametrami, ID użytkownika) powodują eksplozję serii czasowych i degradację wydajności.
+  \item \textbf{Unikanie wysokiej kardynalności etykiet:} Etykiety z dużą liczbą unikalnych wartości (URL z parametrami, ID użytkownika) powodują lawinowy wzrost liczby serii czasowych i spadek wydajności.
   \item \textbf{Service Discovery w Kubernetes:} Automatyczne wykrywanie podów z adnotacją \texttt{prometheus.io/scrape: "true"} eliminuje ręczną aktualizację konfiguracji przy każdym nowym serwisie.
 \end{itemize}
 
@@ -127,7 +127,7 @@ scrape_configs:
 \textbf{Dobre nawyki:}
 \begin{itemize}
   \item \textbf{Ograniczanie kardynalności etykiet:} Etykiety o wysokiej liczbie unikalnych wartości (np. \texttt{user\_id}, \texttt{request\_id}) drastycznie zwiększają zużycie pamięci -- powinny trafiać do treści logu, nie do etykiet.
-  \item \textbf{Strukturalne logowanie (JSON):} Logi w formacie JSON umożliwiają filtrowanie w Grafanie po zawartości (np. \texttt{| json | level="error"}).
+  \item \textbf{Ustrukturyzowane logowanie (JSON):} Logi w formacie JSON umożliwiają filtrowanie w Grafanie po zawartości (np. \texttt{| json | level="error"}).
   \item \textbf{Spójne etykiety z Prometheusem:} Stosowanie tych samych nazw etykiet (\texttt{job}, \texttt{instance}, \texttt{namespace}) ułatwia korelację logów z metrykami.
 \end{itemize}
 

@@ -9,7 +9,7 @@ W ramach części praktycznej z powodzeniem zaimplementowano kompletną ścieżk
 Podczas realizacji projektu zidentyfikowano kilka kluczowych wyzwań, które są charakterystyczne dla współczesnych systemów rozproszonych:
 \begin{itemize}
     \item \textbf{Konfiguracja GitOps:} Wdrożenie narzędzia ArgoCD wymagało precyzyjnego zdefiniowania struktury repozytorium z manifestami. Największym wyzwaniem okazało się zarządzanie sekretami oraz synchronizacja stanów między wieloma mikroserwisami, co wymagało zastosowania wzorca \textit{App of Apps}.
-    \item \textbf{Złożoność stosu Observability:} Implementacja standardu OpenTelemetry oraz stosu LGTM (Loki, Grafana, Tempo, Prometheus) dostarczyła potężnych narzędzi diagnostycznych, ale wiązała się z wysokim kosztem konfiguracji. Poprawne skorelowanie logów z trace'ami wymagało precyzyjnego zarządzania kontekstem (\textit{Context Propagation}) w warstwie aplikacji i kolektora OTel.
+    \item \textbf{Złożoność stosu Observability:} Implementacja standardu OpenTelemetry oraz stosu LGTM (Loki, Grafana, Tempo, Prometheus) dostarczyła potężnych narzędzi diagnostycznych, ale wiązała się z wysokim kosztem konfiguracji. Poprawne skorelowanie logów ze śladami wymagało precyzyjnego zarządzania kontekstem (\textit{Context Propagation}) w warstwie aplikacji i kolektora OTel.
     \item \textbf{Zasobożerność środowiska:} Uruchomienie pełnego stosu infrastrukturalnego (Kubernetes, bazy danych, monitoring) w środowisku lokalnym stawia wysokie wymagania sprzętowe, co wymuszało agresywną optymalizację limitów zasobów dla poszczególnych kontenerów.
 \end{itemize}
 
@@ -23,4 +23,4 @@ Dalszy rozwój systemu mógłby koncentrować się na następujących obszarach:
     \item \textbf{Serverless:} Eksperymenty z architekturą bezserwerową (np. Knative) w celu dalszej optymalizacji zużycia zasobów w momentach niskiego obciążenia systemu.
 \end{itemize}
 
-Podsumowując, przedstawione w pracy podejście inżynierskie stanowi solidną bazę do budowy i utrzymania nowoczesnych aplikacji SaaS, łącząc akademicką rygorystyczność z najlepszymi praktykami branżowymi.
+Podsumowując, przedstawione w pracy podejście inżynierskie stanowi solidną bazę do budowy i utrzymania nowoczesnych aplikacji SaaS, łącząc rygor akademicki z najlepszymi praktykami branżowymi.

@@ -5,7 +5,7 @@ Faza wydania (\textit{Release}) koncentruje się na bezpiecznym przechowywaniu a
 Jako centralne repozytorium obrazów kontenerowych wykorzystano platformę \textbf{Docker Hub}.
 \begin{itemize}
     \item \textbf{Rola w projekcie:} Po pomyślnym zakończeniu etapu budowania i testowania, obrazy mikroserwisów są wysyłane (\textit{push}) do prywatnych lub publicznych repozytoriów w Docker Hub. Każdy obraz jest oznaczony unikalnym tagiem (np. skrótem \textit{commit SHA} lub numerem wersji semantycznej), co zapewnia pełną identyfikowalność.
-    \item \textbf{Uzasadnienie:} Docker Hub jest natywnie wspierany przez większość narzędzi CI/CD oraz klastry Kubernetes, co upraszcza proces pobierania obrazów podczas wdrożenia.
+    \item \textbf{Uzasadnienie:} Docker Hub jest natywnie obsługiwany przez większość narzędzi CI/CD oraz klastry Kubernetes, co upraszcza proces pobierania obrazów podczas wdrożenia.
 \end{itemize}
 
 \subsubsection{Pakietowanie dla Kubernetes: Helm}
@@ -18,7 +18,7 @@ Zarządzanie manifestami YAML dla wielu mikroserwisów staje się trudne bez odp
 \textbf{Dobre nawyki:}
 \begin{itemize}
   \item \textbf{Umbrella chart:} Grupowanie powiązanych mikroserwisów w jeden chart pozwala wdrożyć cały stos jednym poleceniem \texttt{helm install}, zachowując spójność wersji wszystkich komponentów.
-  \item \textbf{Parametryzacja przez values:} Wartości specyficzne dla środowiska (tagi obrazów, liczba replik, limity zasobów) powinny być wydzielone do dedykowanych plików \texttt{values-prod.yaml}, a nie zakodowane na sztywno w szablonach.
+  \item \textbf{Parametryzacja przez values:} Wartości specyficzne dla środowiska (tagi obrazów, liczba replik, limity zasobów) powinny być wydzielone do osobnych plików \texttt{values-prod.yaml}, a nie zakodowane na sztywno w szablonach.
   \item \textbf{Wersjonowanie releaseów:} Każda zmiana wprowadzona przez \texttt{helm upgrade} tworzy nową rewizję. Polecenie \texttt{helm rollback} natychmiast przywraca poprzedni stan klastra bez ręcznej edycji manifestów.
   \item \textbf{Helpery szablonów (\texttt{\_helpers.tpl}):} Wspólne etykiety i selektory należy definiować jako nazwane szablony w \texttt{\_helpers.tpl}, aby zapewnić spójność i uniknąć powielania kodu YAML.
 \end{itemize}
