@@ -1,0 +1,29 @@
+{{- if .Values.rbac.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "bsc-devops.name" . }}-app
+  namespace: {{ include "bsc-devops.namespace" . }}
+  labels:
+    {{- include "bsc-devops.labels" . | nindent 4 }}
+rules:
+  {{- toYaml .Values.rbac.rules | nindent 2 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "bsc-devops.name" . }}-app
+  namespace: {{ include "bsc-devops.namespace" . }}
+  labels:
+    {{- include "bsc-devops.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "bsc-devops.name" . }}-app
+subjects:
+  {{- range list "users-sa" "tasks-sa" "task-archiver-sa" "frontend-sa" "postgres-sa" "pulsar-sa" "jaeger-sa" }}
+  - kind: ServiceAccount
+    name: {{ . }}
+    namespace: {{ include "bsc-devops.namespace" $ }}
+  {{- end }}
+{{- end }}

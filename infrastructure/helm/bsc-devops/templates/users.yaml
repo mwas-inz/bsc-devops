@@ -6,6 +6,8 @@ metadata:
   namespace: {{ include "bsc-devops.namespace" . }}
   labels:
     {{- include "bsc-devops.labels" . | nindent 4 }}
+automountServiceAccountToken: false
+{{- include "bsc-devops.imagePullSecrets" . | nindent 0 }}
 ---
 apiVersion: apps/v1
 kind: Deployment
