@@ -1,9 +1,9 @@
 \subsection{Architektura systemu}
 Projektowany system to „Portal do zarządzania zadaniami", który służy jako poligon doświadczalny dla wdrażanych praktyk inżynierskich. System został zaprojektowany w architekturze mikroserwisowej, co pozwala na pełną demonstrację procesów DevOps w środowisku rozproszonym, w tym niezależnego budowania, testowania i wdrażania poszczególnych komponentów.
 
-W warstwie technologicznej zdecydowano się na wykorzystanie ekosystemu Java z frameworkiem \textit{Quarkus}. Wybór ten podyktowany był charakterem środowiska uruchomieniowego, jakim jest \textit{Kubernetes}. Quarkus, będący rozwiązaniem \textit{Kubernetes-native}, pozwala na znaczną optymalizację zużycia zasobów (pamięci RAM i procesora) oraz skrócenie czasu uruchamiania aplikacji dzięki kompilacji przed czasem (\textit{Ahead-of-Time} - AOT). Jest to kluczowe w architekturze mikroserwisowej, gdzie efektywność kosztowa i szybkość skalowania są priorytetem. Aplikacja została zaprojektowana zgodnie z wytycznymi \textit{Twelve-Factor App}, co gwarantuje jej pełną przenośność.
+W warstwie technologicznej zdecydowano się na wykorzystanie ekosystemu Java (ADR-0003) z frameworkiem \textit{Quarkus}. Wybór ten podyktowany był charakterem środowiska uruchomieniowego, jakim jest \textit{Kubernetes}. Quarkus, będący rozwiązaniem \textit{Kubernetes-native}, pozwala na znaczną optymalizację zużycia zasobów (pamięci RAM i procesora) oraz skrócenie czasu uruchamiania aplikacji dzięki kompilacji z wyprzedzeniem (\textit{Ahead-of-Time}, AOT). Jest to kluczowe w architekturze mikroserwisowej, gdzie opłacalność i szybkość skalowania są priorytetem. Aplikacja została zaprojektowana zgodnie z wytycznymi \textit{Twelve-Factor App}, co gwarantuje jej pełną przenośność.
 
-Głównym środowiskiem uruchomieniowym wykorzystywanym w części praktycznej jest lokalny klaster Kubernetes (narzędzia \textit{kind} lub \textit{minikube}). Takie podejście pozwala na pełną reprodukowalność środowiska produkcyjnego na maszynie deweloperskiej, co jest zgodne z ideą \textit{Cloud Native}. Mimo skupienia na środowisku lokalnym, wszystkie zastosowane narzędzia i konfiguracje (np. Terraform, Helm, manifesty K8s) są projektowane w sposób \textit{cloud-agnostic}, umożliwiający ich przeniesienie do publicznych dostawców chmurowych (np. AWS).
+Głównym środowiskiem uruchomieniowym wykorzystywanym w części praktycznej jest lokalny klaster Kubernetes (narzędzia \textit{kind} lub \textit{minikube}). Takie podejście pozwala na pełną odtwarzalność środowiska produkcyjnego na maszynie deweloperskiej, co jest zgodne z ideą \textit{Cloud Native}. Mimo skupienia na środowisku lokalnym, wszystkie zastosowane narzędzia i konfiguracje (np. Terraform, Helm, manifesty K8s) są projektowane w sposób \textit{cloud-agnostic}, umożliwiający ich przeniesienie do publicznych dostawców chmurowych (np. AWS).
 
 \subsection{Struktura części praktycznej}
 Opis części praktycznej został ustrukturyzowany w sposób odzwierciedlający klasyczną pętlę cyklu życia oprogramowania (ang. \textit{DevOps Lifecycle}). Każdy z etapów pętli — od planowania po monitorowanie — został szczegółowo omówiony w kontekście wybranych narzędzi i metodologii.
@@ -15,6 +15,6 @@ Przyjęto formę opisu opartą na tzw. „kartach narzędzi". Dla każdego z klu
     \item rolę narzędzia w całym ekosystemie oraz dobre praktyki inżynierskie zastosowane przy jego konfiguracji.
 \end{itemize}
 
-Dzięki takiej strukturze, łatwo zrozumieć, jak poszczególne narzędzia współgrają ze sobą w ramach kompleksowego procesu dostarczania oprogramowania, a także jakie decyzje architektoniczne i inżynierskie stoją za ich implementacją.
+Dzięki takiej strukturze można łatwo zrozumieć, jak poszczególne narzędzia współgrają ze sobą w ramach kompleksowego procesu dostarczania oprogramowania, a także jakie decyzje architektoniczne i inżynierskie stoją za ich implementacją.
 
 Poniższe sekcje szczegółowo opisują realizację kolejnych etapów pętli DevOps.

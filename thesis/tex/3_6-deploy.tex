@@ -2,17 +2,17 @@
 Faza wdrożenia (\textit{Deploy}) odpowiada za przeniesienie artefaktów na środowisko uruchomieniowe oraz zapewnienie odpowiedniej infrastruktury.
 
 \subsubsection{Środowisko uruchomieniowe: Kubernetes (k3d)}
-Głównym środowiskiem uruchomieniowym mikroserwisów jest klaster \textbf{Kubernetes} (K8s) — otwartoźródłowy system automatyzacji wdrażania, skalowania i zarządzania skonteneryzowanymi aplikacjami. Pełni rolę orkiestratora: dba o to, aby zdefiniowana liczba instancji aplikacji (podów) była zawsze uruchomiona i dostępna, a w przypadku awarii automatycznie je restartuje. Lokalne klastry Kubernetes oferują niemal pełną kompatybilność z produkcyjnymi klastrami chmurowymi (EKS, GKE), co pozwala testować manifesty, polityki sieciowe i mechanizmy skalowania bezpośrednio na maszynie programisty.
+Zgodnie z decyzją \textit{ADR-0002}, głównym środowiskiem uruchomieniowym mikroserwisów jest klaster \textbf{Kubernetes} (K8s) — system \textit{open-source} do automatyzacji wdrażania, skalowania i zarządzania skonteneryzowanymi aplikacjami. Pełni rolę orkiestratora: dba o to, aby zdefiniowana liczba instancji aplikacji (podów) była zawsze uruchomiona i dostępna, a w przypadku awarii automatycznie je restartuje. Lokalne klastry Kubernetes oferują niemal pełną kompatybilność z produkcyjnymi klastrami chmurowymi (EKS, GKE), co pozwala testować manifesty, polityki sieciowe i mechanizmy skalowania bezpośrednio na maszynie programisty.
 
 \begin{techcard}{Kubernetes}
 
-\textbf{Opis:} Kubernetes (K8s) to otwartoźródłowy system automatyzacji wdrażania, skalowania i zarządzania skonteneryzowanymi aplikacjami. Pełni rolę orkiestratora, dbając o to, aby zdefiniowana liczba instancji aplikacji (podów) była zawsze uruchomiona i dostępna dla użytkowników.
+\textbf{Opis:} Kubernetes (K8s) to system \textit{open-source} do automatyzacji wdrażania, skalowania i zarządzania skonteneryzowanymi aplikacjami. Pełni rolę orkiestratora, dbając o to, aby zdefiniowana liczba instancji aplikacji (podów) była zawsze uruchomiona i dostępna dla użytkowników.
 
 \textbf{Dobre nawyki:}
 \begin{itemize}
   \item \textbf{Zarządzanie zasobami:} Obowiązkowe definiowanie \texttt{requests} (zasoby gwarantowane) i \texttt{limits} (maksymalne zużycie) zapobiega wzajemnemu zagłuszaniu się usług (efekt \textit{noisy neighbor}).
   \item \textbf{Sondy stanu podów:} \texttt{livenessProbe} (czy kontener żyje) oraz \texttt{readinessProbe} (czy może przyjmować ruch) są kluczowe dla samonaprawialności klastra i bezprzestojowych wdrożeń (\textit{Rolling Updates}).
-  \item \textbf{Podejście deklaratywne (GitOps):} Konfiguracja przechowywana w repozytorium i nakładana przez \texttt{kubectl apply}, a nie komendy imperatywne.
+  \item \textbf{Podejście deklaratywne (GitOps):} Konfiguracja przechowywana w repozytorium i nakładana przez \texttt{kubectl apply}, a nie polecenia imperatywne.
   \item \textbf{Network Policies:} Domyślne ograniczanie komunikacji między podami do niezbędnego minimum -- zasada \textit{Zero Trust}.
 \end{itemize}
 
@@ -61,7 +61,7 @@ spec:
             port: 8080
 \end{lstlisting}
 
-W części praktycznej lokalny klaster uruchamia narzędzie \textbf{k3d} — cienka warstwa opakowująca \textbf{k3s} (certyfikowaną przez CNCF dystrybucję Kubernetes) działającą wewnątrz kontenerów Docker. Kluczowym wymaganiem było dotarcie do Ingressu bezpośrednio z hosta bez dodatkowych komend. Alternatywa — \textbf{minikube} z driverem Docker — wymaga uruchomienia \texttt{minikube tunnel} w osobnym terminalu, by ruch z hosta docierał do zasobów Ingress. k3d rozwiązuje ten problem przez mapowanie portów już na etapie tworzenia klastra:
+Zgodnie z decyzją \textit{ADR-0015}, w części praktycznej lokalny klaster uruchamia narzędzie \textbf{k3d} — cienka warstwa opakowująca \textbf{k3s} (certyfikowaną przez CNCF dystrybucję Kubernetes) działającą wewnątrz kontenerów Docker. Kluczowym wymaganiem było dotarcie do Ingressu bezpośrednio z hosta bez dodatkowych komend. Alternatywa — \textbf{minikube} ze sterownikiem Docker — wymaga uruchomienia \texttt{minikube tunnel} w osobnym terminalu, by ruch z hosta docierał do zasobów Ingress. k3d rozwiązuje ten problem przez mapowanie portów już na etapie tworzenia klastra:
 
 \begin{lstlisting}[language=bash, caption={Tworzenie klastra k3d z mapowaniem portów Ingress (infrastructure/k3d/cluster-create.sh)}, label={lst:k3d-create}]
 k3d cluster create bsc-devops \
@@ -90,7 +90,7 @@ Powyższe polecenie mapuje port 80 hosta na load balancer k3d, dzięki czemu ka�
   \item \textbf{Wielowęzłowość:} Dla testów zbliżonych do produkcji warto dodać agentów (\texttt{--agents 2}), by sprawdzić zachowanie schedulera przy ograniczeniach \texttt{affinity}/\texttt{tolerations}.
 \end{itemize}
 
-\textbf{Rola w projekcie:} k3d stanowi lokalne środowisko deweloperskie i demonstracyjne dla całego stosu mikroserwisów. Zastąpił minikube ze względu na natywne mapowanie portów Ingress (brak \texttt{minikube tunnel}), czas startu klastra poniżej 30 sekund oraz pełną skryptowalność tworzenia klastra jedną komendą CLI.
+\textbf{Rola w projekcie:} k3d stanowi lokalne środowisko deweloperskie i demonstracyjne dla całego stosu mikroserwisów. Zastąpił minikube ze względu na natywne mapowanie portów Ingress (brak \texttt{minikube tunnel}), czas startu klastra poniżej 30 sekund oraz pełną skryptowalność tworzenia klastra jednym poleceniem CLI.
 
 \end{techcard}
 
@@ -106,9 +106,9 @@ Model \textbf{pull-based} odwraca klasyczny przepływ CI/CD: zamiast procesu akt
 \textbf{Dobre nawyki:}
 \begin{itemize}
   \item \textbf{Automated sync z \texttt{selfHeal}:} Włączenie \texttt{selfHeal: true} gwarantuje, że każda ręczna zmiana w klastrze zostanie natychmiast cofnięta -- klaster jest zawsze zgodny z tym, co opisuje Git.
-  \item \textbf{\texttt{prune: true} z rozwagą:} Automatyczne usuwanie zasobów odłączonych od charta skraca dług konfiguracyjny, ale wymaga pewności, że wszystkie zasoby są zarządzane przez ArgoCD.
-  \item \textbf{Application CRD w Git:} Plik \texttt{gitops/application.yaml} powinien być przechowywany w repozytorium obok charta -- cały opis wdrożenia jest wówczas wersjonowany i audytowalny.
-  \item \textbf{Pinowanie \texttt{targetRevision}:} Używanie konkretnego numeru wersji charta (nie \texttt{latest}) zapewnia powtarzalność wdrożeń i pełną historię zmian.
+  \item \textbf{\texttt{prune: true} z rozwagą:} Automatyczne usuwanie zasobów odłączonych od charta ogranicza dług konfiguracyjny, ale wymaga pewności, że wszystkie zasoby są zarządzane przez ArgoCD.
+  \item \textbf{Application CRD w Git:} Plik \texttt{gitops/application.yaml} powinien być przechowywany w repozytorium obok charta -- cały opis wdrożenia jest wówczas wersjonowany i podlega audytowi.
+  \item \textbf{Przypinanie \texttt{targetRevision}:} Używanie konkretnego numeru wersji charta (nie \texttt{latest}) zapewnia powtarzalność wdrożeń i pełną historię zmian.
 \end{itemize}
 
 \textbf{Rola w projekcie:} ArgoCD zamyka pętlę CI/CD: GitHub Actions buduje obraz, publikuje chart do GHCR, a ArgoCD automatycznie wykrywa nową wersję charta i synchronizuje klaster k3d. Zasób \texttt{Application} wskazuje na chart \texttt{bsc-devops} w GHCR i wskazuje na lokalny klaster k3d. Wbudowany interfejs webowy dostarcza wizualizację drzewa zasobów przydatną jako materiał ilustracyjny pracy.
@@ -143,7 +143,7 @@ spec:
 
 Zasób \texttt{Application} (listing~\ref{lst:argocd-application}) skupia w jednym pliku YAML trzy elementy niezbędne do opisania pełnego cyklu wdrożenia.
 
-Sekcja \texttt{source} wskazuje chart \texttt{bsc-devops} w rejestrze OCI GHCR -- pole \texttt{repoURL} przyjmuje adres rejestru, nie repozytorium Git, gdyż chart jest publikowany jako artefakt OCI przez rurociąg CD (listing~\ref{lst:cd-helm}). Wersja \texttt{targetRevision: "0.5.0"} jest jawnie przypięta: ten sam commit Git zawsze wdroży identyczną wersję aplikacji, co zapewnia pełną powtarzalność i audytowalność wdrożeń.
+Sekcja \texttt{source} wskazuje chart \texttt{bsc-devops} w rejestrze OCI GHCR -- pole \texttt{repoURL} przyjmuje adres rejestru, nie repozytorium Git, gdyż chart jest publikowany jako artefakt OCI przez łańcuch CD (listing~\ref{lst:cd-helm}). Wersja \texttt{targetRevision: "0.5.0"} jest jawnie przypięta: ten sam commit Git zawsze wdroży identyczną wersję aplikacji, co zapewnia pełną powtarzalność wdrożeń i możliwość ich audytu.
 
 Sekcja \texttt{destination} wskazuje klaster lokalny przez wewnętrzny adres serwera API (\texttt{kubernetes.default.svc}), eliminując potrzebę rejestrowania zewnętrznych klastrów w ArgoCD.
 
@@ -155,7 +155,7 @@ Model GitOps wymaga, aby wszystkie zasoby konfiguracyjne -- łącznie z sekretam
 
 \begin{techcard}{Sealed Secrets}
 
-\textbf{Opis:} Bitnami Sealed Secrets to mechanizm bezpiecznego przechowywania sekretów Kubernetes w repozytorium Git. Narzędzie \texttt{kubeseal} szyfruje zasób \texttt{Secret} kluczem publicznym kontrolera klastra, tworząc zasób \texttt{SealedSecret} bezpieczny do commitowania. Kontroler w przestrzeni \texttt{kube-system} odszyfrowuje go kluczem prywatnym i materializuje oryginalny \texttt{Secret} w docelowej przestrzeni nazw -- bez żadnej interwencji operatora.
+\textbf{Opis:} Bitnami Sealed Secrets to mechanizm bezpiecznego przechowywania sekretów Kubernetes w repozytorium Git. Narzędzie \texttt{kubeseal} szyfruje zasób \texttt{Secret} kluczem publicznym kontrolera klastra, tworząc zasób \texttt{SealedSecret} bezpieczny do commitowania. Kontroler w przestrzeni \texttt{kube-system} odszyfrowuje go kluczem prywatnym i odtwarza oryginalny \texttt{Secret} w docelowej przestrzeni nazw -- bez żadnej interwencji operatora.
 
 \textbf{Dobre nawyki:}
 \begin{itemize}

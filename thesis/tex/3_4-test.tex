@@ -35,7 +35,7 @@ class UserResourceTest {
 Kluczową cechą ekosystemu Quarkusa jest mechanizm \textbf{Dev Services}: jeśli w konfiguracji aplikacji nie podano jawnego adresu URL bazy danych, Quarkus automatycznie uruchamia kontener PostgreSQL przy użyciu biblioteki \textit{Testcontainers}. Programista nie musi konfigurować środowiska testowego ani utrzymywać lokalnej instancji bazy -- wystarczy wywołanie \texttt{./gradlew test}. Testy zawsze działają na izolowanej, świeżej instancji bazy danych, co eliminuje klasyczny problem współdzielonego stanu testowego.
 
 \textbf{Izolacja transakcyjna -- \texttt{@TestTransaction}:}
-Dla testów weryfikujących logikę perzystencji stosowana jest adnotacja \texttt{@TestTransaction}: każdy test jest owijany w transakcję bazodanową, która po jego zakończeniu jest automatycznie wycofywana (\textit{rollback}). Zapewnia to pełną izolację między testami bez konieczności ręcznego czyszczenia stanu bazy. Wzorzec ten zastosowano w testach konsumenta zdarzeń mikroserwisu \textit{tasks}:
+Dla testów weryfikujących logikę utrwalania danych stosowana jest adnotacja \texttt{@TestTransaction}: każdy test jest wykonywany w ramach transakcji bazodanowej, która po jego zakończeniu jest automatycznie wycofywana (\textit{rollback}). Zapewnia to pełną izolację między testami bez konieczności ręcznego czyszczenia stanu bazy. Wzorzec ten zastosowano w testach konsumenta zdarzeń mikroserwisu \textit{tasks}:
 
 \begin{lstlisting}[language=java, caption={Test konsumenta zdarzeń z izolacją @TestTransaction (apps/tasks/src/test/.../UserEventConsumerTest.java)}, label={lst:test-transaction}]
 @QuarkusTest
@@ -68,9 +68,9 @@ class UserEventConsumerTest {
 Użycie testów w łańcuchu CI na początku jest celowe i ma bezpośredni wpływ na efektywność procesu (listing~\ref{lst:github-actions-build}). Krok \texttt{Run tests} poprzedza budowanie natywnego obrazu kontenera (\texttt{imageBuild}), które korzysta z kompilatora GraalVM AOT i trwa kilkanaście minut. Niepowodzenie testu natychmiast przerywa łańcuch -- bez zbędnego zużycia zasobów CI na kosztowną kompilację natywną.
 
 \begin{itemize}
-    \item \textbf{Zakres:} Testy pokrywają kluczowe komponenty domeny (logika REST, perzystencja przez Panache) oraz integrację z bazą danych uruchamianą przez Dev Services, bez konieczności mocków.
+    \item \textbf{Zakres:} Testy pokrywają kluczowe komponenty domeny (logika REST, utrwalanie danych przez Panache) oraz integrację z bazą danych uruchamianą przez Dev Services, bez konieczności mocków.
     \item \textbf{Anulowanie przestarzałych uruchomień:} Konfiguracja w sekcji \texttt{concurrency} z ustawieniem \texttt{cancel-in-progress: true} gwarantuje, że nowe uruchomienie łańcucha dla tej samej gałęzi automatycznie anuluje poprzednie, wciąż aktywne uruchomienie. Eliminuje to sytuacje, w których wyniki przestarzałych łańcuchów blokują lub dezorientują recenzentów kodu.
-    \item \textbf{Izolacja per serwis:} Każdy mikroserwis posiada oddzielny plik workflow uruchamiany wyłącznie przy zmianach w jego katalogu. Testy serwisu \textit{users} nie są uruchamiane przy zmianie kodu \textit{tasks} -- co skraca czas informacji zwrotnej i obniża koszty CI.
+    \item \textbf{Izolacja na poziomie serwisu:} Każdy mikroserwis posiada oddzielny plik workflow uruchamiany wyłącznie przy zmianach w jego katalogu. Testy serwisu \textit{users} nie są uruchamiane przy zmianie kodu \textit{tasks} -- co skraca czas informacji zwrotnej i obniża koszty CI.
 \end{itemize}
 
 \subsubsection{Widoczność wyników w procesie Pull Request}
