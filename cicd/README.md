@@ -1,12 +1,22 @@
 # CI/CD
 
-This folder will collect planning notes for continuous integration and continuous delivery.
+CI/CD is implemented with GitHub Actions in `.github/workflows/`.
 
-## To Do
+## Workflows
 
-- Pipeline design ideas
-- Build, test, and release flow notes
-- Environment promotion strategy
-- Source validation on pull requests
-- Container image build and publish flow
-- Deployment automation for Kubernetes targets
+| Workflow | Trigger | Purpose |
+| --- | --- | --- |
+| `ci-users` | push/PR on `apps/users/**` | Build, test, Trivy scan, push image to GHCR, Cosign sign |
+| `ci-tasks` | push/PR on `apps/tasks/**` | Build, test, Trivy scan, push image to GHCR, Cosign sign |
+| `ci-task-archiver` | push/PR on `apps/task-archiver/**` | Build, test, Trivy scan, push image to GHCR, Cosign sign |
+| `ci-frontend` | push/PR on `apps/frontend/**` | Install, lint, test (Vitest), Docker build, push to GHCR |
+| `ci-helm` | push/PR on `infrastructure/helm/**` | `helm lint`, render, `kubeconform` validate, auto-tag `chart-*` |
+| `cd-helm` | push of `chart-*` tag | Package and push OCI chart to GHCR |
+| `release` | push of `*-v*` tag | Retag and Cosign-sign the final release image |
+| `release-please` | push to `main` | Automates changelogs and release PRs |
+| `thesis` | push/PR on `thesis/**` | Compile LaTeX thesis to PDF |
+
+## Image Registry
+
+All container images and the Helm chart are published to GitHub Container Registry (GHCR)
+under `ghcr.io/mwas-inz/`.

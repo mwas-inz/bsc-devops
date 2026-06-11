@@ -1,9 +1,10 @@
 # Diagrams
 
-This folder stores shared architecture and flow diagrams for the thesis and related documentation.
+Shared architecture and flow diagrams for the thesis and related documentation.
 
-## To Do
+Diagram files are not yet committed. Planned content:
 
-- High-level system architecture diagrams
-- Deployment and delivery flow diagrams
+- High-level system architecture
+- Deployment and delivery flow
+- Observability data-flow
 - Supporting visuals for ADRs and thesis chapters
