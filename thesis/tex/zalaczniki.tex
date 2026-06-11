@@ -1,0 +1,290 @@
+\newpage
+
+% =====================================================================
+% Załączniki A–O: Architecture Decision Records (skrócone)
+% Pełne wersje (format MADR) w repozytorium: docs/adr/
+% =====================================================================
+
+\appendix{ADR-0001: Przyjęcie ADR jako narzędzia projektowania i formatu MADR}
+
+\textbf{Status:} zaakceptowany (data: 2026-04-06).
+
+\textbf{Kontekst.} W pracy o tematyce DevOps i SDLC istotne jest udokumentowanie nie tylko stanu końcowego, lecz także uzasadnienia decyzji technicznych. Potrzebny był mechanizm wymuszający podejście „architektura w pierwszej kolejności" oraz przejrzysty ślad decyzyjny na potrzeby oceny akademickiej.
+
+\textbf{Decyzja.} Przyjęto Architecture Decision Records (ADR) w formacie MADR (\textit{Markdown Architectural Decision Records}) jako podstawowe narzędzie sterujące projektem. Każda istotna decyzja jest opisywana w osobnym, wersjonowanym dokumencie.
+
+\textbf{Rozważane alternatywy:} same wiadomości commitów; nieformalna dokumentacja typu wiki.
+
+\textbf{Konsekwencje:}
+\begin{itemize}
+  \item[$+$] każda zmiana architektoniczna ma osobny, wersjonowany zapis,
+  \item[$+$] praca może bezpośrednio cytować ADR-y w uzasadnieniu wyboru rozwiązań,
+  \item[$-$] niewielki narzut procesowy --- dokumentacja musi poprzedzać lub towarzyszyć implementacji.
+\end{itemize}
+
+\appendix{ADR-0002: Wybór Kubernetes jako głównego środowiska uruchomieniowego}
+
+\textbf{Status:} zaakceptowany (data: 2026-04-12).
+
+\textbf{Kontekst.} Demonstracja praktyk DevOps i cloud-native wymaga standardowej, skalowalnej platformy orkiestracji kontenerów, wspierającej konfigurację deklaratywną, samonaprawę oraz bogaty ekosystem narzędzi CI/CD, GitOps i obserwowalności.
+
+\textbf{Decyzja.} Wybrano Kubernetes (K8s) jako de facto standard aplikacji cloud-native, dający abstrakcje niezbędne dla infrastruktury jako kodu i przepływów GitOps oraz przenośność między środowiskiem lokalnym a chmurą.
+
+\textbf{Rozważane alternatywy:} Docker Compose; rozwiązania serverless/FaaS; tradycyjne maszyny wirtualne.
+
+\textbf{Konsekwencje:}
+\begin{itemize}
+  \item[$+$] wysoka zgodność z tematem pracy oraz przenośność między chmurami,
+  \item[$+$] obsługa automatycznych wdrożeń, skalowania i obserwowalności,
+  \item[$-$] większa złożoność i wyższy narzut zasobowy niż w prostszych alternatywach.
+\end{itemize}
+
+\appendix{ADR-0003: Wybór ekosystemu Java/JVM dla backendu}
+
+\textbf{Status:} zaakceptowany (data: 2026-04-12).
+
+\textbf{Kontekst.} Backend wymaga dojrzałego, łatwego w utrzymaniu stosu wspierającego nowoczesne wzorce architektoniczne, konteneryzację i obserwowalność, a zarazem wykorzystującego kompetencje autora.
+
+\textbf{Decyzja.} Wybrano ekosystem Java/JVM ze względu na dojrzałość bibliotek i biegłość autora. Aby sprostać ograniczeniom cloud-native (czas startu, zużycie pamięci), projekt celuje w obrazy natywne (GraalVM, kompilacja z wyprzedzeniem).
+
+\textbf{Rozważane alternatywy:} Go; Node.js (TypeScript); Python.
+
+\textbf{Konsekwencje:}
+\begin{itemize}
+  \item[$+$] maksymalne wykorzystanie kompetencji autora oraz dojrzałych narzędzi DI i testowania,
+  \item[$+$] obrazy natywne dają start poniżej sekundy i niski ślad pamięciowy,
+  \item[$-$] kompilacja natywna zwiększa złożoność i czas łańcucha CI/CD oraz ogranicza refleksję.
+\end{itemize}
+
+\appendix{ADR-0004: Przyjęcie Conventional Commits dla historii zmian}
+
+\textbf{Status:} zaakceptowany (data: 2026-04-21).
+
+\textbf{Kontekst.} Wraz z rozwojem automatyzacji potrzebny był ustandaryzowany, czytelny maszynowo sposób opisu zmian w systemie kontroli wersji, umożliwiający automatyczne generowanie list zmian i wersjonowanie semantyczne.
+
+\textbf{Decyzja.} Przyjęto Conventional Commits --- lekką konwencję nadającą wiadomościom commitów ustrukturyzowaną, czytelną maszynowo formę.
+
+\textbf{Rozważane alternatywy:} commity dowolne; Gitmoji.
+
+\textbf{Konsekwencje:}
+\begin{itemize}
+  \item[$+$] umożliwia automatyczne określanie przyrostu wersji (semver) i generowanie list zmian,
+  \item[$+$] czytelniejsza i przeszukiwalna historia, dobra integracja z CI/CD,
+  \item[$-$] wymaga dyscypliny i narzędzi wymuszających format (linting).
+\end{itemize}
+
+\appendix{ADR-0005: Strategia konteneryzacji --- Dockerfile jako standard budowania}
+
+\textbf{Status:} zaakceptowany (data: 2026-04-26).
+
+\textbf{Kontekst.} Aplikację Java trzeba w powtarzalny sposób pakować w obraz kontenera; istnieją trzy główne podejścia różniące się przejrzystością, kontrolą i zależnościami narzędziowymi, co wpływa na projekt łańcucha CI/CD oraz walor dydaktyczny pracy.
+
+\textbf{Decyzja.} Wybrano Dockerfile ze względu na pełną przejrzystość procesu, status standardu branżowego oraz możliwość jawnego pokazania dobrych praktyk (budowanie wieloetapowe, użytkownik nie-root, kolejność warstw).
+
+\textbf{Rozważane alternatywy:} Jib (wtyczka Gradle/Maven); Paketo Buildpacks (CNCF).
+
+\textbf{Konsekwencje:}
+\begin{itemize}
+  \item[$+$] w pełni jawny, czytelny proces budowania --- zgodny z celem dydaktycznym,
+  \item[$+$] uniwersalny standard bez zależności od wtyczek; natywna dostępność na runnerach GitHub Actions,
+  \item[$-$] ręczne utrzymanie pliku oraz aktualizacja obrazu bazowego pod kątem łatek bezpieczeństwa.
+\end{itemize}
+
+\appendix{ADR-0006: OpenTelemetry jako ujednolicony standard obserwowalności}
+
+\textbf{Status:} proponowany (data: 2026-04-26).
+
+\textbf{Kontekst.} Obserwowalność opiera się na trzech filarach (logi, metryki, ślady rozproszone). Bez wspólnego standardu każdy filar wymaga osobnej biblioteki instrumentacji, co wiąże aplikację z konkretnymi dostawcami i utrudnia zmianę zaplecza.
+
+\textbf{Decyzja.} Wybrano OpenTelemetry (CNCF) --- neutralny wobec dostawców standard obejmujący wszystkie trzy filary jednym SDK i Collectorem, z agentem Java instrumentującym aplikację automatycznie, bez zmian w kodzie.
+
+\textbf{Rozważane alternatywy:} osobne biblioteki (Micrometer + SLF4J/Logback + Brave/Zipkin); agent SaaS „wszystko w jednym" (Datadog/Dynatrace).
+
+\textbf{Konsekwencje:}
+\begin{itemize}
+  \item[$+$] aplikacja odseparowana od konkretnego zaplecza --- zmiana wymaga rekonfiguracji Collectora, a nie kodu,
+  \item[$+$] automatyczna instrumentacja (HTTP, JDBC, gRPC) bez zmian w kodzie,
+  \item[$-$] wciąż ewoluująca specyfikacja oraz dodatkowy komponent (Collector) do utrzymania.
+\end{itemize}
+
+\appendix{ADR-0007: Stos LGTM jako zaplecze obserwowalności}
+
+\textbf{Status:} proponowany (data: 2026-04-26).
+
+\textbf{Kontekst.} Po przyjęciu OpenTelemetry (ADR-0006) należało wybrać konkretne, samodzielnie hostowane i otwarte zaplecza dla logów, metryk i śladów oraz wspólną warstwę wizualizacji, zgodne z Kubernetes i Collectorem OTel.
+
+\textbf{Decyzja.} Wybrano stos LGTM --- Loki (logi), Grafana (wizualizacja), Tempo (ślady) i Prometheus (metryki) --- ponieważ wszystkie komponenty integrują się natywnie przez Grafanę, przyjmują dane z Collectora OTel i wdraża się je oficjalnymi chartami Helm.
+
+\textbf{Rozważane alternatywy:} stos ELK/EFK (Elasticsearch/OpenSearch + Kibana); zarządzany SaaS (Grafana Cloud/Datadog/New Relic).
+
+\textbf{Konsekwencje:}
+\begin{itemize}
+  \item[$+$] korelacja danych z trzech filarów w jednym interfejsie (Grafana),
+  \item[$+$] Loki i Tempo są oszczędne zasobowo --- odpowiednie dla jednowęzłowego klastra akademickiego,
+  \item[$-$] cztery osobno zarządzane komponenty; model indeksowania etykiet w Loki wymaga dyscypliny (kardynalność).
+\end{itemize}
+
+\appendix{ADR-0008: Wybór Gradle jako systemu budowania monorepozytorium}
+
+\textbf{Status:} zaakceptowany (data: 2026-05-03).
+
+\textbf{Kontekst.} Monorepozytorium zawiera wiele komponentów (backend Java, frontend, infrastruktura). Potrzebny był wydajny system budowania wspierający projekty wielomodułowe, zarządzanie zależnościami oraz buforowanie i zrównoleglenie.
+
+\textbf{Decyzja.} Wybrano Gradle ze względu na najlepszy kompromis między elastycznością a wygodą dla monorepozytorium Java, wydajność (budowy przyrostowe, build cache) oraz dobrą integrację z Quarkusem.
+
+\textbf{Rozważane alternatywy:} Maven (oparty na XML); Bazel (dla bardzo dużych monorepozytoriów).
+
+\textbf{Konsekwencje:}
+\begin{itemize}
+  \item[$+$] proste zarządzanie zależnościami między modułami i szybkie budowy w GitHub Actions,
+  \item[$-$] nieco wyższy próg wejścia niż Maven oraz dodatkowe pliki konfiguracji w katalogu głównym.
+\end{itemize}
+
+\appendix{ADR-0009: GitHub jako platforma VCS i CI/CD}
+
+\textbf{Status:} zaakceptowany (data: 2026-05-17).
+
+\textbf{Kontekst.} Projekt wymaga systemu kontroli wersji i platformy CI/CD wspierającej monorepozytorium, integrację z rejestrami obrazów oraz definiowanie łańcuchów w formie kodu (YAML), bezpłatnej dla repozytoriów publicznych i studenckich.
+
+\textbf{Decyzja.} Wybrano GitHub --- standard branżowy z najbogatszym ekosystemem gotowych akcji, natywną integracją z Cosign i Trivy oraz zerowym narzutem infrastrukturalnym; bezpłatny plan wystarcza na potrzeby projektu.
+
+\textbf{Rozważane alternatywy:} GitLab; Bitbucket; Gitea.
+
+\textbf{Konsekwencje:}
+\begin{itemize}
+  \item[$+$] gotowe akcje (Trivy, Cosign, Docker) oraz integracja Jira z GitHub (pełna identyfikowalność zmian),
+  \item[$-$] zależność od zamkniętej platformy chmurowej i limit minut runnerów w planie bezpłatnym.
+\end{itemize}
+
+\appendix{ADR-0010: Trivy jako skaner podatności obrazów kontenerów}
+
+\textbf{Status:} zaakceptowany (data: 2026-05-17).
+
+\textbf{Kontekst.} Łańcuch CI musi skanować każdy zbudowany obraz pod kątem znanych podatności (CVE) przed wysłaniem do rejestru (praktyka \textit{Shift Left Security}). Potrzebny był skaner z natywną integracją z GitHub Actions, obejmujący pakiety systemowe i zależności aplikacji oraz przerywający budowę według progu istotności.
+
+\textbf{Decyzja.} Wybrano Trivy (Aqua Security) ze względu na pierwszorzędną akcję GitHub, szersze pokrycie typów pakietów oraz wysoką adopcję w ekosystemie Kubernetes/Cloud Native.
+
+\textbf{Rozważane alternatywy:} Grype (Anchore).
+
+\textbf{Konsekwencje:}
+\begin{itemize}
+  \item[$+$] zerokonfiguracyjna integracja, status projektu CNCF, wynik SARIF dla zakładki GitHub Security,
+  \item[$-$] aktualizacja bazy wymaga dostępu do sieci w CI; sporadyczne fałszywe alarmy przy skanowaniu JVM.
+\end{itemize}
+
+\appendix{ADR-0011: Cosign --- bezkluczowe podpisywanie obrazów}
+
+\textbf{Status:} zaakceptowany (data: 2026-05-28).
+
+\textbf{Kontekst.} Po zbudowaniu i przeskanowaniu obrazu łańcuch CI musi poświadczyć jego pochodzenie (\textit{provenance}), bez przechowywania długotrwałych kluczy w repozytorium.
+
+\textbf{Decyzja.} Wybrano Cosign w trybie bezkluczowym (\textit{keyless}, Sigstore): podpis składany jest krótkotrwałym certyfikatem wystawionym na tożsamość OIDC GitHub Actions i zapisywany w publicznym dzienniku przejrzystości Rekor, co umożliwia weryfikację bez dystrybucji klucza publicznego.
+
+\textbf{Rozważane alternatywy:} Cosign ze statyczną parą kluczy; Notary v2 / Docker Content Trust.
+
+\textbf{Konsekwencje:}
+\begin{itemize}
+  \item[$+$] brak długotrwałych kluczy do rotacji; publicznie weryfikowalne podpisy (dziennik Rekor); zgodność z SLSA,
+  \item[$-$] weryfikacja wymaga dostępu sieciowego do Rekor/Fulcio; tryb offline wymaga innego korzenia zaufania.
+\end{itemize}
+
+\appendix{ADR-0012: Helm jako menedżer pakietów Kubernetes}
+
+\textbf{Status:} zaakceptowany (data: 2026-06-01).
+
+\textbf{Kontekst.} Manifesty YAML z wartościami zakodowanymi na sztywno (tagi obrazów, przestrzeń nazw, limity) stały się trudne w utrzymaniu przy siedmiu wdrożeniach: tagi wymagały podmiany przez \texttt{sed}, brakowało historii wydań, a wycofanie nieudanego wdrożenia oznaczało ręczne przywracanie manifestów.
+
+\textbf{Decyzja.} Wybrano Helm --- jedyną opcję łączącą parametryzację, wersjonowanie wydań i wycofywanie w jednym narzędziu, będącą standardem w ekosystemie Kubernetes i integrującą się natywnie z ArgoCD/Flux.
+
+\textbf{Rozważane alternatywy:} surowe manifesty z podmianą przez \texttt{sed}; Kustomize.
+
+\textbf{Konsekwencje:}
+\begin{itemize}
+  \item[$+$] idempotentne wdrożenia, atomowe wycofywanie oraz jeden udokumentowany plik wartości (\texttt{values.yaml}),
+  \item[$+$] charty to standardowy mechanizm dystrybucji aplikacji Kubernetes z natywną obsługą w ArgoCD/Flux,
+  \item[$-$] rozwlekła składnia szablonów Go; sekrety przekazane przez \texttt{--set} trafiają do historii wydań.
+\end{itemize}
+
+\appendix{ADR-0013: ArgoCD jako narzędzie dostawy GitOps}
+
+\textbf{Status:} zaakceptowany (data: 2026-06-09).
+
+\textbf{Kontekst.} Po przyjęciu Helma (ADR-0012) projekt potrzebował kontrolera GitOps domykającego pętlę dostawy: obserwującego repozytorium i uzgadniającego stan klastra. Dominują dwa narzędzia CNCF (\textit{graduated}) --- ArgoCD i Flux.
+
+\textbf{Decyzja.} Wybrano ArgoCD ze względu na pierwszorzędną obsługę chartów Helm z rejestru OCI, obserwowalny interfejs webowy (natychmiast pokazujący stan synchronizacji --- przydatny w demonstracjach i jako materiał ilustracyjny) oraz pozycję najczęściej cytowanego narzędzia GitOps.
+
+\textbf{Rozważane alternatywy:} Flux (GitOps Toolkit, bez wbudowanego interfejsu).
+
+\textbf{Konsekwencje:}
+\begin{itemize}
+  \item[$+$] wizualizacja drzewa zasobów i różnic Helm w interfejsie; definicje (CRD \texttt{Application}) wersjonowane w Git,
+  \item[$-$] większy ślad pamięciowy (około 300 MB) niż Flux; interfejs webowy to dodatkowa powierzchnia ataku.
+\end{itemize}
+
+\appendix{ADR-0014: Wybór Vue 3 jako frameworka frontendowego}
+
+\textbf{Status:} zaakceptowany (data: 2026-05-28).
+
+\textbf{Kontekst.} Architektura klient--serwer wymaga warstwy frontendowej --- lekkiej nakładki na REST API, z obsługą TypeScript i dobrą integracją z Vite. Frontend jest elementem pomocniczym, więc liczą się produktywność i prostota.
+
+\textbf{Decyzja.} Wybrano Vue~3 (z Vite i TypeScript) ze względu na najlepszy kompromis między produktywnością, obsługą TypeScript a natywną integracją z Vite dla lekkiej aplikacji jednostronicowej.
+
+\textbf{Rozważane alternatywy:} React (Vite + TypeScript); Angular; Svelte/SvelteKit.
+
+\textbf{Konsekwencje:}
+\begin{itemize}
+  \item[$+$] Vite jako natywne narzędzie budujące (szybka iteracja, małe paczki produkcyjne); komponenty jednoplikowe czytelne w prezentacji akademickiej,
+  \item[$-$] mniejszy ekosystem bibliotek UI niż React oraz mniejsza popularność w zastosowaniach korporacyjnych niż Angular/React.
+\end{itemize}
+
+\appendix{ADR-0015: k3d jako lokalne środowisko Kubernetes}
+
+\textbf{Status:} zaakceptowany (data: 2026-06-08).
+
+\textbf{Kontekst.} Projekt wymaga lokalnego klastra Kubernetes do rozwoju, testów integracyjnych i demonstracji (ADR-0002), szybkiego w utworzeniu i udostępniającego Ingress pod adresem \texttt{http://localhost} bez obejść. Początkowo użyto minikube, lecz w trybie sterownika Docker wymagał on uruchamiania \texttt{minikube tunnel} w osobnym terminalu, a czas startu był długi.
+
+\textbf{Decyzja.} Wybrano k3d --- cienką nakładkę na k3s uruchamiającą klaster w kontenerach Docker. Mapowanie portów na etapie tworzenia klastra usuwa konieczność tunelowania, start trwa poniżej 30 sekund, a wbudowany Traefik pełni rolę kontrolera Ingress.
+
+\textbf{Rozważane alternatywy:} minikube; kind; Kubernetes w Docker Desktop.
+
+\textbf{Konsekwencje:}
+\begin{itemize}
+  \item[$+$] Ingress dostępny pod \texttt{http://localhost} bez tunelu; szybki start (około 20 s); proste klastry wielowęzłowe (\texttt{--agents N}),
+  \item[$-$] k3s pomija część rzadko używanych API; domyślny Ingress to Traefik (manifesty muszą używać \texttt{ingressClassName: traefik}).
+\end{itemize}
+
+% =====================================================================
+% Załącznik P: skorowidz kart narzędzi
+% Pełne karty znajdują się w treści rozdziału 3; źródła w docs/tech-card/
+% =====================================================================
+
+\newpage
+\appendix{Karty narzędzi --- skorowidz}
+
+Pełne karty narzędzi (opis, fragment konfiguracji, dobre nawyki, rola w projekcie) znajdują się w treści części praktycznej (rozdział~3) jako wstawki przy odpowiednich etapach pętli DevOps. Wersje źródłowe w formacie Markdown są przechowywane w repozytorium projektu w katalogu \texttt{docs/tech-card/}. Tabela~\ref{tab:tech-cards} zestawia wszystkie karty wraz z etapem ich omówienia oraz ścieżką pliku źródłowego.
+
+\begin{table}[H]
+  \centering
+  \renewcommand{\thetable}{\arabic{table}}%
+  \caption{Skorowidz kart narzędzi}
+  \label{tab:tech-cards}
+  \begin{tabular}{lll}
+    \hline
+    \textbf{Narzędzie} & \textbf{Etap DevOps} & \textbf{Plik źródłowy} \\
+    \hline
+    Quarkus                  & Code    & \texttt{docs/tech-card/quarkus.md} \\
+    Vue 3                    & Code    & \texttt{docs/tech-card/vue.md} \\
+    Docker                   & Build   & \texttt{docs/tech-card/docker.md} \\
+    Helm                     & Release & \texttt{docs/tech-card/helm.md} \\
+    Kubernetes               & Deploy  & \texttt{docs/tech-card/kubernetes.md} \\
+    k3d                      & Deploy  & \texttt{docs/tech-card/k3d.md} \\
+    ArgoCD                   & Deploy  & \texttt{docs/tech-card/argocd.md} \\
+    Sealed Secrets           & Deploy  & \texttt{docs/tech-card/sealed-secrets.md} \\
+    OpenTelemetry Collector  & Monitor & \texttt{docs/tech-card/opentelemetry-collector.md} \\
+    Prometheus               & Monitor & \texttt{docs/tech-card/prometheus.md} \\
+    Loki                     & Monitor & \texttt{docs/tech-card/loki.md} \\
+    Tempo                    & Monitor & \texttt{docs/tech-card/tempo.md} \\
+    Grafana                  & Monitor & \texttt{docs/tech-card/grafana.md} \\
+    \hline
+  \end{tabular}
+\end{table}

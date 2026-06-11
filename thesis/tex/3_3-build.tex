@@ -38,7 +38,7 @@ jobs:
 \subsubsection{Budowanie artefaktów: Gradle i NPM}
 W zależności od komponentu, wykorzystywane są wyspecjalizowane narzędzia budujące:
 \begin{itemize}
-    \item \textbf{Gradle (Backend):} Zarządza zależnościami projektu Java/Quarkus, kompiluje kod oraz uruchamia testy jednostkowe. Wybrano go ze względu na elastyczność i wydajność (mechanizm \textit{build cache}).
+    \item \textbf{Gradle (Backend):} Zarządza zależnościami projektu Java/Quarkus, kompiluje kod oraz uruchamia testy jednostkowe. Wybrano go (ADR-0008) ze względu na elastyczność i wydajność (mechanizm \textit{build cache}).
     \item \textbf{Vite (Frontend):} Odpowiada za budowanie zoptymalizowanej paczki produkcyjnej aplikacji Vue 3. Vite wykorzystuje natywne moduły ES podczas prac programistycznych, co skraca czas przeładowania do milisekund, a NPM zarządza zależnościami projektu.
 \end{itemize}
 

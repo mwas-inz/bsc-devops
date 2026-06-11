@@ -2,7 +2,7 @@
 Faza wdrożenia (\textit{Deploy}) odpowiada za przeniesienie artefaktów na środowisko uruchomieniowe oraz zapewnienie odpowiedniej infrastruktury.
 
 \subsubsection{Środowisko uruchomieniowe: Kubernetes (k3d)}
-Głównym środowiskiem uruchomieniowym mikroserwisów jest klaster \textbf{Kubernetes} (K8s) — system \textit{open-source} do automatyzacji wdrażania, skalowania i zarządzania skonteneryzowanymi aplikacjami. Pełni rolę orkiestratora: dba o to, aby zdefiniowana liczba instancji aplikacji (podów) była zawsze uruchomiona i dostępna, a w przypadku awarii automatycznie je restartuje. Lokalne klastry Kubernetes oferują niemal pełną kompatybilność z produkcyjnymi klastrami chmurowymi (EKS, GKE), co pozwala testować manifesty, polityki sieciowe i mechanizmy skalowania bezpośrednio na maszynie programisty.
+Zgodnie z decyzją \textit{ADR-0002}, głównym środowiskiem uruchomieniowym mikroserwisów jest klaster \textbf{Kubernetes} (K8s) — system \textit{open-source} do automatyzacji wdrażania, skalowania i zarządzania skonteneryzowanymi aplikacjami. Pełni rolę orkiestratora: dba o to, aby zdefiniowana liczba instancji aplikacji (podów) była zawsze uruchomiona i dostępna, a w przypadku awarii automatycznie je restartuje. Lokalne klastry Kubernetes oferują niemal pełną kompatybilność z produkcyjnymi klastrami chmurowymi (EKS, GKE), co pozwala testować manifesty, polityki sieciowe i mechanizmy skalowania bezpośrednio na maszynie programisty.
 
 \begin{techcard}{Kubernetes}
 
@@ -61,7 +61,7 @@ spec:
             port: 8080
 \end{lstlisting}
 
-W części praktycznej lokalny klaster uruchamia narzędzie \textbf{k3d} — cienka warstwa opakowująca \textbf{k3s} (certyfikowaną przez CNCF dystrybucję Kubernetes) działającą wewnątrz kontenerów Docker. Kluczowym wymaganiem było dotarcie do Ingressu bezpośrednio z hosta bez dodatkowych komend. Alternatywa — \textbf{minikube} ze sterownikiem Docker — wymaga uruchomienia \texttt{minikube tunnel} w osobnym terminalu, by ruch z hosta docierał do zasobów Ingress. k3d rozwiązuje ten problem przez mapowanie portów już na etapie tworzenia klastra:
+Zgodnie z decyzją \textit{ADR-0015}, w części praktycznej lokalny klaster uruchamia narzędzie \textbf{k3d} — cienka warstwa opakowująca \textbf{k3s} (certyfikowaną przez CNCF dystrybucję Kubernetes) działającą wewnątrz kontenerów Docker. Kluczowym wymaganiem było dotarcie do Ingressu bezpośrednio z hosta bez dodatkowych komend. Alternatywa — \textbf{minikube} ze sterownikiem Docker — wymaga uruchomienia \texttt{minikube tunnel} w osobnym terminalu, by ruch z hosta docierał do zasobów Ingress. k3d rozwiązuje ten problem przez mapowanie portów już na etapie tworzenia klastra:
 
 \begin{lstlisting}[language=bash, caption={Tworzenie klastra k3d z mapowaniem portów Ingress (infrastructure/k3d/cluster-create.sh)}, label={lst:k3d-create}]
 k3d cluster create bsc-devops \
