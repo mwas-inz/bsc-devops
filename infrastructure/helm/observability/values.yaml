@@ -133,3 +133,23 @@ prometheus:
       limits:
         cpu: 500m
         memory: 512Mi
+
+# ---------------------------------------------------------------------------
+# OpenTelemetry Collector (INZ-22) — single Deployment "gateway" that receives
+# OTLP traces + logs from the applications and fans them out to Tempo and Loki.
+# The pipeline config lives in files/otel-collector-config.yaml (mounted via a
+# ConfigMap) so it stays a standalone, otelcol-validatable file.
+# ---------------------------------------------------------------------------
+collector:
+  enabled: true
+  replicas: 1
+  image:
+    repository: otel/opentelemetry-collector-contrib
+    tag: "0.154.0"
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

@@ -1,0 +1,61 @@
+# OpenTelemetry Collector — gateway for the bsc-devops platform (INZ-22).
+#
+# Applications send OTLP (traces + logs) to this Collector, which fans them out
+# to the LGTM backends. Metrics are scraped directly from each service's
+# /q/metrics endpoint by Prometheus, so there is deliberately no metrics
+# pipeline here (see ADR-0007 / design decision D5).
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  # Refuses data above the memory budget so the Collector cannot OOM the node.
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 80
+    spike_limit_percentage: 25
+  # Enriches every signal with environment metadata in one central place,
+  # instead of encoding it in each application.
+  resource:
+    attributes:
+      - key: deployment.environment
+        value: production
+        action: insert
+  # Batches telemetry to cut egress connections and CPU on both ends.
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+
+exporters:
+  # Loki 3.x ingests OTLP natively at /otlp; the legacy `loki` exporter has been
+  # removed from the Collector, so logs are sent via the generic OTLP/HTTP exporter.
+  otlp_http/loki:
+    endpoint: http://loki:3100/otlp
+  otlp_grpc/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [otlp_grpc/tempo]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [otlp_http/loki]
+  telemetry:
+    logs:
+      level: info

@@ -10,6 +10,7 @@ charts as pinned dependencies (ADR-0006, ADR-0007).
 | Tempo | `grafana/tempo` 1.24.4 | Traces | OTLP `tempo:4317` / `tempo:4318`, query `http://tempo:3200` |
 | Grafana | `grafana/grafana` 10.5.15 | Visualization | `http://grafana` (admin; password in `grafana-admin` Secret) |
 | Prometheus | `prometheus-community/prometheus` 29.10.1 | Metrics | `http://prometheus` |
+| OTel Collector | in-chart (contrib 0.154.0) | OTLP gateway → Loki/Tempo | OTLP `otel-collector:4317` / `:4318` |
 
 ## Design notes (single-node k3d)
 
@@ -21,6 +22,11 @@ charts as pinned dependencies (ADR-0006, ADR-0007).
   their existing `prometheus.io/scrape` annotations.
 - **Tempo** and **Grafana** are ephemeral (no persistence). Tempo enables the OTLP
   receiver by default.
+- **OTel Collector** is a single-Deployment gateway (config in
+  `files/otel-collector-config.yaml`): applications send OTLP traces and logs to it,
+  and it fans them out to Tempo and Loki. Metrics bypass it — Prometheus scrapes the
+  apps directly. The legacy `loki` exporter is avoided in favour of OTLP to Loki's
+  native `/otlp` endpoint.
 - Datasources and dashboards are provisioned as code separately (INZ-26).
 
 ## Deploy locally
