@@ -41,6 +41,3 @@ subjects:
   - kind: ServiceAccount
     name: pulsar-sa
     namespace: bsc-devops
-  - kind: ServiceAccount
-    name: jaeger-sa
-    namespace: bsc-devops

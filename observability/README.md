@@ -11,13 +11,12 @@ Observability strategy for the thesis platform based on the three-pillar model
 
 ## Current State
 
-Jaeger is deployed as the tracing backend in the Helm chart
-(`infrastructure/helm/bsc-devops/templates/jaeger.yaml`) for local development.
-Application services export OpenTelemetry traces to Jaeger and Prometheus-format metrics
-via Micrometer.
-
-The production LGTM stack (Loki, Grafana, Tempo, Prometheus) is planned for a later sprint
-once cluster resource requirements are validated.
+The LGTM stack (Loki, Grafana, Tempo, Prometheus) and an OpenTelemetry Collector are
+deployed via `infrastructure/helm/observability/` and delivered by a dedicated ArgoCD
+Application (`gitops/observability-application.yaml`). Application services export OTLP
+traces and logs to the Collector, which fans them out to Tempo and Loki; Prometheus
+scrapes application metrics directly from `/q/metrics`. Jaeger has been retired in
+favour of Tempo.
 
 ## Tech Cards
 

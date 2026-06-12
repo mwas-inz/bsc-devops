@@ -7,4 +7,4 @@ metadata:
     app.kubernetes.io/part-of: bsc-devops
 data:
   MP_MESSAGING_CONNECTOR_SMALLRYE_PULSAR_SERVICEURL: "pulsar://pulsar:6650"
-  QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
+  QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.observability.svc.cluster.local:4317"

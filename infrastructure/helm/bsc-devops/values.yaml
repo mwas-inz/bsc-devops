@@ -24,7 +24,7 @@ rbac:
 
 observability:
   pulsarServiceUrl: "pulsar://pulsar:6650"
-  otelEndpoint: "http://jaeger:4317"
+  otelEndpoint: "http://otel-collector.observability.svc.cluster.local:4317"
 
 postgres:
   enabled: true
@@ -58,22 +58,11 @@ pulsar:
       cpu: "1000m"
       memory: "2Gi"
 
-jaeger:
-  enabled: true
-  image: "jaegertracing/all-in-one:1.57"
-  resources:
-    requests:
-      cpu: "100m"
-      memory: "128Mi"
-    limits:
-      cpu: "500m"
-      memory: "512Mi"
-
 users:
   enabled: true
   image:
     repository: "docker.io/mateuszwas/users"
-    tag: ""
+    tag: "1.2.0"
   replicas: 1
   resources:
     requests:
@@ -87,7 +76,7 @@ tasks:
   enabled: true
   image:
     repository: "docker.io/mateuszwas/tasks"
-    tag: ""
+    tag: "1.2.0"
   replicas: 1
   resources:
     requests:
@@ -101,7 +90,7 @@ taskArchiver:
   enabled: true
   image:
     repository: "docker.io/mateuszwas/task-archiver"
-    tag: ""
+    tag: "1.2.0"
   replicas: 1
   resources:
     requests:
