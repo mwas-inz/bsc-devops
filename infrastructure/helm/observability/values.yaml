@@ -106,6 +106,56 @@ grafana:
     limits:
       cpu: 300m
       memory: 256Mi
+  # Sidecar auto-imports any ConfigMap labelled grafana_dashboard (INZ-26).
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      folder: /tmp/dashboards
+  # Datasources provisioned as code, with cross-pillar correlation wired in:
+  # Loki -> Tempo (derivedFields on the trace_id structured-metadata field),
+  # Tempo -> Loki (tracesToLogsV2) and Tempo -> Prometheus (serviceMap).
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          uid: prometheus
+          access: proxy
+          url: http://prometheus
+          isDefault: true
+        - name: Loki
+          type: loki
+          uid: loki
+          access: proxy
+          url: http://loki:3100
+          jsonData:
+            derivedFields:
+              - name: trace_id
+                matcherType: label
+                matcherRegex: trace_id
+                datasourceUid: tempo
+                url: "${__value.raw}"
+                urlDisplayLabel: View trace
+        - name: Tempo
+          type: tempo
+          uid: tempo
+          access: proxy
+          url: http://tempo:3200
+          jsonData:
+            tracesToLogsV2:
+              datasourceUid: loki
+              spanStartTimeShift: "-5m"
+              spanEndTimeShift: "5m"
+              filterByTraceID: true
+              tags:
+                - key: service.name
+                  value: service_name
+            serviceMap:
+              datasourceUid: prometheus
+            nodeGraph:
+              enabled: true
 
 # ---------------------------------------------------------------------------
 # Prometheus (metrics) — standalone server only. The "lean" decision (D2 / ADR-0007)

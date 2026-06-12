@@ -27,7 +27,10 @@ charts as pinned dependencies (ADR-0006, ADR-0007).
   and it fans them out to Tempo and Loki. Metrics bypass it — Prometheus scrapes the
   apps directly. The legacy `loki` exporter is avoided in favour of OTLP to Loki's
   native `/otlp` endpoint.
-- Datasources and dashboards are provisioned as code separately (INZ-26).
+- **Datasources** (Prometheus/Loki/Tempo, with cross-pillar correlation —
+  Loki→Tempo `derivedFields`, Tempo→Loki `tracesToLogsV2`, Tempo→Prometheus
+  `serviceMap`) are provisioned via `grafana.datasources`. **Dashboards** under
+  `files/dashboards/` are auto-imported by the Grafana sidecar (INZ-26).
 
 ## Deploy locally
 

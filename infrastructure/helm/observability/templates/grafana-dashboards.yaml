@@ -1,0 +1,21 @@
+{{- if .Values.grafana.sidecar.dashboards.enabled }}
+{{- /*
+Dashboards as code: each JSON under files/dashboards/ becomes a ConfigMap labelled
+grafana_dashboard so the Grafana sidecar auto-imports it (INZ-26). No manual UI import.
+*/ -}}
+{{- range $path, $_ := .Files.Glob "files/dashboards/*.json" }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-{{ trimSuffix ".json" (base $path) }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/part-of: observability
+data:
+  {{ base $path }}: |-
+{{ $.Files.Get $path | indent 4 }}
+{{- end }}
+{{- end }}
