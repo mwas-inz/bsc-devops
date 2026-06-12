@@ -156,6 +156,25 @@ Sekcja \texttt{syncPolicy.automated} z \texttt{prune: true} i \texttt{selfHeal: 
   \label{fig:argocd-ui}
 \end{figure}
 
+Aktualizacja wdrożenia do nowej wersji charta przebiega w dwóch krokach. Łańcuch CD (listing~\ref{lst:cd-helm}) publikuje nowy artefakt OCI do GHCR po oznaczeniu repozytorium tagiem \texttt{chart-*}. Następnie pole \texttt{targetRevision} w \texttt{gitops/application.yaml} jest uaktualniane i zasób ponownie ładowany do klastra -- ArgoCD wykrywa zmianę i natychmiast inicjuje cykl uzgadniania. Operację automatyzuje skrypt \texttt{scripts/local/argocd-update.sh}:
+
+\begin{lstlisting}[language=bash, caption={Aktualizacja \texttt{targetRevision} i ponowne załadowanie zasobu \texttt{Application} do klastra (scripts/local/argocd-update.sh)}, label={lst:argocd-update}]
+$ bash scripts/local/argocd-update.sh 0.7.0
+=== BSC DevOps - ArgoCD Application Update ===
+Target version: 0.7.0
+--- Updating targetRevision: 0.6.0 -> 0.7.0 ---
+--- Committing to Git ---
+--- Applying Application to cluster ---
+=== Update Applied ===
+Watching sync status (Ctrl-C to exit):
+NAME        SYNC STATUS   HEALTH STATUS
+bsc-devops  OutOfSync     Healthy
+bsc-devops  Synced        Progressing
+bsc-devops  Synced        Healthy
+\end{lstlisting}
+
+Skrypt waliduje wersję wejściową, nadpisuje \texttt{targetRevision} wyrażeniem regularnym, tworzy commit z komunikatem \texttt{chore(gitops): bump targetRevision}, wypycha go do zdalnego repozytorium i re-aplikuje zasób \texttt{Application} do klastra. Obserwacja z flagą \texttt{-w} ujawnia trójfazowy przebieg synchronizacji: \textit{OutOfSync} (ArgoCD wykrył rozbieżność), \textit{Progressing} (pobieranie i nakładanie charta) oraz \textit{Healthy} (wszystkie pody zdrowe). Ponieważ zasób \texttt{Application} sam jest przechowywany w repozytorium Git, każde wdrożenie jest odwzorowaniem konkretnego commitu i podlega pełnemu audytowi.
+
 \subsubsection{Zarządzanie sekretami w modelu GitOps: Sealed Secrets}
 Model GitOps wymaga, aby wszystkie zasoby konfiguracyjne -- łącznie z sekretami -- były przechowywane w repozytorium Git. Natywny zasób Kubernetes \texttt{Secret} koduje dane jedynie w Base64, co czyni jego publiczne przechowywanie równoważnym ujawnieniu haseł w jawnym tekście. Narzędzie \textbf{Bitnami Sealed Secrets} rozwiązuje ten problem przez \textbf{szyfrowanie asymetryczne}: kontroler działający w przestrzeni nazw \texttt{kube-system} generuje parę kluczy RSA i udostępnia klucz publiczny; lokalne narzędzie \texttt{kubeseal} szyfruje \texttt{Secret} tym kluczem przed committem, a kontroler odszyfrowuje wynikowy zasób \texttt{SealedSecret} kluczem prywatnym w czasie działania klastra. Zaszyfrowany plik jest bezpieczny w publicznym repozytorium -- bez klucza prywatnego klastra jest kryptograficznie bezużyteczny.
 
