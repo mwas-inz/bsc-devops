@@ -6,6 +6,20 @@
 * Consulted:
 * Informed:
 
+> **Amendment (2026-06-12, INZ-24):** This ADR refers throughout to the OpenTelemetry
+> **Java agent** as the auto-instrumentation mechanism. For this project's services
+> that delivery choice is **superseded**: the applications instrument via the
+> **Quarkus OpenTelemetry extension** (`quarkus-opentelemetry`, build-time
+> instrumentation) instead of the `-javaagent`. The Java agent performs bytecode
+> instrumentation at JVM startup and is therefore incompatible with the **GraalVM
+> native images** the services are built as (ADR-0003), and it would
+> double-instrument when combined with the Quarkus extension already in use.
+> The decision to standardise on **OpenTelemetry** is unchanged — only the
+> agent-vs-extension delivery differs. Likewise, structured JSON logging is provided
+> by the `quarkus-logging-json` extension (Quarkus uses JBoss LogManager, not
+> Logback), with trace context (`traceId`/`spanId`) injected automatically by the
+> OTel extension's MDC integration.
+
 ## Context and Problem Statement
 
 Observability is built on three pillars: logs, metrics, and distributed traces.
