@@ -23,6 +23,15 @@ The chart renders Kubernetes resources for the following components:
 | API Ingress | `api-ingress.yaml` |
 | Shared ConfigMap | `configmap.yaml` |
 
+## Observability Stack
+
+`helm/observability/` is a separate umbrella chart that deploys the LGTM backend
+(Loki, Tempo, Grafana, Prometheus) into the `observability` namespace via the official
+community charts (ADR-0007). It is tuned for a single-node k3d cluster: SingleBinary
+Loki on a small `local-path` PVC, standalone Prometheus (no node-exporter or
+kube-state-metrics), and ephemeral Tempo/Grafana. Application telemetry reaches it
+through the OpenTelemetry Collector. See `helm/observability/README.md`.
+
 ## Local Manifests
 
 `local/` contains raw Kubernetes manifests that mirror the Helm chart for debugging outside the
