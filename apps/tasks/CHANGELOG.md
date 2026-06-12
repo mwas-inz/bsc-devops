@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0](https://github.com/mwas-inz/bsc-devops/compare/tasks-v1.1.2...tasks-v1.2.0) (2026-06-12)
+
+
+### Features
+
+* **observability:** Etap Monitor foundation — LGTM, OTel Collector, app instrumentation (INZ-21) ([79e7c23](https://github.com/mwas-inz/bsc-devops/commit/79e7c230f8af4054e87bfc971dd1ae52c7fef86b))
+* **observability:** structured JSON logging and OTLP log export in services ([da9fe3f](https://github.com/mwas-inz/bsc-devops/commit/da9fe3f667f04e3624335dd61ab28afb120f2e90))
+
 ## [1.1.2](https://github.com/mwas-inz/bsc-devops/compare/tasks-v1.1.1...tasks-v1.1.2) (2026-06-08)
 
 
