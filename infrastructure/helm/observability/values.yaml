@@ -1,0 +1,135 @@
+# LGTM observability backend — tuned for a single-node local k3d cluster.
+# Subchart values are nested under each dependency name (loki / tempo / grafana /
+# prometheus). Storage is ephemeral (emptyDir) on purpose: this is a demo/thesis
+# stack, not a durable store. Clean service names (loki/tempo/grafana) are set via
+# fullnameOverride so downstream config (OTel Collector, Grafana datasources) and
+# the thesis listings can reference them directly.
+
+# ---------------------------------------------------------------------------
+# Loki (logs) — SingleBinary mode, filesystem storage, caches off.
+# The chart defaults to SimpleScalable + memcached caches + empty schemaConfig,
+# none of which fit one small node, so every relevant knob is overridden here.
+# ---------------------------------------------------------------------------
+loki:
+  fullnameOverride: loki
+  deploymentMode: SingleBinary
+  loki:
+    auth_enabled: false
+    commonConfig:
+      replication_factor: 1
+    storage:
+      type: filesystem
+    schemaConfig:
+      configs:
+        - from: "2024-04-01"
+          store: tsdb
+          object_store: filesystem
+          schema: v13
+          index:
+            prefix: loki_index_
+            period: 24h
+  singleBinary:
+    replicas: 1
+    # Loki's container has a read-only root fs and writes its data/ruler dirs under
+    # /var/loki, so it needs a writable volume there. A small local-path PVC (the
+    # provisioner k3d ships, same as Postgres) is the simplest reliable option.
+    persistence:
+      enabled: true
+      size: 2Gi
+      storageClass: local-path
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+  # Disable the scalable deployment targets — SingleBinary handles everything.
+  write:
+    replicas: 0
+  read:
+    replicas: 0
+  backend:
+    replicas: 0
+  # Memcached caches request multiple GB by default — off for local.
+  chunksCache:
+    enabled: false
+  resultsCache:
+    enabled: false
+  # No nginx gateway: clients talk to the loki service directly on :3100.
+  gateway:
+    enabled: false
+  lokiCanary:
+    enabled: false
+  test:
+    enabled: false
+  minio:
+    enabled: false
+
+# ---------------------------------------------------------------------------
+# Tempo (traces) — single binary, local storage. The chart already enables the
+# OTLP receiver (grpc :4317 / http :4318) by default.
+# ---------------------------------------------------------------------------
+tempo:
+  fullnameOverride: tempo
+  persistence:
+    enabled: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# ---------------------------------------------------------------------------
+# Grafana (visualization) — single pane of glass. Datasources and dashboards
+# are provisioned as code in Stage 4 (INZ-26); here we only stand it up.
+# ---------------------------------------------------------------------------
+grafana:
+  fullnameOverride: grafana
+  # Admin credentials come from a Secret, never from committed values. Create the
+  # grafana-admin Secret out-of-band with a random password (see README); for the
+  # GitOps flow it should be a Sealed Secret (ADR-0016), wired in Stage 5.
+  admin:
+    existingSecret: grafana-admin
+    userKey: admin-user
+    passwordKey: admin-password
+  persistence:
+    enabled: false
+  service:
+    type: ClusterIP
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+
+# ---------------------------------------------------------------------------
+# Prometheus (metrics) — standalone server only. The "lean" decision (D2 / ADR-0007)
+# drops node-exporter and kube-state-metrics; the server scrapes the application
+# pods directly via their existing prometheus.io/scrape annotations.
+# ---------------------------------------------------------------------------
+prometheus:
+  alertmanager:
+    enabled: false
+  prometheus-pushgateway:
+    enabled: false
+  kube-state-metrics:
+    enabled: false
+  prometheus-node-exporter:
+    enabled: false
+  server:
+    fullnameOverride: prometheus
+    persistentVolume:
+      enabled: false
+    retention: "24h"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi

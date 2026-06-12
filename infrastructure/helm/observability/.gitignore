@@ -1,0 +1,3 @@
+# Downloaded Helm chart dependencies — reproduced from Chart.lock via
+# `helm dependency build`. Chart.lock is committed; the tarballs are not.
+charts/
