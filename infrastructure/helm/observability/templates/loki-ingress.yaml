@@ -1,0 +1,27 @@
+{{- if .Values.lokiIngress.enabled }}
+{{- /*
+Loki has no web UI; this Ingress exposes its HTTP API (port 3100) via Traefik so it
+can be reached with LogCLI / curl. Logs are still viewed through Grafana.
+*/ -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: loki
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: loki
+    app.kubernetes.io/part-of: observability
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: {{ .Values.lokiIngress.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: loki
+                port:
+                  number: 3100
+{{- end }}

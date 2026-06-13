@@ -83,6 +83,14 @@ tempo:
       memory: 512Mi
 
 # ---------------------------------------------------------------------------
+# Loki API ingress — Loki has no web UI; this exposes its HTTP API at
+# loki.localhost (for LogCLI/curl). Rendered by templates/loki-ingress.yaml.
+# ---------------------------------------------------------------------------
+lokiIngress:
+  enabled: true
+  host: loki.localhost
+
+# ---------------------------------------------------------------------------
 # Grafana (visualization) — single pane of glass. Datasources and dashboards
 # are provisioned as code in Stage 4 (INZ-26); here we only stand it up.
 # ---------------------------------------------------------------------------
@@ -99,6 +107,11 @@ grafana:
     enabled: false
   service:
     type: ClusterIP
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hosts:
+      - grafana.localhost
   resources:
     requests:
       cpu: 50m
@@ -173,6 +186,11 @@ prometheus:
     enabled: false
   server:
     fullnameOverride: prometheus
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      hosts:
+        - prometheus.localhost
     persistentVolume:
       enabled: false
     retention: "24h"
