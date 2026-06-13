@@ -8,6 +8,39 @@ Zgodnie z decyzją \textit{ADR-0006}, w całym projekcie zaimplementowano standa
     \item \textbf{OTel Collector:} Centralnym punktem zbierania danych jest komponent Collector, który odbiera telemetrię z aplikacji, przetwarza ją i wysyła do odpowiednich systemów bazodanowych. Pozwala to na całkowite odseparowanie aplikacji od konkretnych dostawców narzędzi monitorujących.
 \end{itemize}
 
+\subsubsection{Instrumentacja aplikacji: rozszerzenie zamiast agenta}
+Choć \textit{ADR-0006} pierwotnie zakładał użycie \textbf{agenta Java} OpenTelemetry, dla usług tego projektu zdecydowano się na \textbf{rozszerzenie \texttt{quarkus-opentelemetry}} (instrumentacja na etapie budowania). Agent Java instrumentuje kod bajtowy przy starcie maszyny wirtualnej, przez co jest niekompatybilny z natywnymi obrazami \textbf{GraalVM}, do których kompilowane są usługi (ADR-0003), i powodowałby podwójną instrumentację. Logowanie strukturalne (JSON) zapewnia rozszerzenie \texttt{quarkus-logging-json}, a sygnał logów jest eksportowany przez OTLP po ustawieniu \texttt{quarkus.otel.logs.enabled}. Identyfikatory \texttt{traceId} oraz \texttt{spanId} trafiają automatycznie do kontekstu diagnostycznego (MDC) -- bez modyfikacji kodu aplikacji.
+
+\begin{lstlisting}[language=yaml, caption={Instrumentacja OpenTelemetry i logowanie JSON w usludze Quarkus (build.gradle, application.properties, Deployment)}, label={lst:quarkus-otel}]
+// build.gradle -- rozszerzenia (zamiast agenta -javaagent)
+implementation 'io.quarkus:quarkus-opentelemetry'
+implementation 'io.quarkus:quarkus-logging-json'
+
+# application.properties
+quarkus.otel.logs.enabled=true              # eksport logow przez OTLP
+%prod.quarkus.log.console.json.enabled=true # JSON tylko w profilu prod
+
+# Deployment (Helm) -- zmienne srodowiskowe
+QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector.observability.svc.cluster.local:4317
+QUARKUS_OTEL_RESOURCE_ATTRIBUTES: service.namespace=bsc-devops,k8s.namespace.name=$(KUBERNETES_NAMESPACE),k8s.pod.name=$(POD_NAME)
+\end{lstlisting}
+
+\paragraph{Propagacja kontekstu.} Pojedyncze żądanie otrzymuje \textit{trace ID} w chwili wejścia do usługi. Rozszerzenie \texttt{quarkus-opentelemetry} umieszcza ten identyfikator w MDC (a więc w każdej linii logu JSON, listing \ref{lst:json-log}) oraz dołącza go do śladów i logów wysyłanych protokołem OTLP do Collectora. Collector kieruje ślady do Tempo, a logi do Loki, zachowując natywne pola \texttt{trace\_id} i \texttt{span\_id}. Dzięki skonfigurowanej w Grafanie korelacji (listing \ref{lst:grafana-datasources}) możliwe jest przejście od śladu w Tempo do skorelowanych logów w Loki i odwrotnie -- po tym samym identyfikatorze. Domyka to pętlę obserwowalności: aplikacja $\rightarrow$ OTel Collector $\rightarrow$ Loki/Tempo $\rightarrow$ Grafana.
+
+\begin{lstlisting}[language=yaml, caption={Przykladowa linia logu JSON z identyfikatorem sladu w polu mdc.traceId}, label={lst:json-log}]
+{
+  "timestamp": "2026-06-12T22:14:05.123Z",
+  "level": "INFO",
+  "loggerName": "pl.edu.pw.eiti.mwas.tasks.TaskResource",
+  "message": "Task created",
+  "mdc": {
+    "traceId": "5b8efff798038103d269b633813fc60c",
+    "spanId": "eee19b7ec3c1b174",
+    "sampled": "true"
+  }
+}
+\end{lstlisting}
+
 \subsubsection{Stos Observability: LGTM}
 Jako systemy przechowywania i wizualizacji danych wybrano stos \textbf{LGTM} (ADR-0007):
 \begin{itemize}
@@ -32,11 +65,11 @@ Poniższe karty zbierają kluczowe informacje o narzędziach tworzących stos ob
   \item \textbf{DaemonSet w Kubernetes:} Collector działa najczęściej jako jeden agent na węzeł klastra, opcjonalnie z centralnym gateway'em agregującym dane z agentów.
 \end{itemize}
 
-\textbf{Rola w projekcie:} OTel Collector jest centralnym węzłem potoku telemetrii. Aplikacja Java z OTel Java Agent wysyła logi, metryki i ślady na jeden adres (Collector), który kieruje je dalej do Loki, Prometheus i Tempo, zapewniając całkowitą niezależność aplikacji od konkretnych narzędzi monitoringowych.
+\textbf{Rola w projekcie:} OTel Collector jest centralnym węzłem potoku telemetrii. Aplikacja Quarkus (rozszerzenie \texttt{quarkus-opentelemetry}) wysyła logi i ślady na jeden adres (Collector), który kieruje je dalej -- logi do Loki, ślady do Tempo -- zapewniając niezależność aplikacji od konkretnych narzędzi monitoringowych. Metryki pobiera Prometheus bezpośrednio z aplikacji, z pominięciem Collectora.
 
 \end{techcard}
 
-\begin{lstlisting}[language=yaml, caption={Konfiguracja OpenTelemetry Collector -- trzy niezale\. zne pipeline'y obserwowalno\'{s}ci (infrastructure/otel-collector-config.yaml)}, label={lst:otel-collector-config}]
+\begin{lstlisting}[language=yaml, caption={Konfiguracja OpenTelemetry Collector: pipeline logow i sladow; metryki pobiera bezposrednio Prometheus (infrastructure/helm/observability/files/otel-collector-config.yaml)}, label={lst:otel-collector-config}]
 receivers:
   otlp:
     protocols:
@@ -46,39 +79,42 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 processors:
-  batch:
-    timeout: 1s
-    send_batch_size: 1024
-  resource:
+  memory_limiter:        # ochrona Collectora przed OOM
+    check_interval: 1s
+    limit_percentage: 80
+    spike_limit_percentage: 25
+  resource:              # wzbogacenie o atrybut srodowiska
     attributes:
       - key: deployment.environment
         value: production
         action: insert
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
 
 exporters:
-  loki:
-    endpoint: http://loki:3100/loki/api/v1/push
-  prometheus:
-    endpoint: 0.0.0.0:8889
-  otlp/tempo:
-    endpoint: http://tempo:4317
+  otlp_http/loki:        # Loki 3.x: natywny endpoint OTLP /otlp
+    endpoint: http://loki:3100/otlp
+  otlp_grpc/tempo:
+    endpoint: tempo:4317
     tls:
       insecure: true
 
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
 service:
+  extensions: [health_check]
   pipelines:
-    logs:
-      receivers: [otlp]
-      processors: [batch, resource]
-      exporters: [loki]
-    metrics:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [prometheus]
     traces:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp/tempo]
+      processors: [memory_limiter, resource, batch]
+      exporters: [otlp_grpc/tempo]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [otlp_http/loki]
 \end{lstlisting}
 
 \begin{techcard}{Prometheus}
@@ -93,31 +129,27 @@ service:
   \item \textbf{Service Discovery w Kubernetes:} Automatyczne wykrywanie podów z adnotacją \texttt{prometheus.io/scrape: "true"} eliminuje ręczną aktualizację konfiguracji przy każdym nowym serwisie.
 \end{itemize}
 
-\textbf{Rola w projekcie:} Prometheus zbiera metryki z endpointu \texttt{/actuator/prometheus} eksponowanego przez Micrometer oraz z infrastruktury Kubernetes (kube-state-metrics, node-exporter). Po jego wdrożeniu metryki są dostępne w Grafanie i stanowią podstawę definiowania alertów.
+\textbf{Rola w projekcie:} Prometheus zbiera metryki z endpointu \texttt{/q/metrics} eksponowanego przez Micrometer, wykrywając usługi po adnotacjach \texttt{prometheus.io/scrape}. W akademickim wdrożeniu, dla oszczędności zasobów, pominięto komponenty metryk infrastruktury (kube-state-metrics, node-exporter). Po wdrożeniu metryki są dostępne w Grafanie i stanowią podstawę definiowania alertów.
 
 \end{techcard}
 
-\begin{lstlisting}[language=yaml, caption={Konfiguracja Prometheus -- scraping aplikacji i autodiscovery Kubernetes (infrastructure/prometheus.yml)}, label={lst:prometheus-config}]
+\begin{lstlisting}[language=yaml, caption={Prometheus: autodiscovery uslug po adnotacjach prometheus.io (domyslny job czartu, role: endpoints)}, label={lst:prometheus-config}]
 global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'bsc-app-backend'
-    static_configs:
-      - targets: ['bsc-app-backend:8080']
-    metrics_path: /actuator/prometheus
-
-  - job_name: 'kubernetes-pods'
+  # Domyslny job wykrywa Service'y z adnotacja prometheus.io/scrape
+  - job_name: kubernetes-service-endpoints
     kubernetes_sd_configs:
-      - role: pod
+      - role: endpoints
     relabel_configs:
-      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
         action: keep
         regex: "true"
-      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
         action: replace
         target_label: __metrics_path__
-        regex: (.+)
+        regex: (.+)        # uslugi eksponuja /q/metrics (Micrometer)
 \end{lstlisting}
 
 \begin{techcard}{Loki}
@@ -141,12 +173,12 @@ scrape_configs:
 
 \textbf{Dobre nawyki:}
 \begin{itemize}
-  \item \textbf{Propagacja Trace ID do logów:} OTel Java Agent automatycznie wstrzykuje \texttt{trace\_id} i \texttt{span\_id} do logów -- format JSON musi zawierać te pola, a Grafana powinna mieć skonfigurowane łącze Loki $\rightarrow$ Tempo.
+  \item \textbf{Propagacja Trace ID do logów:} Rozszerzenie \texttt{quarkus-opentelemetry} automatycznie wstrzykuje \texttt{traceId} i \texttt{spanId} do kontekstu MDC (a więc do logów JSON), a Grafana ma skonfigurowane łącze Loki $\rightarrow$ Tempo.
   \item \textbf{Strategia próbkowania (\textit{sampling}):} Zbieranie 100\% śladów w systemie produkcyjnym generuje duże koszty. Próbkowanie \textit{head-based} (np. 10\% żądań) jest wystarczające dla projektów akademickich.
   \item \textbf{Metrics Generator:} Tempo może automatycznie generować metryki RED ze śladów i eksportować je do Prometheusa, eliminując duplikowanie instrumentacji.
 \end{itemize}
 
-\textbf{Rola w projekcie:} Tempo odbiera ślady od OTel Java Agent (przez Collector). W Grafanie umożliwia przejście od wykresu metryki (wzrost czasu odpowiedzi) bezpośrednio do konkretnego śladu, a stamtąd do logów z tego samego żądania -- zamykając pętlę obserwowalności.
+\textbf{Rola w projekcie:} Tempo odbiera ślady od aplikacji (przez OTel Collector). W Grafanie umożliwia przejście od wykresu metryki (wzrost czasu odpowiedzi) bezpośrednio do konkretnego śladu, a stamtąd do logów z tego samego żądania -- zamykając pętlę obserwowalności.
 
 \end{techcard}
 
@@ -166,24 +198,27 @@ scrape_configs:
 
 \end{techcard}
 
-\begin{lstlisting}[language=yaml, caption={Konfiguracja \'{z}r\'{o}de\l{} danych Grafana z w\l{}\k{a}czon\k{a} korelacj\k{a} metryk-log\'{o}w-\'{s}lad\'{o}w (infrastructure/grafana/provisioning/datasources/datasources.yaml)}, label={lst:grafana-datasources}]
+\begin{lstlisting}[language=yaml, caption={Zrodla danych Grafana z korelacja miedzy filarami (klucz grafana.datasources w infrastructure/helm/observability/values.yaml)}, label={lst:grafana-datasources}]
 apiVersion: 1
-
 datasources:
   - name: Prometheus
     type: prometheus
-    url: http://prometheus:9090
+    uid: prometheus
+    url: http://prometheus
     isDefault: true
 
   - name: Loki
     type: loki
+    uid: loki
     url: http://loki:3100
     jsonData:
       derivedFields:
-        - name: TraceID
-          matcherRegex: '"trace_id":"(\w+)"'
-          url: '${__value.raw}'
+        # trace_id pochodzi z metadanych OTLP (nie z regexa po tresci logu)
+        - name: trace_id
+          matcherType: label
+          matcherRegex: trace_id
           datasourceUid: tempo
+          url: "${__value.raw}"
 
   - name: Tempo
     type: tempo
@@ -193,6 +228,11 @@ datasources:
       tracesToLogsV2:
         datasourceUid: loki
         filterByTraceID: true
+        tags:
+          - key: service.name
+            value: service_name
       serviceMap:
         datasourceUid: prometheus
+      nodeGraph:
+        enabled: true
 \end{lstlisting}
