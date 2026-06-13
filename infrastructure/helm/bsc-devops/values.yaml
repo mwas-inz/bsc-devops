@@ -1,7 +1,9 @@
 global:
   namespace: bsc-devops
 
-nameOverride: ""
+# Chart is published as "bsc-devops-apps", but the deployed resource identity
+# (labels, RBAC names) stays "bsc-devops" to match the namespace and release.
+nameOverride: "bsc-devops"
 fullnameOverride: ""
 
 # Global image tag — overridden per-service via image.tag

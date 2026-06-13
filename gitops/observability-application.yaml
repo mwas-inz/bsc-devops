@@ -6,11 +6,15 @@ metadata:
 spec:
   project: default
   source:
-    # Git-path Helm source: ArgoCD runs `helm dependency build` from Chart.lock,
-    # so the LGTM community subcharts do not need to be published to an OCI registry.
-    repoURL: https://github.com/mwas-inz/bsc-devops.git
-    path: infrastructure/helm/observability
-    targetRevision: main
+    # OCI Helm chart published to GHCR by cd-helm. The LGTM community subcharts are
+    # bundled into the package at build time, so ArgoCD renders it without resolving
+    # dependencies at sync time.
+    repoURL: ghcr.io/mwas-inz/charts
+    chart: bsc-devops-observability
+    targetRevision: "0.1.0"
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: observability

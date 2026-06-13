@@ -3,11 +3,13 @@ name: CD — Helm chart
 on:
   push:
     tags:
-      - 'chart-*'
+      - 'chart-apps-*'
+      - 'chart-observability-*'
 
 jobs:
   publish:
-    name: Package & Push — GHCR
+    name: Package & Push — bsc-devops-apps
+    if: startsWith(github.ref_name, 'chart-apps-')
     runs-on: ubuntu-latest
 
     permissions:
@@ -32,4 +34,42 @@ jobs:
 
       - name: Push chart to GHCR
         run: |
-          helm push bsc-devops-*.tgz oci://ghcr.io/${{ github.repository_owner }}/charts
+          helm push bsc-devops-apps-*.tgz oci://ghcr.io/${{ github.repository_owner }}/charts
+
+  publish-observability:
+    name: Package & Push — bsc-devops-observability
+    if: startsWith(github.ref_name, 'chart-observability-')
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v5
+
+      - name: Log in to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io \
+            --username ${{ github.actor }} \
+            --password-stdin
+
+      - name: Add chart repos
+        run: |
+          helm repo add grafana https://grafana.github.io/helm-charts
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo update
+
+      - name: Build dependencies (bundle LGTM subcharts)
+        run: helm dependency build infrastructure/helm/observability
+
+      - name: Package chart
+        run: helm package infrastructure/helm/observability
+
+      - name: Push chart to GHCR
+        run: |
+          helm push bsc-devops-observability-*.tgz oci://ghcr.io/${{ github.repository_owner }}/charts
