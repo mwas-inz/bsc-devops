@@ -87,3 +87,67 @@ jobs:
             git tag "${TAG}"
             git push origin "${TAG}"
           fi
+
+  validate-observability:
+    name: Lint & Validate — observability
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    env:
+      CHART: infrastructure/helm/observability
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v5
+
+      - name: Add chart repos
+        run: |
+          helm repo add grafana https://grafana.github.io/helm-charts
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo update
+
+      - name: Build chart dependencies
+        run: helm dependency build ${{ env.CHART }}
+
+      - name: Lint chart
+        run: helm lint ${{ env.CHART }}
+
+      - name: Render templates
+        run: helm template observability ${{ env.CHART }} --debug > /dev/null
+
+  tag-observability:
+    name: Tag — obs-chart-<version>
+    needs: validate-observability
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Read chart version
+        id: chart
+        run: |
+          VERSION=$(grep '^version:' infrastructure/helm/observability/Chart.yaml | awk '{print $2}')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Create and push git tag
+        env:
+          TAG: obs-chart-${{ steps.chart.outputs.version }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" > /dev/null 2>&1; then
+            echo "Tag ${TAG} already exists — skipping"
+          else
+            git tag "${TAG}"
+            git push origin "${TAG}"
+          fi
