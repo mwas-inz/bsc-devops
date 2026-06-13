@@ -125,7 +125,7 @@ spec:
   project: default
   source:
     repoURL: ghcr.io/mateuszwas/charts   # OCI Helm registry (GHCR)
-    chart: bsc-devops
+    chart: bsc-devops-apps
     targetRevision: "0.5.0"
     helm:
       valueFiles:
@@ -156,7 +156,7 @@ Sekcja \texttt{syncPolicy.automated} z \texttt{prune: true} i \texttt{selfHeal: 
   \label{fig:argocd-ui}
 \end{figure}
 
-Aktualizacja wdrożenia do nowej wersji charta przebiega w dwóch krokach. Łańcuch CD (listing~\ref{lst:cd-helm}) publikuje nowy artefakt OCI do GHCR po oznaczeniu repozytorium tagiem \texttt{chart-*}. Następnie pole \texttt{targetRevision} w \texttt{gitops/application.yaml} jest uaktualniane i zasób ponownie ładowany do klastra -- ArgoCD wykrywa zmianę i natychmiast inicjuje cykl uzgadniania. Operację automatyzuje skrypt \texttt{scripts/local/argocd-update.sh}:
+Aktualizacja wdrożenia do nowej wersji charta przebiega w dwóch krokach. Łańcuch CD (listing~\ref{lst:cd-helm}) publikuje nowy artefakt OCI do GHCR po oznaczeniu repozytorium tagiem \texttt{chart-apps-*}. Następnie pole \texttt{targetRevision} w \texttt{gitops/application.yaml} jest uaktualniane i zasób ponownie ładowany do klastra -- ArgoCD wykrywa zmianę i natychmiast inicjuje cykl uzgadniania. Operację automatyzuje skrypt \texttt{scripts/local/argocd-update.sh}:
 
 \begin{lstlisting}[language=bash, caption={Aktualizacja \texttt{targetRevision} i ponowne załadowanie zasobu \texttt{Application} do klastra (scripts/local/argocd-update.sh)}, label={lst:argocd-update}]
 $ bash scripts/local/argocd-update.sh 0.7.0

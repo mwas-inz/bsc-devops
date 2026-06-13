@@ -4,9 +4,9 @@ Infrastructure as code for the bsc-devops thesis platform.
 
 ## Helm Chart
 
-`helm/bsc-devops/` is an umbrella Helm chart (v0.7.0) that packages all application services.
-It is published to GHCR as an OCI chart via the `cd-helm` GitHub Actions workflow whenever a
-`chart-*` git tag is pushed.
+`helm/bsc-devops/` is an umbrella Helm chart (`bsc-devops-apps`, v0.7.0) that packages all
+application services. It is published to GHCR as an OCI chart via the `cd-helm` GitHub Actions
+workflow whenever a `chart-apps-*` git tag is pushed.
 
 The chart renders Kubernetes resources for the following components:
 

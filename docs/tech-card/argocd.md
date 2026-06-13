@@ -24,7 +24,7 @@ spec:
   project: default
   source:
     repoURL: ghcr.io/mateuszwas/charts   # OCI Helm registry (GHCR)
-    chart: bsc-devops
+    chart: bsc-devops-apps
     targetRevision: "0.5.0"
     helm:
       valueFiles:

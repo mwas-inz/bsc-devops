@@ -86,7 +86,7 @@ Dystrybucja chartu realizowana jest przez dwa oddzielne łańcuchy CI/CD, powią
 on:
   push:
     tags:
-      - 'chart-*'
+      - 'chart-apps-*'
 
 jobs:
   publish:
@@ -103,7 +103,7 @@ jobs:
       - name: Package chart
         run: helm package infrastructure/helm/bsc-devops
       - name: Push chart to GHCR
-        run: helm push bsc-devops-*.tgz oci://ghcr.io/${{ github.repository_owner }}
+        run: helm push bsc-devops-apps-*.tgz oci://ghcr.io/${{ github.repository_owner }}
 \end{lstlisting}
 
-Łańcuch \texttt{ci-helm} waliduje chart i -- przy każdym pushu na gałąź \texttt{main} -- odczytuje wersję z \texttt{Chart.yaml} i tworzy git tag \texttt{chart-<wersja>}. Tag ten wyzwala łańcuch \texttt{cd-helm}, który pakuje chart poleceniem \texttt{helm package} i publikuje artefakt OCI pod adresem \texttt{ghcr.io/mwas-inz/bsc-devops:<wersja>}.
+Łańcuch \texttt{ci-helm} waliduje chart i -- przy każdym pushu na gałąź \texttt{main} -- odczytuje wersję z \texttt{Chart.yaml} i tworzy git tag \texttt{chart-apps-<wersja>}. Tag ten wyzwala łańcuch \texttt{cd-helm}, który pakuje chart poleceniem \texttt{helm package} i publikuje artefakt OCI pod adresem \texttt{ghcr.io/mwas-inz/charts/bsc-devops-apps:<wersja>}.

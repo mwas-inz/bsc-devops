@@ -1,5 +1,5 @@
 apiVersion: v2
-name: observability
+name: bsc-devops-observability
 description: >-
   LGTM observability backend (Loki, Grafana, Tempo, Prometheus) for the
   bsc-devops thesis platform. Bundles the official community charts as
