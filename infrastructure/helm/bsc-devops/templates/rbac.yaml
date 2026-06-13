@@ -21,7 +21,7 @@ roleRef:
   kind: Role
   name: {{ include "bsc-devops.name" . }}-app
 subjects:
-  {{- range list "users-sa" "tasks-sa" "task-archiver-sa" "frontend-sa" "postgres-sa" "pulsar-sa" "jaeger-sa" }}
+  {{- range list "users-sa" "tasks-sa" "task-archiver-sa" "frontend-sa" "postgres-sa" "pulsar-sa" }}
   - kind: ServiceAccount
     name: {{ . }}
     namespace: {{ include "bsc-devops.namespace" $ }}

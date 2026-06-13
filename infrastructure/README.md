@@ -4,7 +4,7 @@ Infrastructure as code for the bsc-devops thesis platform.
 
 ## Helm Chart
 
-`helm/bsc-devops/` is an umbrella Helm chart (v0.6.0) that packages all application services.
+`helm/bsc-devops/` is an umbrella Helm chart (v0.7.0) that packages all application services.
 It is published to GHCR as an OCI chart via the `cd-helm` GitHub Actions workflow whenever a
 `chart-*` git tag is pushed.
 
@@ -19,7 +19,6 @@ The chart renders Kubernetes resources for the following components:
 | Vue 3 frontend | `frontend.yaml` |
 | PostgreSQL | `postgres.yaml` |
 | Apache Pulsar | `pulsar.yaml` |
-| Jaeger (tracing) | `jaeger.yaml` |
 | API Ingress | `api-ingress.yaml` |
 | Shared ConfigMap | `configmap.yaml` |
 

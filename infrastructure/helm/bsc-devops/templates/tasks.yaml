@@ -63,6 +63,14 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            # Tag telemetry with orchestration metadata so logs/traces in Loki/Tempo
+            # carry the same Kubernetes labels as the rest of the platform.
+            - name: QUARKUS_OTEL_RESOURCE_ATTRIBUTES
+              value: "service.namespace=bsc-devops,k8s.namespace.name=$(KUBERNETES_NAMESPACE),k8s.pod.name=$(POD_NAME)"
 ---
 apiVersion: v1
 kind: Service

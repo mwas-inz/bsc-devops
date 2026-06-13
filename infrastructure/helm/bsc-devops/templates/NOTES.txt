@@ -22,13 +22,12 @@ Services:
 {{- if .Values.pulsar.enabled }}
   pulsar        -> pulsar:6650 (broker), pulsar:8080 (admin)
 {{- end }}
-{{- if .Values.jaeger.enabled }}
-  jaeger        -> jaeger:16686 (UI), jaeger:4317 (OTLP gRPC)
-{{- end }}
+
+Telemetry is exported via OTLP to the OpenTelemetry Collector in the
+observability namespace (otel-collector.observability.svc:4317).
 
 Port-forward shortcuts:
   kubectl port-forward -n {{ include "bsc-devops.namespace" . }} svc/frontend 8080:80
-  kubectl port-forward -n {{ include "bsc-devops.namespace" . }} svc/jaeger 16686:16686
 
 Deploy with a specific image tag:
   helm upgrade --install {{ .Release.Name }} ./infrastructure/helm/bsc-devops \

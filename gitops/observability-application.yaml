@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: observability
+  namespace: argocd
+spec:
+  project: default
+  source:
+    # Git-path Helm source: ArgoCD runs `helm dependency build` from Chart.lock,
+    # so the LGTM community subcharts do not need to be published to an OCI registry.
+    repoURL: https://github.com/mwas-inz/bsc-devops.git
+    path: infrastructure/helm/observability
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      # Server-side apply avoids the client-side last-applied annotation size limit
+      # that large Grafana/Prometheus resources can exceed.
+      - ServerSideApply=true
