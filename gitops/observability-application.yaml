@@ -11,7 +11,7 @@ spec:
     # dependencies at sync time.
     repoURL: ghcr.io/mwas-inz/charts
     chart: bsc-devops-observability
-    targetRevision: "0.1.0"
+    targetRevision: "0.2.0"
     helm:
       valueFiles:
         - values.yaml
