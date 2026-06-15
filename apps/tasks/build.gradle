@@ -32,10 +32,10 @@ dependencies {
 
     // transitive dependency fix for Pulsar
     // https://github.com/smallrye/smallrye-reactive-messaging/discussions/2567#discussioncomment-9042159
-    implementation("org.apache.bookkeeper:circe-checksum:4.17.3") {
+    implementation("org.apache.bookkeeper:circe-checksum:4.18.0") {
         artifact { type = "jar" }
     }
-    implementation("org.apache.bookkeeper:cpu-affinity:4.17.3") {
+    implementation("org.apache.bookkeeper:cpu-affinity:4.18.0") {
         artifact { type = "jar" }
     }
 }
