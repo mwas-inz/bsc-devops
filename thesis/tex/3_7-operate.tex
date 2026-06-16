@@ -5,7 +5,6 @@ Faza operacyjna (\textit{Operate}) obejmuje utrzymanie aplikacji w środowisku p
 Zgodnie z założeniem o pełnej odtwarzalności środowiska w modelu lokalnym, zdecydowano się na uruchomienie odpowiedników usług chmurowych bezpośrednio wewnątrz klastra Kubernetes przy użyciu gotowych chartów Helm.
 \begin{itemize}
     \item \textbf{Baza danych: PostgreSQL (zamiast AWS RDS):} Dane mikroserwisów są przechowywane w relacyjnej bazie danych PostgreSQL. W klastrze lokalnym baza ta działa jako kontener z podmontowanym wolumenem (\textit{Persistent Volume}), co zapewnia trwałość danych mimo restartów kontenerów.
-    \item \textbf{Zapis plików: MinIO (zamiast AWS S3):} Do przechowywania obiektów wykorzystano MinIO — rozwiązanie \textit{open-source} w pełni kompatybilne z API Amazon S3. Dzięki temu aplikacja może korzystać ze standardowych bibliotek S3, a zmiana środowiska na chmurowe wymaga jedynie aktualizacji adresów URL i kluczy dostępowych.
 \end{itemize}
 
 \subsubsection{Zarządzanie zasobami: Kubernetes}
