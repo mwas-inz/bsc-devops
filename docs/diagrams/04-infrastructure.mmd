@@ -1,0 +1,38 @@
+---
+title: Infrastruktura klastra — przestrzenie nazw, Ingress, GitOps i bezpieczeństwo
+config:
+  theme: neo
+---
+flowchart TD
+    subgraph k3d["Klaster k3d (k3s w Dockerze)"]
+
+        subgraph kubesystem["Przestrzeń nazw: kube-system"]
+            sealed["Kontroler Sealed Secrets<br/>klucz prywatny RSA"]
+        end
+
+        subgraph argons["Przestrzeń nazw: argocd"]
+            argocd["Kontroler ArgoCD"]
+        end
+
+        subgraph appsns["Przestrzeń nazw: bsc-devops"]
+            apps["frontend, users, tasks,<br/>task-archiver, pulsar"]
+            rbac["RBAC: ServiceAccount na usługę<br/>Role o minimalnych uprawnieniach"]
+            pgpvc[("PostgreSQL + PVC")]
+        end
+
+        subgraph obsns["Przestrzeń nazw: observability"]
+            lgtm["OTel Collector +<br/>Loki, Tempo, Prometheus, Grafana"]
+        end
+    end
+
+    argocd -->|ustala| appsns
+    argocd -->|ustala| obsns
+    sealed -->|odszyfrowuje <br> SealedSecrets| appsns
+    sealed -->|odszyfrowuje <br>  SealedSecrets| argons
+    apps --> pgpvc
+    rbac -.->|reguluje| apps
+
+    classDef sec fill:#fce4ec,stroke:#ad1457,color:#880e4f;
+    classDef gitops fill:#ede7f6,stroke:#4527a0,color:#311b92;
+    class sealed,rbac sec;
+    class argocd gitops;

@@ -1,0 +1,30 @@
+---
+title: Korelacja telemetrii — jedno żądanie w trzech filarach
+config:
+  theme: neo
+---
+flowchart TB
+    req["Przychodzące żądanie<br/>traceId nadane przy wejściu"]
+    svc["Usługa Quarkus<br/>quarkus-opentelemetry"]
+
+    req --> svc
+    svc -->|"log JSON z mdc.traceId"| loki[("Loki")]
+    svc -->|"spany z traceId / spanId"| tempo[("Tempo")]
+    svc -->|"/q/metrics (RED)"| prom[("Prometheus")]
+
+    subgraph grafana["Grafana — wspólny interfejs"]
+        gdash["Pulpity i Explore"]
+    end
+
+    loki --> gdash
+    tempo --> gdash
+    prom --> gdash
+
+    loki -.->|"derivedFields: trace_id do Tempo"| tempo
+    tempo -.->|"tracesToLogsV2 do Loki"| loki
+    tempo -.->|"serviceMap do Prometheus"| prom
+
+    classDef store fill:#fff3e0,stroke:#e65100,color:#e65100;
+    classDef viz fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
+    class loki,tempo,prom store;
+    class gdash viz;
