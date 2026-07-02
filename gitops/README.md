@@ -22,6 +22,22 @@ no plaintext tokens are committed.
 | `secrets/dockerhub-pull-secret.sealed.yaml` | DockerHub pull secret (rate-limit mitigation) |
 | `argocd/install.sh` / `install.ps1` | Installs ArgoCD via Helm into the `argocd` namespace |
 
+## ArgoCD UI
+
+The ArgoCD server is exposed through a Traefik ingress at `http://argocd.localhost`
+(k3d maps `localhost:80` to Traefik; browsers resolve `*.localhost` to loopback).
+The ingress is configured in `infrastructure/local/argocd/values.yaml`
+(`server.ingress` with `server.insecure: true` — TLS terminates at Traefik).
+It belongs to the ArgoCD Helm release itself, not to an Application, so changes to
+those values require a `helm upgrade` (re-running `argocd/install.sh` does this).
+
+Login as `admin` with the initial password:
+
+```sh
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath='{.data.password}' | base64 -d
+```
+
 ## Bootstrap
 
 See `scripts/README.md` for the full GitOps bootstrap walkthrough.

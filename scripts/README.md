@@ -38,6 +38,16 @@ This runs five steps in order:
 | 4    | Install ArgoCD (Helm, `argocd`) — mounts GHCR Docker config for OCI chart pull      |
 | 5    | Apply `gitops/application.yaml` — ArgoCD syncs `bsc-devops` chart from GHCR         |
 
+Traefik then serves every UI on plain HTTP via `*.localhost` hostnames:
+
+| URL                           | Service                                            |
+| ----------------------------- | -------------------------------------------------- |
+| `http://localhost/`           | Demo app (frontend + `/api/tasks`, `/api/users`)   |
+| `http://argocd.localhost`     | ArgoCD UI (admin password: see `gitops/README.md`) |
+| `http://grafana.localhost`    | Grafana                                            |
+| `http://prometheus.localhost` | Prometheus                                         |
+| `http://loki.localhost`       | Loki HTTP API (no UI)                              |
+
 After bootstrap, ArgoCD manages all subsequent deployments automatically.
 Pushing a new chart version to GHCR and updating `targetRevision` in
 `gitops/application.yaml` is all that is needed to trigger a rollout.
