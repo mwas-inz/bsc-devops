@@ -176,7 +176,7 @@
 
 \textbf{Status:} zaakceptowany (data: 2026-05-28).
 
-\textbf{Kontekst.} Po zbudowaniu i przeskanowaniu obrazu łańcuch CI musi poświadczyć jego pochodzenie (\textit{provenance}), bez przechowywania długotrwałych kluczy w repozytorium.
+\textbf{Kontekst.} Po zbudowaniu i przeskanowaniu obrazu łańcuch CI musi poświadczyć jego pochodzenie (ang. \textit{provenance}), bez przechowywania długotrwałych kluczy w repozytorium.
 
 \textbf{Decyzja.} Wybrano Cosign w trybie bezkluczowym (\textit{keyless}, Sigstore): podpis składany jest krótkotrwałym certyfikatem wystawionym na tożsamość OIDC GitHub Actions i zapisywany w publicznym dzienniku przejrzystości Rekor, co umożliwia weryfikację bez dystrybucji klucza publicznego.
 
@@ -209,7 +209,7 @@
 
 \textbf{Status:} zaakceptowany (data: 2026-06-09).
 
-\textbf{Kontekst.} Po przyjęciu Helma (ADR-0012) projekt potrzebował kontrolera GitOps domykającego pętlę dostawy: obserwującego repozytorium i uzgadniającego stan klastra. Dominują dwa narzędzia CNCF (\textit{graduated}) --- ArgoCD i Flux.
+\textbf{Kontekst.} Po przyjęciu Helma (ADR-0012) projekt potrzebował kontrolera GitOps domykającego pętlę dostawy: obserwującego repozytorium i uzgadniającego stan klastra. Dominują dwa narzędzia CNCF (ang. \textit{graduated}) --- ArgoCD i Flux.
 
 \textbf{Decyzja.} Wybrano ArgoCD ze względu na pierwszorzędną obsługę chartów Helm z rejestru OCI, obserwowalny interfejs webowy (natychmiast pokazujący stan synchronizacji --- przydatny w demonstracjach i jako materiał ilustracyjny) oraz pozycję najczęściej cytowanego narzędzia GitOps.
 

@@ -4,7 +4,7 @@ Faza wydania (\textit{Release}) koncentruje się na bezpiecznym przechowywaniu a
 \subsubsection{Rejestr obrazów: Docker Hub}
 Jako centralne repozytorium obrazów kontenerowych wykorzystano platformę \textbf{Docker Hub}.
 \begin{itemize}
-    \item \textbf{Rola w projekcie:} Po pomyślnym zakończeniu etapu budowania i testowania, obrazy mikroserwisów są wysyłane (\textit{push}) do prywatnych lub publicznych repozytoriów w Docker Hub. Każdy obraz jest oznaczony unikalnym tagiem (np. skrótem \textit{commit SHA} lub numerem wersji semantycznej), co zapewnia pełną identyfikowalność.
+    \item \textbf{Rola w projekcie:} Po pomyślnym zakończeniu etapu budowania i testowania, obrazy mikroserwisów są wysyłane (ang. \textit{push}) do prywatnych lub publicznych repozytoriów w Docker Hub. Każdy obraz jest oznaczony unikalnym tagiem (np. skrótem \textit{commit SHA} lub numerem wersji semantycznej), co zapewnia pełną identyfikowalność.
     \item \textbf{Uzasadnienie:} Docker Hub jest natywnie obsługiwany przez większość narzędzi CI/CD oraz klastry Kubernetes, co upraszcza proces pobierania obrazów podczas wdrożenia.
 \end{itemize}
 
@@ -107,3 +107,12 @@ jobs:
 \end{lstlisting}
 
 Łańcuch \texttt{ci-helm} waliduje chart i -- przy każdym pushu na gałąź \texttt{main} -- odczytuje wersję z \texttt{Chart.yaml} i tworzy git tag \texttt{chart-apps-<wersja>}. Tag ten wyzwala łańcuch \texttt{cd-helm}, który pakuje chart poleceniem \texttt{helm package} i publikuje artefakt OCI pod adresem \texttt{ghcr.io/mwas-inz/charts/bsc-devops-apps:<wersja>}.
+
+Cały łańcuch --- od walidacji, przez zdarzenie tagu, po konsumpcję opublikowanego artefaktu przez ArgoCD --- przedstawia rysunek~\ref{fig:chart-release}. Warto zauważyć, że tag jest wypychany tokenem osobistym (PAT), a nie domyślnym \texttt{GITHUB\_TOKEN}: zdarzenia utworzone domyślnym tokenem nie wyzwalają kolejnych łańcuchów, co stanowi zabezpieczenie GitHub Actions przed nieskończonymi pętlami.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{img/diagrams/06-release/release-01-flow-chart-release.png}
+    \caption{Dwuetapowy łańcuch publikacji chartu --- walidacja (\texttt{ci-helm}) oddzielona od publikacji (\texttt{cd-helm}) niezmiennym git tagiem \texttt{chart-apps-<wersja>}; artefakt OCI konsumowany przez ArgoCD według przypiętej wersji (opracowanie własne).}
+    \label{fig:chart-release}
+\end{figure}

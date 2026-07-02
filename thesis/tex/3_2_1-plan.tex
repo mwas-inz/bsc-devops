@@ -2,7 +2,8 @@
 Faza planowania (\textit{Plan}) odpowiada za zdefiniowanie wymagań, priorytetyzację zadań i organizację pracy. W niniejszym projekcie etap ten realizowany jest z użyciem platformy Jira jako centrum zarządzania backlogiem.
 
 \subsubsection{Zarządzanie projektami: Jira}
-Do zarządzania wymaganiami i planowania prac wykorzystano platformę \textbf{Jira} (projekt \textit{INZ}). Narzędzie to wybrano, ponieważ jest standardem rynkowym i oferuje zaawansowane możliwości obsługi metodyk zwinnych (Agile).
+Do zarządzania wymaganiami i planowania prac wykorzystano platformę \textbf{Jira} (projekt \textit{INZ}).
+Narzędzie to wybrano, ponieważ jest standardem rynkowym i oferuje zaawansowane możliwości obsługi metodyk zwinnych (Agile).
 
 \textbf{Metodyka:}
 Agile to rodzina iteracyjnych metodyk wytwarzania oprogramowania, kładących nacisk na częste dostarczanie wartości i adaptację do zmian. Sprinty są podstawową jednostką iteracji w Agile — to ograniczone czasowo okresy pracy (zazwyczaj 1--4 tygodnie), po których dostarcza się działający przyrost produktu. Tablica Kanban to uproszczona alternatywa skupiona na wizualizacji przepływu zadań i ograniczaniu pracy w toku, bez sztywnych iteracji czasowych.
@@ -10,14 +11,25 @@ Agile to rodzina iteracyjnych metodyk wytwarzania oprogramowania, kładących na
 Ponieważ projekt realizowany jest indywidualnie i w ograniczonym czasie, zadania podzielono logicznie na sprinty zgodnie z etapami pętli DevOps, lecz do bieżącego śledzenia pracy zastosowano tablicę Kanban — bardziej odpowiednią dla małych, jednoosobowych projektów.
 
 \textbf{Struktura backlogu:}
-Backlog projektu odwzorowuje etapy pętli DevOps. Zdefiniowano pięć Epics odpowiadających sprintom implementacyjnym: \textit{Build}, \textit{Release}, \textit{Deploy}, \textit{Monitor} i \textit{Polish}. W ramach każdego Epica utworzono zestaw zadań (\textit{Tasks}) pokrywających zarówno dostarczenie kodu infrastruktury, jak i uzupełnienie odpowiednich sekcji pracy inżynierskiej. Łącznie backlog liczy 29 zadań.
+Backlog projektu odwzorowuje etapy pętli DevOps. Zdefiniowano pięć etapów (ang. \textit{Epics}, żargonowo nazywane też po polsku "epikami") odpowiadających sprintom implementacyjnym: \textit{Build}, \textit{Release}, \textit{Deploy}, \textit{Monitor} i dodatkowy \textit{Polish} związany z poprawkami edytorskimi pracy dyplomowej.
+W ramach każdego epika utworzono zestaw zadań (\textit{Tasks}) pokrywających zarówno dostarczenie kodu infrastruktury, jak i uzupełnienie odpowiednich sekcji pracy inżynierskiej.
+Łącznie początkowy backlog liczy 29 zadań, ale w miarę postępu prac będzie on uzupełniany o kolejne, wynikające z bieżących potrzeb i obserwacji.
 
 \textbf{Integracja i dobre praktyki:}
-Zastosowano integrację z systemem kontroli wersji GitHub. Każda gałąź kodu (\textit{branch}) jest nazwana według schematu \texttt{feature/INZ-XX-opis}, a wiadomości zatwierdzeń zawierają identyfikator zadania (np. \texttt{feat(helm): INZ-9 create umbrella chart}). Dzięki temu zmiany w kodzie są automatycznie powiązane z odpowiednim zgłoszeniem w Jira, co zapewnia pełną identyfikowalność — od wymagania po konkretną linię kodu.
+Zastosowano integrację z systemem kontroli wersji GitHub. Każda gałąź kodu (ang. \textit{branch}) jest nazwana według schematu \texttt{feature/INZ-XX-opis}, a wiadomości zatwierdzeń — zgodne ze standardem Conventional Commits (ADR-0004) — wiążą zadanie stopką (np. \texttt{Resolves: INZ-9}).
+Dzięki temu zmiany w kodzie są automatycznie powiązane z odpowiednim zgłoszeniem w Jira, co zapewnia pełną identyfikowalność — od wymagania po konkretną linię kodu.
+Kompletny łańcuch tej identyfikowalności — od zadania w Jira, przez gałąź, commit i Pull Request, po wdrożony artefakt — przedstawia rysunek~\ref{fig:traceability}.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{jira.png}
-    \caption{Tablica Kanban projektu INZ w Jira -- widok sprintów i zadań}
+    \includegraphics[width=\textwidth]{img/diagrams/03-plan/plan-01-flow-traceability.png}
+    \caption{Identyfikacja zadań --- identyfikator wymagania (\texttt{INZ-XX}) towarzyszy zmianie od zadania w Jira po wdrożoną wersję, a powiązania w Jira powstają automatycznie (opracowanie własne).}
+    \label{fig:traceability}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{jira.png}
+    \caption{Tablica Kanban projektu INZ w Jira -- widok sprintów i zadań oraz powiązań z repozytorium GitHub (opracowanie własne).}
     \label{fig:jira-board}
 \end{figure}
