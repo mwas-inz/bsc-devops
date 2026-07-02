@@ -1,4 +1,4 @@
-FROM node:lts-alpine3.23 AS build
+FROM node:lts-alpine3.24 AS build
 
 WORKDIR /app
 COPY package*.json ./
@@ -7,9 +7,9 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM nginx:1.31.1-alpine-slim
+FROM nginx:1.31.2-alpine-slim
 
-RUN apk update && apk upgrade --no-cache curl libxml2 freetype
+RUN apk upgrade --no-cache
 
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
