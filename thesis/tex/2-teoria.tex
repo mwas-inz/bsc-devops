@@ -9,7 +9,7 @@ Kładzie nacisk na konfigurację deklaratywną, utrwalanie kodu źródłowego, k
 łatwe odtwarzanie środowisk. Ma umożliwić przenośność, odporność i szybkie iteracje w rozproszonych systemach.
 W praktyce współczesnego oprogramowania 12FA jest często używany jako punkt odniesienia dla projektowania usług Software-as-a-Service (SaaS),
 systemów mikroserwisowych i procesów DevOps.
-\cite{Wiggins2012TwelveFactor}\cite{Kosinska2023CloudNativeKnowledge}
+\cite{Wiggins2012TwelveFactor,Kosinska2023CloudNativeKnowledge}
 
 \subsubsection{Zasady Twelve-Factor App}
 
@@ -122,7 +122,16 @@ DevOps to podejście do rozwoju oprogramowania, które łączy praktyki i narzę
 Początki tego podejścia sięgają około 2007 roku, kiedy to inżynierowie i liderzy IT zaczęli dostrzegać potrzebę lepszej współpracy między zespołami deweloperskimi a operacyjnymi, aby sprostać rosnącym wymaganiom rynku i użytkowników.
 Jego prekursorami byli m.in. Patrick Debois, Nicole Forsgren, Jez Humble, Gene Kim i John Willis, którzy promowali idee takie jak ciągła integracja (CI), ciągłe dostarczanie (CD) i automatyzacja procesów.
 Ich prace i działalność przyczyniły się do rozwoju DevOps jako kultury, filozofii i praktyki, która zyskała szerokie uznanie w branży IT i stała się kluczowym elementem nowoczesnego rozwoju oprogramowania.
-\cite{AtlassianDevOpsHistory} \cite{Kim2021DevOpsHandbook}
+\cite{AtlassianDevOpsHistory,Kim2021DevOpsHandbook}
+Rosnącą popularność tego podejścia dobrze ilustruje zainteresowanie hasłem \textit{DevOps} w wyszukiwarce Google (rysunek~\ref{fig:google-trends}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{img/google-trends.png}
+    \caption{Zainteresowanie hasłem \textit{DevOps} w wyszukiwarce Google \cite{GoogleTrendsDevOps}.}
+    \label{fig:google-trends}
+\end{figure}
+
 Kultura DevOps promuje otwartą komunikację i współpracę między zespołami deweloperskimi a operacyjnymi, co pozwala na szybsze rozwiązywanie problemów i lepsze zrozumienie wymagań biznesowych.
 Automatyzacja jest kluczowym elementem, który umożliwia eliminację manualnych procesów, co z kolei przyspiesza cykle wydania i redukuje ryzyko błędów \cite{Leite2019DevOpsConcepts}.
 
@@ -150,7 +159,7 @@ Jest to próba przełożenia wartości i zasad DevOps na konkretne, skodyfikowan
 Dwoma najbardziej wpływowymi podejściami są model CALMS oraz metryki DORA.
 
 \begin{description}[font=\bfseries]
-    \item[Model CALMS] \cite{Kim2021DevOpsHandbook}\cite{Maroukian2020DevOpsAdoption} Opracowany przez Johna Willisa i Damona Edwardsa (a później uzupełniony przez Jeza Humble'a), model ten definiuje pięć fundamentów sukcesu DevOps:
+    \item[Model CALMS] \cite{Kim2021DevOpsHandbook,Maroukian2020DevOpsAdoption} Opracowany przez Johna Willisa i Damona Edwardsa (a później uzupełniony przez Jeza Humble'a), model ten definiuje pięć fundamentów sukcesu DevOps:
           \begin{itemize}
               \item \textbf{C (Culture)} --- Kultura oparta na zaufaniu, współpracy i wspólnym celu. Jest to najważniejszy element, bez którego inne narzędzia i procesy tracą na znaczeniu.
               \item \textbf{A (Automation)} --- Automatyzacja powtarzalnych zadań (np. testowanie, wdrażanie), co pozwala na eliminację błędów ludzkich i szybsze dostarczanie wartości.
@@ -159,7 +168,7 @@ Dwoma najbardziej wpływowymi podejściami są model CALMS oraz metryki DORA.
               \item \textbf{S (Sharing)} --- Dzielenie się wiedzą, sukcesami i porażkami wewnątrz organizacji, co wspiera ciągłe uczenie się i buduje spójność zespołu.
           \end{itemize}
 
-    \item[Metryki DORA] \cite{Google2022StateOfDevOps}\cite{DoraCapabilities} DevOps Research and Assessment (DORA) zaproponowany przez Nicole Forsgren w Google to model,
+    \item[Metryki DORA] \cite{Google2022StateOfDevOps,DoraCapabilities} DevOps Research and Assessment (DORA) zaproponowany przez Nicole Forsgren w Google to model,
           który zidentyfikował cztery kluczowe wskaźniki (ang. \textit{Four Key Metrics}) pozwalające obiektywnie mierzyć wydajność dostarczania oprogramowania:
           \begin{itemize}
               \item \textbf{Deployment Frequency} (Częstotliwość wdrożeń) --- Mierzy, jak często organizacja pomyślnie wdraża kod do produkcji. Wysoka częstotliwość wskazuje na zwinność zespołu.
