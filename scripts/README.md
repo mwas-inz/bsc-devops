@@ -42,6 +42,14 @@ After bootstrap, ArgoCD manages all subsequent deployments automatically.
 Pushing a new chart version to GHCR and updating `targetRevision` in
 `gitops/application.yaml` is all that is needed to trigger a rollout.
 
+**Day-2 updates (after a chart change is published):**
+
+| Script                      | Description                                                                                            |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `argocd-update.sh` / `.ps1` | Bump apps `targetRevision`, commit, push, and re-apply the apps Application.                           |
+| `observability-update.sh`   | Re-apply + hard-refresh the observability Application; optional version bump; probes the UI hostnames. |
+| `observability-rollout.sh`  | One-time Etap Monitor rollout: apps sync, Grafana admin secret, LGTM + Collector delivery.             |
+
 ### Legacy scripts
 
 These scripts deploy the application directly without ArgoCD, useful for quick
