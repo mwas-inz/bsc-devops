@@ -1,0 +1,40 @@
+---
+title: Korelacja telemetrii — jeden traceId, trzy filary, nawigacja w Grafanie
+config:
+  theme: neo
+---
+flowchart TB
+    subgraph write["Zapis — jedno żądanie, jeden identyfikator"]
+        direction LR
+        req["żądanie HTTP<br/>traceId: 4bf92f…"]
+        svc["usługa Quarkus<br/>quarkus-opentelemetry"]
+        loki[("Loki — wpis logu<br/>mdc.traceId = 4bf92f…")]
+        tempo[("Tempo — spany śladu<br/>traceId = 4bf92f…")]
+        prom[("Prometheus — metryki RED<br/>etykiety: usługa, endpoint")]
+        req --> svc
+        svc -->|log JSON| loki
+        svc -->|spany| tempo
+        svc -->|scrape /q/metrics| prom
+    end
+
+    subgraph read["Odczyt w Grafanie — nawigacja po identyfikatorze"]
+        direction LR
+        s1["1. Explore / Loki:<br/>znaleziony błąd w logu"]
+        s2["2. Tempo: pełny ślad żądania<br/>span po spanie"]
+        s3["3a. powrót do Loki:<br/>wszystkie logi tego żądania"]
+        s4["3b. Prometheus:<br/>metryki usługi z mapy usług"]
+        s1 -->|"klik: trace_id (derivedFields)"| s2
+        s2 -->|tracesToLogsV2| s3
+        s2 -->|serviceMap| s4
+    end
+
+    write ~~~ read
+
+    classDef ev fill:#ede7f6,stroke:#4527a0,color:#311b92;
+    classDef svcc fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
+    classDef store fill:#fff3e0,stroke:#e65100,color:#e65100;
+    classDef viz fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
+    class req ev;
+    class svc svcc;
+    class loki,tempo,prom store;
+    class s1,s2,s3,s4 viz;

@@ -1,0 +1,26 @@
+---
+title: Podróż jednej zmiany — dwa kroki ręczne, reszta automatyczna
+config:
+  theme: neo
+---
+flowchart LR
+    commit(["commit (push)<br/>KROK RĘCZNY"])
+    ci["CI: testy, budowanie natywne,<br/>skanowanie, podpis"]
+    art["artefakty: obraz (Docker Hub)<br/>+ chart (GHCR)"]
+    bump(["decyzja o wydaniu:<br/>aktualizacja targetRevision<br/>KROK RĘCZNY"])
+    rec["ArgoCD: uzgodnienie"]
+    roll["wdrożenie kroczące"]
+    tele["obserwacja w Grafanie<br/>(logi, ślady, metryki)"]
+
+    commit --> ci --> art --> bump --> rec --> roll --> tele
+    tele -.->|"wniosek z obserwacji → kolejna zmiana"| commit
+
+    note["pełna ścieżka zmiany zawiera dokładnie dwa kroki ręczne:<br/>zatwierdzenie kodu i decyzję o wydaniu — pozostałe etapy wykonują się same"]
+    bump -.- note
+
+    classDef auto fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
+    classDef manual fill:#ede7f6,stroke:#4527a0,color:#311b92;
+    classDef notec fill:#fffde7,stroke:#f9a825,color:#795548;
+    class ci,art,rec,roll,tele auto;
+    class commit,bump manual;
+    class note notec;

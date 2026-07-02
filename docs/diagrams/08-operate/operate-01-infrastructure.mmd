@@ -1,0 +1,57 @@
+---
+title: Infrastruktura klastra — cztery przestrzenie nazw, cztery role
+config:
+  theme: neo
+---
+flowchart TB
+    user["Użytkownik / Deweloper<br/>(przeglądarka)"]
+
+    subgraph k3d["Klaster k3d (k3s w Dockerze)"]
+        direction TB
+
+        subgraph platform["kube-system — warstwa platformy"]
+            direction TB
+            traefik["Traefik Ingress<br/>jedyny punkt wejścia HTTP"]
+            sealed["Kontroler Sealed Secrets<br/>klucz prywatny RSA"]
+        end
+
+        subgraph delivery["argocd — warstwa dostarczania"]
+            argocd["Kontroler ArgoCD<br/>uzgadnia stan klastra z chartami"]
+        end
+
+        subgraph workload["bsc-devops — warstwa aplikacji"]
+            direction TB
+            apps["frontend • users • tasks<br/>task-archiver • Pulsar"]
+            pg[("PostgreSQL + PVC")]
+            rbac["RBAC: ServiceAccount na usługę"]
+        end
+
+        subgraph observ["observability — warstwa obserwacji"]
+            lgtm["OTel Collector + LGTM<br/>Loki • Tempo • Prometheus • Grafana"]
+        end
+    end
+
+    user -->|HTTP| traefik
+    traefik -->|"/ oraz /api"| apps
+    traefik -->|"grafana.localhost<br/>prometheus.localhost"| lgtm
+    argocd -->|uzgadnia| workload
+    argocd -->|uzgadnia| observ
+    sealed -.->|"Secret: baza danych"| workload
+    sealed -.->|"Secret: poświadczenia rejestru"| delivery
+    sealed -.->|"Secret: hasło administratora Grafany"| observ
+    apps --> pg
+    rbac -.->|ogranicza uprawnienia| apps
+    apps -.->|telemetria OTLP| lgtm
+
+    classDef sec fill:#fce4ec,stroke:#ad1457,color:#880e4f;
+    classDef gitops fill:#ede7f6,stroke:#4527a0,color:#311b92;
+    classDef infra fill:#ede7f6,stroke:#4527a0,color:#311b92;
+    classDef svc fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
+    classDef data fill:#fff3e0,stroke:#e65100,color:#e65100;
+    classDef viz fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
+    class sealed,rbac sec;
+    class argocd gitops;
+    class traefik infra;
+    class apps svc;
+    class pg data;
+    class lgtm viz;

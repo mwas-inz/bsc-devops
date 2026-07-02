@@ -1,0 +1,26 @@
+---
+title: Test integracyjny z Dev Services — automatyczna infrastruktura testowa
+config:
+  theme: neo
+---
+sequenceDiagram
+    autonumber
+    participant dev as Deweloper / CI
+    participant gr as Gradle
+    participant ju as JUnit 5 (@QuarkusTest)
+    participant app as Aplikacja Quarkus
+    participant ds as Dev Services (Testcontainers)
+    participant pg as PostgreSQL (kontener)
+
+    dev->>gr: ./gradlew test
+    gr->>ju: uruchomienie zestawu testów
+    ju->>app: start kontekstu aplikacji (@QuarkusTest)
+    app->>ds: brak adresu bazy w konfiguracji
+    ds->>pg: uruchomienie świeżego kontenera
+    ds-->>app: wstrzyknięcie adresu JDBC do konfiguracji
+    loop dla każdego testu
+        ju->>app: żądanie HTTP (RestAssured: given / when / then)
+        app->>pg: operacje na danych w transakcji
+        Note over app,pg: @TestTransaction — wycofanie (rollback) po teście
+    end
+    ds->>pg: zatrzymanie kontenera po zestawie testów

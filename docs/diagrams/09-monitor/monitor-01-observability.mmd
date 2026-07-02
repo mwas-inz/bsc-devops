@@ -1,0 +1,37 @@
+---
+title: Trzy sygnały, dwa wzorce transportu — OpenTelemetry i stos LGTM
+config:
+  theme: neo
+---
+flowchart LR
+    subgraph app["Usługa Quarkus (każda z czterech)"]
+        direction TB
+        logs["logi: JSON na stdout<br/>quarkus-logging-json, MDC: traceId"]
+        traces["ślady: quarkus-opentelemetry<br/>traceId / spanId"]
+        metrics["metryki: Micrometer<br/>punkt /q/metrics"]
+    end
+
+    subgraph obs["Przestrzeń nazw: observability"]
+        collector["OTel Collector<br/>wspólny punkt wejścia OTLP"]
+        loki[("Loki<br/>logi")]
+        tempo[("Tempo<br/>ślady")]
+        prom[("Prometheus<br/>metryki")]
+        grafana["Grafana — wspólny interfejs<br/>trzy źródła danych"]
+    end
+
+    logs -->|"push: OTLP"| collector
+    traces -->|"push: OTLP"| collector
+    collector -->|potok logów| loki
+    collector -->|potok śladów| tempo
+    metrics -.->|"pull: inicjowane przez Prometheus (scrape /q/metrics)"| prom
+
+    loki --> grafana
+    tempo --> grafana
+    prom --> grafana
+
+    classDef svc fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
+    classDef store fill:#fff3e0,stroke:#e65100,color:#e65100;
+    classDef viz fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
+    class logs,traces,metrics svc;
+    class loki,tempo,prom store;
+    class grafana,collector viz;

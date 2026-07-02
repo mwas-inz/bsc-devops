@@ -1,0 +1,39 @@
+---
+title: Przenośność przez warstwy abstrakcji — granica na API Kubernetes
+config:
+  theme: neo
+---
+flowchart TB
+    subgraph fixed["Niezmienne — identyczne artefakty w każdym środowisku"]
+        direction TB
+        app["Aplikacja<br/>Quarkus, zasady Twelve-Factor"]
+        img["Obraz OCI<br/>izoluje system operacyjny i zależności"]
+        helm["Chart Helm<br/>parametryzuje manifesty (values.yaml)"]
+        api["API Kubernetes<br/>deklaratywny kontrakt z platformą"]
+        app -->|konteneryzacja| img
+        img -->|"pakowanie i konfiguracja"| helm
+        helm -->|"renderowanie manifestów"| api
+    end
+
+    subgraph runtime["Wymienne — dowolny zgodny klaster Kubernetes"]
+        direction LR
+        k3d["k3d — lokalnie<br/>(zaimplementowane)"]
+        eks["Amazon EKS"]
+        gke["Google GKE"]
+        aks["Azure AKS"]
+        k3d ~~~ eks ~~~ gke ~~~ aks
+    end
+
+    api ==>|"ten sam kontrakt API — te same artefakty"| runtime
+
+    note["migracja = wskazanie innego klastra;<br/>artefakty i proces GitOps bez zmian"]
+    runtime -.- note
+
+    classDef inv fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
+    classDef live fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
+    classDef ghost fill:#f5f5f5,stroke:#9e9e9e,color:#757575,stroke-dasharray: 4 3;
+    classDef notec fill:#fffde7,stroke:#f9a825,color:#795548;
+    class app,img,helm,api inv;
+    class k3d live;
+    class eks,gke,aks ghost;
+    class note notec;

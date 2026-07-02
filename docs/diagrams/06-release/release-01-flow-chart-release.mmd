@@ -1,0 +1,50 @@
+---
+title: Dwuetapowy łańcuch publikacji chartu Helm
+config:
+  theme: neo
+---
+flowchart LR
+    push(["push na main<br/>ścieżka: infrastructure/helm/**"])
+
+    subgraph ci["ci-helm — walidacja"]
+        direction TB
+        lint["helm lint"] --> tmpl["helm template"]
+        tmpl --> kc["kubeconform --strict<br/>schematy Kubernetes 1.35.0"]
+        kc --> ver["odczyt wersji z Chart.yaml"]
+        ver --> mktag["git tag chart-apps-&lt;wersja&gt;<br/>pomijany, jeśli istnieje"]
+    end
+
+    tagev{{"zdarzenie: git tag<br/>chart-apps-*"}}
+    pat["tag wypychany tokenem PAT — zdarzenia domyślnego<br/>GITHUB_TOKEN nie wyzwalają kolejnych łańcuchów"]
+    obs["analogiczna para dla chartu observability<br/>(tagi chart-observability-*)"]
+
+    subgraph cd["cd-helm — publikacja"]
+        direction TB
+        login["helm registry login ghcr.io"] --> pkg["helm package"]
+        pkg --> pushc["helm push<br/>oci://ghcr.io/mwas-inz/charts"]
+    end
+
+    ghcr[("GHCR<br/>bsc-devops-apps:&lt;wersja&gt;")]
+    argo["ArgoCD Application<br/>targetRevision 0.7.0 — ręczna aktualizacja"]
+
+    push --> ci
+    ci --> tagev
+    tagev -.- pat
+    tagev -.- obs
+    tagev --> cd
+    cd --> ghcr
+    ghcr -.->|"pull — uzgodnienie"| argo
+
+    classDef ev fill:#ede7f6,stroke:#4527a0,color:#311b92;
+    classDef step fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
+    classDef pub fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
+    classDef art fill:#fff3e0,stroke:#e65100,color:#e65100;
+    classDef gitops fill:#ede7f6,stroke:#4527a0,color:#311b92;
+    classDef ghost fill:#f5f5f5,stroke:#9e9e9e,color:#757575,stroke-dasharray: 4 3;
+
+    class push,tagev ev;
+    class lint,tmpl,kc,ver,mktag step;
+    class login,pkg,pushc pub;
+    class ghcr art;
+    class argo gitops;
+    class pat,obs ghost;
