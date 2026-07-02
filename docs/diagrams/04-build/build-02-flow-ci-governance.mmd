@@ -1,0 +1,36 @@
+---
+title: Zdarzenia i bramki CI — ten sam łańcuch dla PR i dla main
+config:
+  theme: neo
+---
+flowchart LR
+    ev(["zdarzenie GitHub"])
+    prE["pull_request"]
+    mainE["push na main"]
+    filt["filtr ścieżek: tylko zmieniona usługa<br/>(apps/users/**)"]
+    conc["concurrency: nowy bieg anuluje<br/>poprzedni (cancel-in-progress)"]
+    pipe["łańcuch: testy → obraz natywny<br/>→ skanowanie Trivy"]
+    check["status check per usługa<br/>„Build, Test, Scan &amp; Push — users”"]
+    gate{{"ochrona gałęzi: scalenie zablokowane<br/>do zielonego buildu"}}
+    pushi["push obrazu do Docker Hub<br/>tagi: SHA commitu + latest"]
+    sign["podpis Cosign (keyless)<br/>po digeście obrazu"]
+
+    ev --> prE
+    ev --> mainE
+    prE --> filt
+    mainE --> filt
+    filt --> conc --> pipe
+    pipe -->|pull_request| check --> gate
+    pipe -->|"push (main)"| pushi --> sign
+
+    classDef evc fill:#ede7f6,stroke:#4527a0,color:#311b92;
+    classDef shared fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
+    classDef prc fill:#fff3e0,stroke:#e65100,color:#e65100;
+    classDef mainc fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
+    classDef sec fill:#fce4ec,stroke:#ad1457,color:#880e4f;
+
+    class ev,prE,mainE evc;
+    class filt,conc,pipe shared;
+    class check,gate prc;
+    class pushi mainc;
+    class sign sec;

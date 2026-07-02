@@ -1,0 +1,49 @@
+---
+title: Mapa zgodności projektu z Twelve-Factor App
+config:
+  theme: neo
+---
+flowchart LR
+    subgraph g1["Kod i zależności"]
+        direction LR
+        f1["I. Kod źródłowy"] --> i1["monorepo GitHub — jedno źródło<br/>prawdy, wiele wdrożeń"]
+        f2["II. Zależności"] --> i2["build.gradle + BOM quarkus-bom, Gradle Wrapper<br/>package.json (frontend)"]
+    end
+
+    subgraph g2["Konfiguracja i usługi"]
+        direction LR
+        f3["III. Konfiguracja"] --> i3["zmienne środowiskowe: ConfigMap app-config<br/>+ Secret db-secret (SealedSecret)"]
+        f4["IV. Usługi wspierające"] --> i4["PostgreSQL i Pulsar dołączane<br/>przez konfigurację, nie przez kod"]
+    end
+
+    subgraph g3["Cykl życia"]
+        direction LR
+        f5["V. Buduj, publikuj, uruchamiaj"] --> i5["CI: obraz (tag = SHA) → chart wiąże<br/>konfigurację → ArgoCD uruchamia"]
+        f6["VI. Procesy"] --> i6["bezstanowe usługi Quarkus<br/>stan wyłącznie w PostgreSQL"]
+        f7["VII. Przydzielanie portów"] --> i7["quarkus.http.port=8080<br/>Service + Traefik kierują ruch"]
+        f8["VIII. Współbieżność"] --> i8["skalowanie liczbą replik<br/>(values.yaml: replicas)"]
+        f9["IX. Jednorazowość"] --> i9["start natywny w milisekundach, sondy<br/>wdrożenie kroczące"]
+    end
+
+    subgraph g4["Środowiska i eksploatacja"]
+        direction LR
+        f10["X. Jednolitość środowisk"] --> i10["k3d = to samo API Kubernetes<br/>Dev Services = ten sam PostgreSQL w testach"]
+        f11["XI. Logi"] --> i11["JSON na stdout (profil prod) → OTLP → Loki<br/>MDC: traceId"]
+        f12["XII. Zarządzanie aplikacją"] --> i12["realizowane odmiennie: schemat DB aktualizowany przy starcie<br/>(schema-management: update) — świadome uproszczenie"]
+    end
+
+    g1 ~~~ g2 ~~~ g3 ~~~ g4
+
+    classDef factor fill:#fafafa,stroke:#424242,color:#212121;
+    classDef git fill:#ede7f6,stroke:#4527a0,color:#311b92;
+    classDef cfg fill:#fff3e0,stroke:#e65100,color:#e65100;
+    classDef ci fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
+    classDef k8s fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
+    classDef dev fill:#f5f5f5,stroke:#9e9e9e,color:#757575,stroke-dasharray: 4 3;
+
+    class f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12 factor;
+    class i1,i2 git;
+    class i3,i4,i8 cfg;
+    class i5 ci;
+    class i6,i7,i9,i10,i11 k8s;
+    class i12 dev;

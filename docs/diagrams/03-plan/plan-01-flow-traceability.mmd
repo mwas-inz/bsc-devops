@@ -1,0 +1,28 @@
+---
+title: Łańcuch identyfikowalności — od wymagania do działającej wersji
+config:
+  theme: neo
+---
+flowchart LR
+    jira["Zadanie Jira<br/>INZ-XX"]
+    br["Gałąź<br/>feature/INZ-XX-opis"]
+    com["Commit — Conventional Commits<br/>stopka: Resolves INZ-XX"]
+    pr["Pull Request<br/>kontrole stanu per usługa"]
+    merge["Scalenie do main"]
+    art["Artefakty: obraz — tag = SHA commitu<br/>chart — wersja z Chart.yaml"]
+    dep["Wdrożenie<br/>ArgoCD targetRevision"]
+
+    jira --> br --> com --> pr --> merge --> art --> dep
+    br -.-> jira
+    com -.->|"automatyczne powiązanie w Jira"| jira
+    pr -.-> jira
+
+    classDef plan fill:#ede7f6,stroke:#4527a0,color:#311b92;
+    classDef git fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
+    classDef artc fill:#fff3e0,stroke:#e65100,color:#e65100;
+    classDef dpl fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
+
+    class jira plan;
+    class br,com,pr,merge git;
+    class art artc;
+    class dep dpl;

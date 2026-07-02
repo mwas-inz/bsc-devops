@@ -1,0 +1,35 @@
+---
+title: Mapowanie niezależne od chmury — lokalny k3d na usługi zarządzane AWS (propozycja)
+config:
+  theme: neo
+---
+flowchart LR
+    subgraph local["Lokalnie — k3d (zaimplementowane)"]
+        l_k8s["k3d / k3s"]
+        l_ingress["Traefik Ingress"]
+        l_db[("PostgreSQL w klastrze")]
+        l_obs["LGTM w klastrze<br/>Loki, Grafana, Tempo, Prometheus"]
+        l_reg["Rejestry OCI<br/>Docker Hub + GHCR"]
+        l_secret["Sealed Secrets"]
+    end
+
+    subgraph aws["AWS — odpowiedniki zarządzane (propozycja, niezaimplementowane)"]
+        a_k8s["Amazon EKS"]
+        a_ingress["AWS Load Balancer (ALB)"]
+        a_db[("Amazon RDS for PostgreSQL")]
+        a_obs["Amazon Managed Grafana +<br/>Managed Service for Prometheus"]
+        a_reg["Amazon ECR"]
+        a_secret["AWS Secrets Manager / KMS"]
+    end
+
+    l_k8s ==>|odpowiada| a_k8s
+    l_ingress ==>|odpowiada| a_ingress
+    l_db ==>|odpowiada| a_db
+    l_obs ==>|odpowiada| a_obs
+    l_reg ==>|odpowiada| a_reg
+    l_secret ==>|odpowiada| a_secret
+
+    classDef localc fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
+    classDef awsc fill:#fff3e0,stroke:#e65100,color:#e65100;
+    class l_k8s,l_ingress,l_db,l_obs,l_reg,l_secret localc;
+    class a_k8s,a_ingress,a_db,a_obs,a_reg,a_secret awsc;

@@ -1,0 +1,39 @@
+---
+title: Szew odsprzęgający — niezależność od dostawcy (porty i adaptery)
+config:
+  theme: neo
+---
+flowchart LR
+    app["Aplikacja<br/>Quarkus"]
+    port(["port: OTLP"])
+    seam["OTel Collector<br/>(szew / granica)"]
+
+    loki[("Loki<br/>logi")]
+    tempo[("Tempo<br/>ślady")]
+    altA["[Elasticsearch]"]
+    altB["[Jaeger]"]
+    altC["[inny backend]"]
+
+    prom[("Prometheus")]
+
+    app --> port --> seam
+    seam --> loki
+    seam --> tempo
+    seam -.-> altA
+    seam -.-> altB
+    seam -.-> altC
+    prom -.->|"pull /q/metrics"| app
+
+    cap["zmiana backendu = zmiana konfiguracji Collectora,<br/>nie kodu aplikacji"]
+    seam -.- cap
+
+    classDef appc fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
+    classDef seamc fill:#ede7f6,stroke:#4527a0,color:#311b92;
+    classDef adapter fill:#fff3e0,stroke:#e65100,color:#e65100;
+    classDef ghost fill:#f5f5f5,stroke:#9e9e9e,color:#757575,stroke-dasharray: 4 3;
+    classDef note fill:#fffde7,stroke:#f9a825,color:#795548;
+    class app appc;
+    class seam,port seamc;
+    class loki,tempo,prom adapter;
+    class altA,altB,altC ghost;
+    class cap note;

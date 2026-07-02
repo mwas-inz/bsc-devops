@@ -1,0 +1,26 @@
+---
+title: Pełny cykl — od commitu, przez wdrożenie, po obserwację
+config:
+  theme: neo
+---
+sequenceDiagram
+    autonumber
+    actor Dev as Deweloper
+    participant GH as GitHub Actions
+    participant Reg as Rejestry (Docker Hub: obrazy, GHCR: charty)
+    participant Git as Git (gitops/)
+    participant Argo as ArgoCD
+    participant K8s as Klaster k3d
+    participant Graf as Grafana
+
+    Dev->>GH: git push (zmiana w usłudze)
+    GH->>GH: JUnit, budowanie natywne, skanowanie Trivy
+    GH->>Reg: wypchnięcie obrazu i podpis Cosign (po digeście)
+    GH->>Reg: publikacja chartu Helm (tag chart-apps)
+    Dev->>Git: argocd-update.sh podnosi targetRevision
+    Git->>Argo: ponowne zastosowanie Application
+    Argo->>Reg: pobranie chartu w wersji targetRevision
+    Argo->>K8s: synchronizacja (wdrożenie kroczące)
+    K8s-->>Argo: Synced / Healthy
+    K8s->>Graf: telemetria (logi, ślady, metryki)
+    Dev->>Graf: obserwacja wdrożenia i kondycji

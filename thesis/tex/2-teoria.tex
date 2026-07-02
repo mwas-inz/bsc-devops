@@ -50,22 +50,22 @@ systemów mikroserwisowych i procesów DevOps.
           Proces wdrażania kodu powinien być podzielony na trzy niezależne etapy:
           \begin{itemize}
               \item \textit{Build} (budowanie): zamiana kodu źródłowego w gotowy do uruchomienia pakiet (tzw. artefakt).
-              \item \textit{Release} (publikowanie): połączenie zbudowanego pakietu z aktualną konfiguracją środowiska. Każdy \textit{release} powinien mieć unikalny identyfikator i być niezmienny (\textit{immutable}).
+              \item \textit{Release} (publikowanie): połączenie zbudowanego pakietu z aktualną konfiguracją środowiska. Każdy \textit{release} powinien mieć unikalny identyfikator i być niezmienny (ang. \textit{immutable}).
               \item \textit{Run} (uruchamianie): uruchomienie konkretnej wersji publikacji w środowisku wykonawczym.
           \end{itemize}
-          Rozdzielenie tych faz zapobiega wprowadzaniu zmian bezpośrednio w działającym środowisku i ułatwia szybkie wycofywanie zmian (\textit{rollback}) do poprzedniej, stabilnej wersji publikacji.
+          Rozdzielenie tych faz zapobiega wprowadzaniu zmian bezpośrednio w działającym środowisku i ułatwia szybkie wycofywanie zmian (ang. \textit{rollback}) do poprzedniej, stabilnej wersji publikacji.
 
     \item \textbf{Procesy} --- Uruchamiaj aplikację jako jeden lub więcej bezstanowych procesów
 
-          Aplikacje 12-factor są bezstanowe (\textit{stateless}) i niczego nie współdzielą (\textit{share-nothing}).
+          Aplikacje 12-factor są bezstanowe (ang. \textit{stateless}) i niczego nie współdzielą (ang. \textit{share-nothing}).
           Wszelkie dane, które muszą zostać zachowane (trwałe), powinny być przechowywane w usługach wspierających, takich jak bazy danych lub magazyny obiektowe.
-          Pamięć lokalna procesu może być używana jedynie jako tymczasowa pamięć podręczna (\textit{cache}).
+          Pamięć lokalna procesu może być używana jedynie jako tymczasowa pamięć podręczna (ang. \textit{cache}).
           Takie podejście umożliwia łatwe skalowanie aplikacji poprzez uruchamianie wielu kopii procesów bez obawy o spójność danych między nimi.
 
     \item \textbf{Przydzielanie portów} --- Udostępniaj usługi przez przydzielanie portów
 
           Aplikacja nie powinna polegać na obecności zewnętrznego serwera WWW (jak Apache czy Tomcat) w środowisku wykonawczym.
-          Zamiast tego, powinna być całkowicie samowystarczalna i udostępniać swoje usługi poprzez przypisanie się (\textit{binding}) do określonego portu sieciowego.
+          Zamiast tego, powinna być całkowicie samowystarczalna i udostępniać swoje usługi poprzez przypisanie się (ang. \textit{binding}) do określonego portu sieciowego.
           W środowisku chmurowym (np. Kubernetes) to infrastruktura zajmuje się kierowaniem ruchu z publicznych adresów do odpowiednich portów przypisanych przez procesy aplikacji.
 
     \item \textbf{Współbieżność} --- Skaluj przez odpowiednio dobrane procesy
@@ -76,7 +76,7 @@ systemów mikroserwisowych i procesów DevOps.
 
     \item \textbf{Jednorazowość} --- Zwiększ elastyczność pozwalając na szybkie uruchamianie i zatrzymywanie aplikacji
 
-          Procesy aplikacji powinny być "jednorazowe" (\textit{disposable}), co oznacza, że mogą być uruchamiane lub zatrzymywane w dowolnym momencie bez negatywnego wpływu na system.
+          Procesy aplikacji powinny być "jednorazowe" (ang. \textit{disposable}), co oznacza, że mogą być uruchamiane lub zatrzymywane w dowolnym momencie bez negatywnego wpływu na system.
           Dąży się do minimalizacji czasu uruchamiania (\textit{startup time}) oraz zapewnienia bezpiecznego wyłączania (\textit{graceful shutdown}).
           W przypadku zatrzymania, proces powinien przestać przyjmować nowe zadania, dokończyć bieżące i czysto zwolnić zasoby.
           Zwiększa to odporność systemu na awarie i ułatwia szybkie wdrażanie nowych wersji.
@@ -94,19 +94,27 @@ systemów mikroserwisowych i procesów DevOps.
     \item \textbf{Logi} --- Traktuj logi jako strumień zdarzeń
 
           Aplikacja nie powinna zajmować się zarządzaniem plikami dziennika (logami) ani ich przechowywaniem.
-          Zamiast tego, każdy proces powinien wypisywać strumień zdarzeń bezpośrednio na standardowe wyjście (\textit{stdout}).
+          Zamiast tego, każdy proces powinien wypisywać strumień zdarzeń bezpośrednio na standardowe wyjście (ang. \textit{stdout}).
           W środowiskach produkcyjnych to infrastruktura przejmuje te strumienie, agreguje je i przesyła do wyspecjalizowanych systemów analizy danych (takich jak ELK Stack lub Splunk).
-          Daje to lepszą obserwowalność (\textit{observability}) stanu systemu bez obciążania logiką logowania samej aplikacji.
+          Daje to lepszą obserwowalność (ang. \textit{observability}) stanu systemu bez obciążania logiką logowania samej aplikacji.
 
     \item \textbf{Zarządzanie aplikacją} --- Uruchamiaj zadania administracyjne jako jednorazowe procesy
 
-          Zadania administracyjne lub konserwacyjne (np. migracje bazy danych, inspekcja danych za pomocą skryptów) powinny być uruchamiane jako jednorazowe procesy (\textit{one-off processes}) w tym samym środowisku, w którym działa aplikacja.
+          Zadania administracyjne lub konserwacyjne (np. migracje bazy danych, inspekcja danych za pomocą skryptów) powinny być uruchamiane jako jednorazowe procesy (ang. \textit{one-off processes}) w tym samym środowisku, w którym działa aplikacja.
           Powinny one korzystać z tej samej wersji kodu i tej samej konfiguracji co procesy obsługujące regularny ruch.
           Kod zadania administracyjnego musi zostać dołączony do kodu aplikacji, a jego uruchomienie powinno być możliwe poprzez proste polecenie, co zapewnia spójność i łatwość zarządzania zadaniami administracyjnymi.
 \end{enumerate}
 
 \subsubsection{Znaczenie Twelve-Factor App dla projektu}
 Zasady sformułowane w ramach metodologii Twelve-Factor App stanowią fundament techniczny niniejszej pracy. Ich zastosowanie w części praktycznej pozwala na budowę systemu, który jest w pełni gotowy do działania w nowoczesnych środowiskach chmurowych. Kluczowe aspekty, takie jak ścisła izolacja zależności, przechowywanie konfiguracji w środowisku czy traktowanie logów jako strumieni zdarzeń, bezpośrednio przekładają się na łatwość konteneryzacji aplikacji oraz jej późniejszej orkiestracji w klastrze Kubernetes. Implementacja tych zasad jest niezbędnym krokiem do osiągnięcia wysokiego poziomu automatyzacji w procesach CI/CD, co stanowi główny cel pracy.
+Zestawienie wszystkich dwunastu zasad z miejscami ich realizacji w części praktycznej przedstawia rysunek~\ref{fig:twelve-factor-map}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{img/diagrams/01-teoria/teoria-01-twelve-factor.png}
+    \caption{Mapa zgodności projektu z zasadami Twelve-Factor App --- każda zasada wraz z miejscem jej realizacji w części praktycznej (opracowanie własne).}
+    \label{fig:twelve-factor-map}
+\end{figure}
 
 \subsection{DevOps}
 
@@ -286,6 +294,23 @@ Najpopularniejsi dostawcy chmur (ang. \textit{Cloud Service Providers}) to:
 
 Oprócz powyższych liderów, na rynku funkcjonuje wielu innych dostawców o profilu globalnym lub regionalnym, takich jak Alibaba Cloud (lider rynku azjatyckiego), IBM Cloud oraz Oracle Cloud. Istnieją również platformy wyspecjalizowane, jak Salesforce (model SaaS), DigitalOcean i Linode (popularne wśród deweloperów i startupów) oraz dostawcy europejscy kładący szczególny nacisk na suwerenność danych, m.in. OVHcloud, Hetzner Online czy Scaleway.
 
+\subsubsection{Modele usług chmurowych}
+Obok modeli wdrożenia standard NIST wyróżnia trzy modele usług chmurowych, różniące się zakresem odpowiedzialności przejmowanym przez dostawcę \cite{Mell2011NISTCloudDefinition}:
+
+\begin{itemize}
+    \item \textbf{IaaS (Infrastructure as a Service)} --- dostawca udostępnia podstawowe zasoby obliczeniowe (maszyny wirtualne, sieć, pamięć masową), a użytkownik odpowiada za system operacyjny oraz wszystkie warstwy powyżej niego.
+    \item \textbf{PaaS (Platform as a Service)} --- dostawca zarządza dodatkowo systemem operacyjnym i platformą uruchomieniową; użytkownik dostarcza jedynie aplikację wraz z danymi. Przykładem jest zarządzany Kubernetes (np. Amazon EKS), w którym dostawca utrzymuje płaszczyznę sterowania klastra.
+    \item \textbf{SaaS (Software as a Service)} --- użytkownik korzysta z gotowej aplikacji dostawcy, zachowując kontrolę wyłącznie nad własnymi danymi i konfiguracją.
+\end{itemize}
+
+Granica odpowiedzialności między użytkownikiem a dostawcą przesuwa się zatem stopniowo wraz z przejściem od IaaS do SaaS, co ilustruje rysunek~\ref{fig:shared-responsibility}. Środowisko części praktycznej niniejszej pracy --- lokalny klaster k3d --- odpowiada skrajnie lewej kolumnie tego podziału: autor zarządza wszystkimi warstwami, od sprzętu po aplikację. Rozważana w części praktycznej migracja do zarządzanego Kubernetes (Amazon EKS) przeniosłaby odpowiedzialność za płaszczyznę sterowania na dostawcę, a użycie zarządzanej instancji Grafany stanowiłoby przykład modelu SaaS.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{img/diagrams/01-teoria/teoria-02-shared-responsibility.png}
+    \caption{Podział odpowiedzialności między użytkownika a dostawcę w modelach usług chmurowych --- od lokalnego klastra k3d do usługi zarządzanej (opracowanie własne).}
+    \label{fig:shared-responsibility}
+\end{figure}
 
 \subsection{Cloud Native}
 
@@ -321,6 +346,15 @@ W porównaniu do alternatyw takich jak Docker Swarm czy Apache Mesos, Kubernetes
 
 \subsubsection{Usługi zarządzane (ang. \textit{Managed Kubernetes})}
 Praktycznym przejawem dominacji tej technologii są usługi oferowane przez głównych dostawców chmury: \textit{Elastic Kubernetes Service} (AWS EKS), \textit{Google Kubernetes Engine} (GKE) oraz \textit{Azure Kubernetes Service} (AKS). Usługi te stanowią fundament wdrażania w przedsiębiorstwach, redukując bariery operacyjne poprzez automatyzację zarządzania warstwą sterowania (ang. \textit{control plane}), aktualizacji i zabezpieczeń \cite{Mondal2023KubernetesAutoscaling}. Pozwalają one na traktowanie klastra jako zasobu chmurowego, co jest kluczowe w nowoczesnych architekturach.
+
+Z perspektywy przenośności aplikacji kluczowe jest to, że wszystkie te usługi realizują ten sam deklaratywny kontrakt API Kubernetes. Jak pokazuje rysunek~\ref{fig:portability-layers}, kolejne warstwy abstrakcji --- obraz OCI, chart Helm i API Kubernetes --- czynią artefakty aplikacji niezmiennymi względem środowiska: migracja między klastrem lokalnym a dowolną usługą zarządzaną sprowadza się do wskazania innego klastra, bez zmian w artefaktach ani w procesie wdrożenia.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{img/diagrams/01-teoria/teoria-03-portability-layers.png}
+    \caption{Przenośność przez warstwy abstrakcji --- artefakty powyżej API Kubernetes są identyczne w każdym środowisku; wymianie podlega wyłącznie warstwa runtime (opracowanie własne).}
+    \label{fig:portability-layers}
+\end{figure}
 
 \subsubsection{Kubernetes w ekosystemie CNCF}
 Zgodnie z systematycznymi przeglądami literatury, Kubernetes nie funkcjonuje jako izolowana warstwa, lecz jako centralny punkt krajobrazu technicznego \textit{Cloud Native Computing Foundation} (CNCF) \cite{Alonso2023MultiCloudNative}. Integruje on różnorodne komponenty, takie jak środowiska uruchomieniowe (ang. \textit{runtimes}), sieci usług (ang. \textit{service mesh}), systemy monitorowania oraz narzędzia CI/CD, tworząc spójny ekosystem dla nowoczesnego cyklu wytwarzania oprogramowania (ang. \textit{Software Development Life Cycle}, SDLC).

@@ -35,6 +35,22 @@ jobs:
             --no-daemon
 \end{lstlisting}
 
+Pełny przebieg łańcucha — od zdarzenia w repozytorium, przez testy i budowanie obrazu natywnego, po bramkę skanowania i podpis artefaktu — przedstawia rysunek~\ref{fig:ci-pipeline}. Rysunek~\ref{fig:ci-governance} pokazuje ten sam łańcuch z perspektywy zdarzeń: bieg dla \textit{pull requesta} jedynie waliduje zmiany, a dopiero bieg dla gałęzi \texttt{main} publikuje i podpisuje obraz; ochrona gałęzi blokuje scalenie do czasu zielonego buildu.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{img/diagrams/04-build/build-01-ci-pipeline.png}
+    \caption{Łańcuch CI z bezpieczeństwem Shift-Left --- skanowanie Trivy jako bramka przed publikacją, podpis Cosign po wypchnięciu obrazu (por.\ rys.~\ref{fig:ci-governance}; opracowanie własne).}
+    \label{fig:ci-pipeline}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{img/diagrams/04-build/build-02-flow-ci-governance.png}
+    \caption{Zdarzenia i bramki tego samego łańcucha --- walidacyjny bieg \textit{pull requesta} i publikujący bieg \texttt{main} z ochroną gałęzi (por.\ rys.~\ref{fig:ci-pipeline}; opracowanie własne).}
+    \label{fig:ci-governance}
+\end{figure}
+
 \subsubsection{Budowanie artefaktów: Gradle i NPM}
 W zależności od komponentu, wykorzystywane są wyspecjalizowane narzędzia budujące:
 \begin{itemize}
@@ -57,7 +73,7 @@ Zgodnie z decyzją \textit{ADR-0005}, jako standard budowania obrazów wybrano p
   \item \textbf{Plik \texttt{.dockerignore}:} Wykluczanie zbędnych plików (np. \texttt{node\_modules}, \texttt{.git}, \texttt{target/}) przyspiesza budowanie i zapobiega wyciekom danych wrażliwych.
 \end{itemize}
 
-\textbf{Rola w projekcie:} Docker pełni rolę "pakowacza" -- przed jego użyciem dysponujemy skompilowanym binarnym plikiem, po procesie budowania obrazu otrzymujemy gotowy do wdrożenia artefakt uruchamialny w dowolnym środowisku kontenerowym. Dockerfile dla trybu natywnego przedstawia listing \ref{lst:dockerfile-native}.
+\textbf{Rola w projekcie:} Docker pełni rolę 'pakowacza' -- przed jego użyciem dysponujemy skompilowanym binarnym plikiem, po procesie budowania obrazu otrzymujemy gotowy do wdrożenia artefakt uruchamialny w dowolnym środowisku kontenerowym. Dockerfile dla trybu natywnego przedstawia listing \ref{lst:dockerfile-native}.
 
 \end{techcard}
 
@@ -90,9 +106,17 @@ ENTRYPOINT ["./application", "-Dquarkus.http.host=0.0.0.0"]
 \end{lstlisting}
 
 Obraz końcowy zawiera wyłącznie minimalny system operacyjny i skompilowany binarny plik aplikacji — bez JVM, JDK ani żadnych narzędzi budujących. Warstwa frontendowa (\textit{Vue 3}) stosuje klasyczny wzorzec wieloetapowy: etap kompilacji Vite produkujący statyczne pliki w katalogu \texttt{dist/}, a następnie serwowanie ich przez minimalny obraz \textit{nginx}.
+Całą ścieżkę budowania natywnego — na tle klasycznej ścieżki JVM — podsumowuje rysunek~\ref{fig:native-build}: kosztem długiej kompilacji AOT (analiza zamkniętego świata, czyli stworznie z góry kompletu bibliotek niezbędnych do działania aplikacji) uzyskuje się start w milisekundach oraz minimalny obraz pozbawiony środowiska JVM.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{img/diagrams/04-build/build-03-flow-native-build.png}
+    \caption{Anatomia budowania natywnego --- ścieżka klasyczna (JVM, optymalizacja JIT w czasie działania) na tle ścieżki projektu (kompilacja AOT w kontenerze Mandrel, minimalny obraz); koszt kompilacji wymieniony na szybki start i małe zużycie pamięci (opracowanie własne).}
+    \label{fig:native-build}
+\end{figure}
 
 \textbf{Shift Left Security:}
-Bezpieczeństwo jest weryfikowane już na etapie budowania (\textit{Shift Left}):
+Bezpieczeństwo jest weryfikowane już na etapie budowania:
 \begin{itemize}
     \item \textbf{Trivy} (ADR-0010)\textbf{:} Każdy zbudowany obraz jest skanowany pod kątem znanych podatności (CVE) w bibliotekach systemowych i aplikacyjnych.
 \begin{lstlisting}[language=yaml, caption={Skanowanie obrazu narz\k{e}dziem Trivy w łańcuchu CI (.github/workflows/ci-users.yml)}, label={lst:trivy-scan}]

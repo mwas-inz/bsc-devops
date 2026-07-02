@@ -35,7 +35,7 @@ class UserResourceTest {
 Kluczową cechą ekosystemu Quarkusa jest mechanizm \textbf{Dev Services}: jeśli w konfiguracji aplikacji nie podano jawnego adresu URL bazy danych, Quarkus automatycznie uruchamia kontener PostgreSQL przy użyciu biblioteki \textit{Testcontainers}. Programista nie musi konfigurować środowiska testowego ani utrzymywać lokalnej instancji bazy -- wystarczy wywołanie \texttt{./gradlew test}. Testy zawsze działają na izolowanej, świeżej instancji bazy danych, co eliminuje klasyczny problem współdzielonego stanu testowego.
 
 \textbf{Izolacja transakcyjna -- \texttt{@TestTransaction}:}
-Dla testów weryfikujących logikę utrwalania danych stosowana jest adnotacja \texttt{@TestTransaction}: każdy test jest wykonywany w ramach transakcji bazodanowej, która po jego zakończeniu jest automatycznie wycofywana (\textit{rollback}). Zapewnia to pełną izolację między testami bez konieczności ręcznego czyszczenia stanu bazy. Wzorzec ten zastosowano w testach konsumenta zdarzeń mikroserwisu \textit{tasks}:
+Dla testów weryfikujących logikę utrwalania danych stosowana jest adnotacja \texttt{@TestTransaction}: każdy test jest wykonywany w ramach transakcji bazodanowej, która po jego zakończeniu jest automatycznie wycofywana (ang. \textit{rollback}). Zapewnia to pełną izolację między testami bez konieczności ręcznego czyszczenia stanu bazy. Wzorzec ten zastosowano w testach konsumenta zdarzeń mikroserwisu \textit{tasks}:
 
 \begin{lstlisting}[language=java, caption={Test konsumenta zdarzeń z izolacją @TestTransaction (apps/tasks/src/test/.../UserEventConsumerTest.java)}, label={lst:test-transaction}]
 @QuarkusTest
@@ -64,6 +64,15 @@ class UserEventConsumerTest {
 }
 \end{lstlisting}
 
+Współdziałanie opisanych mechanizmów --- od uruchomienia testów, przez automatyczne dostarczenie bazy danych przez Dev Services, po wycofywanie transakcji po każdym teście --- przedstawia w ujęciu sekwencyjnym rysunek~\ref{fig:devservices-test}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{img/diagrams/05-test/test-01-flow-devservices-test.png}
+    \caption{Przebieg testu integracyjnego z Dev Services --- brak adresu bazy w konfiguracji uruchamia świeży kontener PostgreSQL (Testcontainers), a \texttt{@TestTransaction} wycofuje zmiany po każdym teście (opracowanie własne).}
+    \label{fig:devservices-test}
+\end{figure}
+
 \subsubsection{Testy jako bramka w łańcuchu CI/CD}
 Użycie testów w łańcuchu CI na początku jest celowe i ma bezpośredni wpływ na efektywność procesu (listing~\ref{lst:github-actions-build}). Krok \texttt{Run tests} poprzedza budowanie natywnego obrazu kontenera (\texttt{imageBuild}), które korzysta z kompilatora GraalVM AOT i trwa kilkanaście minut. Niepowodzenie testu natychmiast przerywa łańcuch -- bez zbędnego zużycia zasobów CI na kosztowną kompilację natywną.
 
@@ -74,4 +83,4 @@ Użycie testów w łańcuchu CI na początku jest celowe i ma bezpośredni wpły
 \end{itemize}
 
 \subsubsection{Widoczność wyników w procesie Pull Request}
-GitHub Actions raportuje wyniki każdego zadania (\textit{job}) jako \textbf{status check} bezpośrednio w widoku Pull Requesta. Zadanie \texttt{Build, Test, Scan \& Push} dla każdego serwisu widoczne jest jako oddzielny, nazwany check -- programista natychmiast identyfikuje, który z mikroserwisów jest \textit{czerwony} i z jakiego powodu. Dopóki wszystkie aktywowane łańcuchy nie zakończą się sukcesem, scalenie PR jest zablokowane, co egzekwuje zasadę \textit{green build before merge} bez konieczności ręcznej interwencji recenzenta.
+GitHub Actions raportuje wyniki każdego zadania (ang. \textit{job}) jako \textbf{status check} bezpośrednio w widoku Pull Requesta. Zadanie \texttt{Build, Test, Scan \& Push} dla każdego serwisu widoczne jest jako oddzielny, nazwany check -- programista natychmiast identyfikuje, który z mikroserwisów jest \textit{czerwony} i z jakiego powodu. Dopóki wszystkie aktywowane łańcuchy nie zakończą się sukcesem, scalenie PR jest zablokowane, co egzekwuje zasadę \textit{green build before merge} bez konieczności ręcznej interwencji recenzenta. Rozgałęzienie zachowania łańcucha między zdarzeniem \textit{pull request} a \textit{push} do \texttt{main} przedstawia rysunek~\ref{fig:ci-governance}.

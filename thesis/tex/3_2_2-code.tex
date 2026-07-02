@@ -6,7 +6,7 @@ Proces kodowania realizowany jest przy użyciu nowoczesnych środowisk programis
 Wszystkie komponenty systemu są projektowane zgodnie z zasadami \textit{Twelve-Factor App}. Kluczowe aspekty to:
 \begin{itemize}
     \item \textbf{Konfiguracja:} Cała konfiguracja specyficzna dla środowiska jest wstrzykiwana przez zmienne środowiskowe, a nie zaszyta w kodzie.
-    \item \textbf{Procesy:} Aplikacje są bezstanowe (\textit{stateless}), co umożliwia ich łatwe skalowanie w poziomie wewnątrz klastra Kubernetes.
+    \item \textbf{Procesy:} Aplikacje są bezstanowe (ang. \textit{stateless}), co umożliwia ich łatwe skalowanie w poziomie wewnątrz klastra Kubernetes.
     \item \textbf{Logowanie:} Logi są traktowane jako strumień zdarzeń wysyłany na standardowe wyjście, co umożliwia ich centralizację przez narzędzia observability.
 \end{itemize}
 
@@ -62,7 +62,7 @@ Zgodnie z decyzją \textit{ADR-0014}, warstwę prezentacji zbudowano z użyciem 
   \item \textbf{Multi-stage w Dockerze:} Etap \texttt{npm ci \&\& vite build} produkuje statyczne pliki; obraz docelowy zawiera wyłącznie \texttt{nginx} bez środowiska Node.js.
 \end{itemize}
 
-\textbf{Rola w projekcie:} Vue~3 pełni rolę cienkiej warstwy prezentacji (\textit{thin client}) nad REST API mikroserwisów. Warstwa frontendowa wdrażana jest jako osobny mikroserwis w Kubernetes z własnym łańcuchem CI/CD, analogicznie do serwisów backendowych.
+\textbf{Rola w projekcie:} Vue~3 pełni rolę cienkiej warstwy prezentacji (ang. \textit{thin client}) nad REST API mikroserwisów. Warstwa frontendowa wdrażana jest jako osobny mikroserwis w Kubernetes z własnym łańcuchem CI/CD, analogicznie do serwisów backendowych.
 
 \end{techcard}
 
@@ -85,16 +85,16 @@ export default defineConfig({
 
 
 \subsubsection{System kontroli wersji: GitHub}
-Jako system kontroli wersji i platformę współpracy wybrano \textbf{GitHub}, oparty na rozproszonym systemie Git. Jest on centralnym punktem prawdy (\textit{Single Source of Truth}) dla całego monorepozytorium.
+Jako system kontroli wersji i platformę współpracy wybrano \textbf{GitHub}, oparty na rozproszonym systemie Git. Jest on centralnym punktem prawdy (ang. \textit{Single Source of Truth}) dla całego monorepozytorium.
 
 \textbf{Standard Conventional Commits:}
-Zgodnie z decyzją projektową \textit{ADR-0004}, wprowadzono standard \textbf{Conventional Commits}. Polega on na nadawaniu wiadomościom zatwierdzeń ustrukturyzowanej formy (np. \texttt{feat:}, \texttt{fix:}, \texttt{chore:}).
+Zgodnie z decyzją projektową \textit{ADR-0004}, wprowadzono standard \textbf{Conventional Commits}. Polega on na nadawaniu wiadomościom zatwierdzeń ustrukturyzowanej formy (np. \texttt{feat:}, \texttt{fix:}, \texttt{chore:}) \cite{conventionalCommits}.
 \begin{itemize}
-    \item \textbf{Uzasadnienie:} Standaryzacja pozwala na automatyczne generowanie list zmian (\textit{changelogs}) oraz automatyzację wersjonowania semantycznego (\textit{Semantic Versioning}).
+    \item \textbf{Uzasadnienie:} Standaryzacja pozwala na automatyczne generowanie list zmian (ang. \textit{changelogs}) oraz automatyzację wersjonowania semantycznego (ang. \textit{Semantic Versioning}).
     \item \textbf{Rola w CI/CD:} Czytelna historia zmian umożliwia narzędziom automatyzującym precyzyjne określenie, które komponenty systemu wymagają przebudowania i wdrożenia po każdej zmianie w monorepozytorium.
 \end{itemize}
 
-Poniższy przykład ilustruje kompletną wiadomość zatwierdzenia zgodną ze standardem. Nagłówek zawiera typ, zakres oraz zwięzły opis zmiany, a stopka (\textit{footer}) powiązuje commit z konkretnym zadaniem w systemie Jira:
+Poniższy przykład ilustruje kompletną wiadomość zatwierdzenia zgodną ze standardem. Nagłówek zawiera typ, zakres oraz zwięzły opis zmiany, a stopka (ang. \textit{footer}) powiązuje commit z konkretnym zadaniem w systemie Jira:
 
 \begin{lstlisting}[caption={Przykład wiadomości zatwierdzenia zgodnej ze standardem Conventional Commits}, label={lst:conventional-commit}]
 feat(helm): create umbrella chart for all 7 services
