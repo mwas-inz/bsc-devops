@@ -24,7 +24,7 @@ kubectl apply -f gitops/secrets/grafana-admin.sealed.yaml
 until kubectl -n "$OBS_NS" get secret grafana-admin >/dev/null 2>&1; do sleep 2; done
 
 echo "--- [3/4] Deliver the LGTM + Collector stack via ArgoCD ---"
-kubectl apply -f gitops/observability-application.yaml
+kubectl apply -f gitops/observability.yaml
 
 echo "--- [4/4] Wait for the stack to be healthy ---"
 kubectl -n argocd wait --for=jsonpath='{.status.health.status}'=Healthy \

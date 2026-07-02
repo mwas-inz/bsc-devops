@@ -13,7 +13,7 @@ Observability strategy for the thesis platform based on the three-pillar model
 
 The LGTM stack (Loki, Grafana, Tempo, Prometheus) and an OpenTelemetry Collector are
 deployed via `infrastructure/helm/observability/` and delivered by a dedicated ArgoCD
-Application (`gitops/observability-application.yaml`). Application services export OTLP
+Application (`gitops/observability.yaml`). Application services export OTLP
 traces and logs to the Collector, which fans them out to Tempo and Loki; Prometheus
 scrapes application metrics directly from `/q/metrics`. Jaeger has been retired in
 favour of Tempo.
