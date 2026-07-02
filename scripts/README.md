@@ -48,6 +48,8 @@ Traefik then serves every UI on plain HTTP via `*.localhost` hostnames:
 | `http://prometheus.localhost` | Prometheus                                         |
 | `http://loki.localhost`       | Loki HTTP API (no UI)                              |
 
+Addresses, users, and passwords for all UIs: `bash scripts/local/ui-credentials.sh`.
+
 After bootstrap, ArgoCD manages all subsequent deployments automatically.
 Pushing a new chart version to GHCR and updating `targetRevision` in
 `gitops/application.yaml` is all that is needed to trigger a rollout.
