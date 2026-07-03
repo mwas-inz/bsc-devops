@@ -1,20 +1,20 @@
 \subsection{Podsumowanie części praktycznej}
-Zaprezentowany ekosystem narzędziowy tworzy spójny proces wytwórczy (ang. \textit{Golden Path}), który minimalizuje nakład pracy ręcznej i ryzyko błędów ludzkich. Integracja poszczególnych etapów — od planowania w systemie Jira, przez automatyczne budowanie i testowanie w GitHub Actions, aż po wdrożenie GitOps i zaawansowane monitorowanie — stanowi kompletną realizację paradygmatu DevOps w architekturze \textit{Cloud Native}. Tak ukształtowane środowisko pozwala deweloperom skupić się na dostarczaniu wartości biznesowej, podczas gdy infrastruktura i procesy pozostają zautomatyzowane, przejrzyste i mierzalne.
+Zaprezentowany ekosystem narzędziowy tworzy spójny proces wytwórczy (ang. \textit{golden path}), który minimalizuje nakład pracy ręcznej i~ryzyko błędów ludzkich. Integracja poszczególnych etapów --- od planowania w~systemie Jira, przez automatyczne budowanie i~testowanie w~GitHub Actions, aż po wdrożenie GitOps i~zaawansowane monitorowanie --- stanowi kompletną realizację paradygmatu DevOps w~architekturze \textit{Cloud Native}. Tak ukształtowane środowisko pozwala deweloperom skupić się na dostarczaniu wartości biznesowej, podczas gdy infrastruktura i~procesy pozostają zautomatyzowane, przejrzyste i~mierzalne.
 
-Współdziałanie wszystkich opisanych etapów podsumowuje rysunek~\ref{fig:capstone-sequence}. Przedstawia on pełny cykl życia pojedynczej zmiany: od zatwierdzenia kodu w repozytorium, przez testy, budowanie natywne i skanowanie w potoku CI, publikację podpisanego obrazu oraz chartu Helm, synchronizację GitOps wykonaną przez ArgoCD, aż po obserwację wdrożonej wersji w Grafanie. Każdy uczestnik tej sekwencji został szczegółowo omówiony w poprzednich podrozdziałach — diagram pokazuje, że tworzą one jeden nieprzerwany, zautomatyzowany łańcuch dostarczania.
+Współdziałanie wszystkich opisanych etapów podsumowuje rysunek~\ref{fig:capstone-sequence}. Przedstawia on pełny cykl życia pojedynczej zmiany: od zatwierdzenia kodu w~repozytorium, przez testy, budowanie natywne i~skanowanie w~procesie CI, publikację podpisanego obrazu oraz chartu Helm, synchronizację GitOps wykonaną przez ArgoCD, aż po obserwację wdrożonej wersji w~Grafanie. Każdy uczestnik tej sekwencji został szczegółowo omówiony w~poprzednich podrozdziałach --- diagram pokazuje, że tworzą one jeden nieprzerwany, zautomatyzowany proces dostarczania.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{img/diagrams/10-podsumowanie/podsumowanie-01-capstone-sequence.png}
-    \caption{Pełny cykl dostarczania zmiany --- od commitu, przez potok CI i wdrożenie GitOps, po obserwację w Grafanie (opracowanie własne).}
+    \caption{Pełny cykl dostarczania zmiany --- od commitu, przez proces CI i~wdrożenie GitOps, po obserwację w~Grafanie (opracowanie własne).}
     \label{fig:capstone-sequence}
 \end{figure}
 
-Z perspektywy pojedynczej zmiany ta sama ścieżka ujawnia granicę automatyzacji (rysunek~\ref{fig:value-stream}): między zatwierdzeniem kodu a obserwacją działającej wersji występują dokładnie dwa kroki wymagające decyzji człowieka --- sam commit oraz decyzja o wydaniu, realizowana przez aktualizację pola \texttt{targetRevision}. Wszystkie pozostałe etapy --- testy, budowanie, skanowanie, podpisywanie, publikacja artefaktów, uzgodnienie stanu klastra i wdrożenie kroczące --- wykonują się bez udziału operatora, a wnioski z obserwacji systemu inicjują kolejną iterację cyklu.
+Z~perspektywy pojedynczej zmiany ta sama ścieżka ujawnia granicę automatyzacji (rysunek~\ref{fig:value-stream}): między zatwierdzeniem kodu a~obserwacją działającej wersji występują dokładnie dwa kroki wymagające decyzji człowieka --- sam commit oraz decyzja o~wydaniu, realizowana przez aktualizację pola \texttt{targetRevision}. Wszystkie pozostałe etapy --- testy, budowanie, skanowanie, podpisywanie, publikacja artefaktów, uzgodnienie stanu klastra i~wdrożenie kroczące --- wykonują się bez udziału operatora, a~wnioski z~obserwacji systemu inicjują kolejną iterację cyklu.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{img/diagrams/10-podsumowanie/podsumowanie-02-value-stream.png}
-    \caption{Podróż pojedynczej zmiany --- dokładnie dwa kroki ręczne (commit i decyzja o wydaniu); pozostałe etapy ścieżki wykonują się automatycznie (opracowanie własne).}
+    \caption{Podróż pojedynczej zmiany --- dokładnie dwa kroki ręczne (commit i~decyzja o~wydaniu); pozostałe etapy ścieżki wykonują się automatycznie (opracowanie własne).}
     \label{fig:value-stream}
 \end{figure}

@@ -1,35 +1,35 @@
 \newpage
-\section{Podsumowanie i wnioski}
-Niniejsza praca stanowiła próbę kompleksowego ujęcia procesu wytwarzania oprogramowania w nowoczesnym ekosystemie \textit{Cloud Native}. Głównym celem było zaprezentowanie, w jaki sposób zasady metodologii DevOps oraz wytyczne \textit{Twelve-Factor App} przekładają się na konkretne rozwiązania techniczne i architektoniczne.
+\section{Podsumowanie i~wnioski}
+Niniejsza praca stanowiła próbę kompleksowego ujęcia procesu wytwarzania oprogramowania w~nowoczesnym ekosystemie \textit{Cloud Native}. Głównym celem było zaprezentowanie, w~jaki sposób zasady metodyki DevOps oraz wytyczne \textit{Twelve-Factor App} przekładają się na konkretne rozwiązania techniczne i~architektoniczne.
 
 \subsection{Osiągnięcie celów pracy}
-W ramach części praktycznej z powodzeniem zaimplementowano kompletną ścieżkę wytwórczą (ang. \textit{Golden Path}), obejmującą wszystkie kluczowe etapy pętli DevOps. Stworzone środowisko pozwala na w pełni zautomatyzowane przejście od zmiany w kodzie źródłowym, przez testy jednostkowe i integracyjne, budowanie obrazów kontenerowych, aż po ich wdrożenie w klastrze Kubernetes przy użyciu modelu GitOps. Wykorzystanie dokumentów ADR (\textit{Architecture Decision Records}) pozwoliło na usystematyzowanie procesów decyzyjnych i utrwalenie wiedzy architektonicznej, co jest kluczowe w projektach o dużej skali.
+W~ramach części praktycznej z~powodzeniem zaimplementowano kompletną ścieżkę wytwórczą (ang. \textit{golden path}), obejmującą wszystkie kluczowe etapy pętli DevOps. Stworzone środowisko pozwala na w~pełni zautomatyzowane przejście od zmiany w~kodzie źródłowym, przez testy jednostkowe i~integracyjne, budowanie obrazów kontenerowych, aż po ich wdrożenie w~klastrze Kubernetes przy użyciu modelu GitOps. Wykorzystanie dokumentów ADR pozwoliło na usystematyzowanie procesów decyzyjnych i~utrwalenie wiedzy architektonicznej, co jest kluczowe w~projektach o~dużej skali.
 
 \subsection{Wyzwania inżynierskie}
 Podczas realizacji projektu zidentyfikowano kilka kluczowych wyzwań, które są charakterystyczne dla współczesnych systemów rozproszonych:
 \begin{itemize}
-    \item \textbf{Konfiguracja GitOps:} Wdrożenie narzędzia ArgoCD wymagało precyzyjnego zdefiniowania struktury repozytorium z manifestami. Największym wyzwaniem okazało się zarządzanie sekretami oraz synchronizacja stanów między wieloma mikroserwisami, co wymagało zastosowania wzorca \textit{App of Apps}.
-    \item \textbf{Złożoność stosu Observability:} Implementacja standardu OpenTelemetry oraz stosu LGTM (Loki, Grafana, Tempo, Prometheus) dostarczyła potężnych narzędzi diagnostycznych, ale wiązała się z wysokim kosztem konfiguracji. Poprawne skorelowanie logów ze śladami wymagało precyzyjnego zarządzania kontekstem (ang. \textit{Context Propagation}) w warstwie aplikacji i kolektora OTel.
-    \item \textbf{Zasobożerność środowiska:} Uruchomienie pełnego stosu infrastrukturalnego (Kubernetes, bazy danych, monitoring) w środowisku lokalnym stawia wysokie wymagania sprzętowe, co wymuszało agresywną optymalizację limitów zasobów dla poszczególnych kontenerów.
+    \item \textbf{Konfiguracja GitOps:} Wdrożenie narzędzia ArgoCD wymagało precyzyjnego zdefiniowania struktury repozytorium z~manifestami. Największym wyzwaniem okazało się zarządzanie sekretami w~publicznym repozytorium (rozwiązane szyfrowaniem asymetrycznym Sealed Secrets) oraz rozdzielenie platformy na niezależnie synchronizowane aplikacje ArgoCD (stos aplikacyjny i~obserwowalności).
+    \item \textbf{Złożoność stosu Observability:} Implementacja standardu OpenTelemetry oraz stosu LGTM (Loki, Grafana, Tempo, Prometheus) dostarczyła potężnych narzędzi diagnostycznych, ale wiązała się z~wysokim kosztem konfiguracji. Poprawne skorelowanie logów ze śladami wymagało precyzyjnego zarządzania kontekstem (ang. \textit{context propagation}) w~warstwie aplikacji i~kolektora OTel.
+    \item \textbf{Wymagania zasobowe środowiska:} Uruchomienie pełnego stosu infrastrukturalnego (Kubernetes, bazy danych, monitoring) w~środowisku lokalnym stawia wysokie wymagania sprzętowe, co wymuszało agresywną optymalizację limitów zasobów dla poszczególnych kontenerów.
 \end{itemize}
 
-\subsection{Wnioski końcowe i kierunki rozwoju}
-Zrealizowany projekt potwierdza, że automatyzacja i standaryzacja procesów są niezbędne do zachowania zwinności w dostarczaniu oprogramowania. Kultura DevOps nie ogranicza się jedynie do doboru narzędzi, ale polega na stworzeniu spójnego ekosystemu, w którym technologia wspiera cele biznesowe i minimalizuje ryzyko błędów ludzkich.
+\subsection{Wnioski końcowe i~kierunki rozwoju}
+Zrealizowany projekt potwierdza, że automatyzacja i~standaryzacja procesów są niezbędne do zachowania zwinności w~dostarczaniu oprogramowania. Kultura DevOps nie ogranicza się jedynie do doboru narzędzi, ale polega na stworzeniu spójnego ekosystemu, w~którym technologia wspiera cele biznesowe i~minimalizuje ryzyko błędów ludzkich.
 
-Syntetyczne ujęcie zbudowanego ekosystemu przedstawia rysunek~\ref{fig:control-loop}: cały cykl wytwarzania działa jak układ regulacji ze sprzężeniem zwrotnym, w którym repozytorium Git pełni rolę stanu pożądanego, łańcuchy CI/CD i ArgoCD --- aktuatorów, klaster Kubernetes --- obiektu regulacji, a stos obserwowalności --- czujnika. Kluczowe są dwie pętle o różnych skalach czasu: wewnętrzna, maszynowa, utrzymuje zgodność klastra z repozytorium bez udziału człowieka, natomiast zewnętrzna, ludzka, zmienia sam stan pożądany na podstawie obserwacji działającego systemu.
+Syntetyczne ujęcie zbudowanego ekosystemu przedstawia rysunek~\ref{fig:control-loop}: cały cykl wytwarzania działa jak układ regulacji ze sprzężeniem zwrotnym, w~którym repozytorium Git pełni rolę stanu pożądanego, procesy CI/CD i~ArgoCD --- aktuatorów, klaster Kubernetes --- obiektu regulacji, a~stos obserwowalności --- czujnika. Kluczowe są dwie pętle o~różnych skalach czasu: wewnętrzna, maszynowa, utrzymuje zgodność klastra z~repozytorium bez udziału człowieka, natomiast zewnętrzna, ludzka, zmienia sam stan pożądany na podstawie obserwacji działającego systemu.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{img/diagrams/10-podsumowanie/podsumowanie-03-control-loop.png}
-    \caption{Cykl SDLC jako układ regulacji ze sprzężeniem zwrotnym --- wewnętrzna pętla maszynowa (\texttt{selfHeal}) utrzymuje zgodność klastra z Git, a zewnętrzna pętla ludzka koryguje stan pożądany na podstawie obserwacji (opracowanie własne).}
+    \caption{Cykl SDLC jako układ regulacji ze sprzężeniem zwrotnym --- wewnętrzna pętla maszynowa (\texttt{selfHeal}) utrzymuje zgodność klastra z~Git, a~zewnętrzna pętla ludzka koryguje stan pożądany na podstawie obserwacji (opracowanie własne).}
     \label{fig:control-loop}
 \end{figure}
 
 Dalszy rozwój systemu mógłby koncentrować się na następujących obszarach:
 \begin{itemize}
-    \item \textbf{DevSecOps:} Rozszerzenie łańcuchów CI/CD o zaawansowane skanowanie statyczne (SAST) i dynamiczne (DAST) kodu oraz głębszą analizę bezpieczeństwa łańcucha dostaw.
-    \item \textbf{FinOps:} Implementacja narzędzi do monitorowania i optymalizacji kosztów infrastruktury chmurowej (np. Kubecost), co jest kluczowe przy przejściu z klastra lokalnego do chmury publicznej.
-    \item \textbf{Serverless:} Eksperymenty z architekturą bezserwerową (np. Knative) w celu dalszej optymalizacji zużycia zasobów w momentach niskiego obciążenia systemu.
+    \item \textbf{DevSecOps:} Rozszerzenie procesów CI/CD o~zaawansowane skanowanie statyczne (SAST) i~dynamiczne (DAST) kodu oraz głębszą analizę bezpieczeństwa łańcucha dostaw.
+    \item \textbf{FinOps:} Implementacja narzędzi do monitorowania i~optymalizacji kosztów infrastruktury chmurowej (np. Kubecost), co jest kluczowe przy przejściu z~klastra lokalnego do chmury publicznej.
+    \item \textbf{Serverless:} Eksperymenty z~architekturą bezserwerową (np. Knative) w~celu dalszej optymalizacji zużycia zasobów w~momentach niskiego obciążenia systemu.
 \end{itemize}
 
-Podsumowując, przedstawione w pracy podejście inżynierskie stanowi solidną bazę do budowy i utrzymania nowoczesnych aplikacji SaaS, łącząc rygor akademicki z najlepszymi praktykami branżowymi.
+Podsumowując, przedstawione w~pracy podejście inżynierskie stanowi solidną bazę do budowy i~utrzymania nowoczesnych aplikacji SaaS, łącząc rygor akademicki z~najlepszymi praktykami branżowymi.

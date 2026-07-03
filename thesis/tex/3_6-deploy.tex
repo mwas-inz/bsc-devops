@@ -2,128 +2,118 @@
 Faza wdrożenia (\textit{Deploy}) odpowiada za przeniesienie artefaktów na środowisko uruchomieniowe oraz zapewnienie odpowiedniej infrastruktury.
 
 \subsubsection{Środowisko uruchomieniowe: Kubernetes (k3d)}
-Zgodnie z decyzją \textit{ADR-0002}, głównym środowiskiem uruchomieniowym mikroserwisów jest klaster \textbf{Kubernetes} (K8s) — system \textit{open-source} do automatyzacji wdrażania, skalowania i zarządzania skonteneryzowanymi aplikacjami. Pełni rolę orkiestratora: dba o to, aby zdefiniowana liczba instancji aplikacji (podów) była zawsze uruchomiona i dostępna, a w przypadku awarii automatycznie je restartuje. Lokalne klastry Kubernetes oferują niemal pełną kompatybilność z produkcyjnymi klastrami chmurowymi (EKS, GKE), co pozwala testować manifesty, polityki sieciowe i mechanizmy skalowania bezpośrednio na maszynie programisty.
+Zgodnie z~decyzją \textit{ADR-0002}, głównym środowiskiem uruchomieniowym mikroserwisów jest klaster \textbf{Kubernetes} (k8s). Lokalne klastry Kubernetes oferują niemal pełną kompatybilność z~produkcyjnymi klastrami chmurowymi (EKS, GKE), co pozwala testować manifesty, polityki sieciowe i~mechanizmy skalowania bezpośrednio na maszynie programisty.
 
 \begin{techcard}{Kubernetes}
 
-\textbf{Opis:} Kubernetes (K8s) to system \textit{open-source} do automatyzacji wdrażania, skalowania i zarządzania skonteneryzowanymi aplikacjami. Pełni rolę orkiestratora, dbając o to, aby zdefiniowana liczba instancji aplikacji (podów) była zawsze uruchomiona i dostępna dla użytkowników.
+\textbf{Opis:} Kubernetes (k8s) to system \textit{open-source} do automatyzacji wdrażania, skalowania i~zarządzania skonteneryzowanymi aplikacjami. Pełni rolę orkiestratora, dbając o~to, aby zdefiniowana liczba instancji aplikacji (podów) była zawsze uruchomiona i~dostępna dla użytkowników.
 
 \textbf{Dobre nawyki:}
 \begin{itemize}
-  \item \textbf{Zarządzanie zasobami:} Obowiązkowe definiowanie \texttt{requests} (zasoby gwarantowane) i \texttt{limits} (maksymalne zużycie) zapobiega wzajemnemu zagłuszaniu się usług (efekt \textit{noisy neighbor}).
-  \item \textbf{Sondy stanu podów:} \texttt{livenessProbe} (czy kontener żyje) oraz \texttt{readinessProbe} (czy może przyjmować ruch) są kluczowe dla samonaprawialności klastra i bezprzestojowych wdrożeń kroczących (ang. \textit{rolling updates}).
-  \item \textbf{Podejście deklaratywne (GitOps):} Konfiguracja przechowywana w repozytorium i nakładana przez \texttt{kubectl apply}, a nie polecenia imperatywne.
-  \item \textbf{Network Policies:} Domyślne ograniczanie komunikacji między podami do niezbędnego minimum -- zasada \textit{Zero Trust}.
+  \item \textbf{Zarządzanie zasobami:} Obowiązkowe definiowanie \texttt{requests} (zasoby gwarantowane) i~\texttt{limits} (maksymalne zużycie) zapobiega wzajemnemu zagłuszaniu się usług (efekt \textit{noisy neighbor}).
+  \item \textbf{Sondy stanu podów:} \texttt{livenessProbe} (czy kontener żyje) oraz \texttt{readinessProbe} (czy może przyjmować ruch) są kluczowe dla samonaprawialności klastra i~bezprzestojowych wdrożeń kroczących (ang. \textit{rolling updates}).
+  \item \textbf{Podejście deklaratywne (GitOps):} Konfiguracja przechowywana w~repozytorium i~nakładana przez \texttt{kubectl apply}, a~nie polecenia imperatywne.
+  \item \textbf{Network Policies:} Domyślne ograniczanie komunikacji między podami do niezbędnego minimum --- zasada \textit{Zero Trust}.
 \end{itemize}
 
-\textbf{Rola w projekcie:} Kubernetes stanowi docelowe środowisko uruchomieniowe. O ile Docker pozwala stworzyć obraz, o tyle Kubernetes odpowiada za to, by ten obraz funkcjonował w klastrze, był dostępny pod konkretnym adresem i automatycznie restartował się w przypadku awarii.
+\textbf{Rola w~projekcie:} Kubernetes stanowi docelowe środowisko uruchomieniowe. O~ile Docker pozwala stworzyć obraz, o~tyle Kubernetes odpowiada za to, by ten obraz funkcjonował w~klastrze, był dostępny pod konkretnym adresem i~automatycznie restartował się w~przypadku awarii.
 
 \end{techcard}
 
-\begin{lstlisting}[language=yaml, caption={Manifest Kubernetes Deployment z sondami kondycji i limitami zasobów (infrastructure/k8s/users-deployment.yaml)}, label={lst:k8s-deployment}]
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: users-deployment
+\begin{lstlisting}[language=yaml, caption={Fragment manifestu Deployment z~sondami kondycji i~limitami zasobów (infrastructure/local/apps/users-deployment.yaml)}, label={lst:k8s-deployment}]
 spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: users
+  replicas: 1
   template:
-    metadata:
-      labels:
-        app: users
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/path: /q/metrics
-        prometheus.io/port: "8080"
     spec:
+      serviceAccountName: users-sa
       containers:
-      - name: users
-        image: mateuszwas/users:1.0.0
-        ports:
-        - containerPort: 8080
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "50m"
-          limits:
-            memory: "256Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /q/health/live
-            port: 8080
-        readinessProbe:
-          httpGet:
-            path: /q/health/ready
-            port: 8080
+        - name: users
+          image: docker.io/mateuszwas/users:IMAGE_TAG
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
 \end{lstlisting}
 
-Zgodnie z decyzją \textit{ADR-0015}, w części praktycznej lokalny klaster uruchamia narzędzie \textbf{k3d} — cienka warstwa opakowująca \textbf{k3s} (certyfikowaną przez CNCF dystrybucję Kubernetes) działającą wewnątrz kontenerów Docker. Kluczowym wymaganiem było dotarcie do Ingressu bezpośrednio z hosta bez dodatkowych komend. Alternatywa — \textbf{minikube} ze sterownikiem Docker — wymaga uruchomienia \texttt{minikube tunnel} w osobnym terminalu, by ruch z hosta docierał do zasobów Ingress. k3d rozwiązuje ten problem przez mapowanie portów już na etapie tworzenia klastra:
+Zgodnie z~decyzją \textit{ADR-0015}, w~części praktycznej lokalny klaster uruchamia narzędzie \textbf{k3d} --- cienka warstwa opakowująca \textbf{k3s} (certyfikowaną przez CNCF dystrybucję Kubernetes) działającą wewnątrz kontenerów Docker. Kluczowym wymaganiem było dotarcie do Ingressu bezpośrednio z~hosta bez dodatkowych poleceń. Alternatywa --- \textbf{minikube} ze sterownikiem Docker --- wymaga uruchomienia \texttt{minikube tunnel} w~osobnym terminalu, by ruch z~hosta docierał do zasobów Ingress. k3d rozwiązuje ten problem przez mapowanie portów już na etapie tworzenia klastra:
 
-\begin{lstlisting}[language=bash, caption={Tworzenie klastra k3d z mapowaniem portów Ingress (infrastructure/k3d/cluster-create.sh)}, label={lst:k3d-create}]
-k3d cluster create bsc-devops \
-  --agents 2 \
-  --port "80:80@loadbalancer" \
-  --port "443:443@loadbalancer"
+\begin{lstlisting}[language=bash, caption={Tworzenie klastra k3d z~mapowaniem portów Ingress (scripts/local/gitops-bootstrap.sh)}, label={lst:k3d-create}]
+k3d cluster create "$CLUSTER" \
+    --agents 2 \
+    --port "80:80@loadbalancer" \
+    --port "443:443@loadbalancer"
 \end{lstlisting}
 
-Powyższe polecenie mapuje port 80 hosta na load balancer k3d, dzięki czemu każdy zasób Ingress jest natychmiast dostępny pod adresem \texttt{http://localhost}. Klaster startuje w czasie poniżej 30 sekund (w porównaniu do 1--2 minut dla minikube).
+Powyższe polecenie mapuje port 80 hosta na load balancer k3d, dzięki czemu każdy zasób Ingress jest natychmiast dostępny pod adresem \texttt{http://localhost}. Klaster startuje w~czasie poniżej 30 sekund (w~porównaniu z~1--2 minutami dla minikube).
 
 \begin{itemize}
-    \item \textbf{Wbudowany kontroler Ingress:} k3s domyślnie instaluje \textbf{Traefik} jako kontroler Ingress — nie wymaga ręcznego instalowania dodatków.
+    \item \textbf{Wbudowany kontroler Ingress:} k3s domyślnie instaluje \textbf{Traefik} jako kontroler Ingress --- nie wymaga ręcznego instalowania dodatków.
     \item \textbf{Wiele węzłów:} Flaga \texttt{--agents N} pozwala tworzyć klastry wielowęzłowe, umożliwiając testowanie zachowania schedulera zbliżonego do środowisk produkcyjnych.
     \item \textbf{Import obrazów lokalnych:} Polecenie \texttt{k3d image import <obraz> -c bsc-devops} ładuje lokalne obrazy Docker bezpośrednio do klastra bez potrzeby wypychania ich do zewnętrznego rejestru.
 \end{itemize}
 
 \begin{techcard}{k3d}
 
-\textbf{Opis:} k3d to narzędzie uruchamiające klastry \textbf{k3s} (lekkiej dystrybucji Kubernetes certyfikowanej przez CNCF) wewnątrz kontenerów Docker. Każdy węzeł klastra jest osobnym kontenerem, a porty load balancera są mapowane na host już w momencie tworzenia klastra. Rozwiązuje to główną bolączkę alternatywnych narzędzi lokalnych -- konieczność uruchamiania dodatkowych procesów tunelujących ruch Ingress.
+\textbf{Opis:} k3d to narzędzie uruchamiające klastry \textbf{k3s} (lekkiej dystrybucji Kubernetes certyfikowanej przez CNCF) wewnątrz kontenerów Docker. Każdy węzeł klastra jest osobnym kontenerem, a~porty load balancera są mapowane na host już w~momencie tworzenia klastra. Rozwiązuje to główną bolączkę alternatywnych narzędzi lokalnych --- konieczność uruchamiania dodatkowych procesów tunelujących ruch Ingress.
 
 \textbf{Dobre nawyki:}
 \begin{itemize}
-  \item \textbf{Mapowanie portów przy tworzeniu:} Flagi \texttt{--port} należy podać w poleceniu \texttt{k3d cluster create} -- nie da się ich dodać do działającego klastra bez jego rekonstrukcji.
-  \item \textbf{Import obrazów lokalnych:} Zamiast wypychać obraz do zewnętrznego rejestru podczas iteracji deweloperskiej, należy użyć \texttt{k3d image import <obraz> -c <klaster>} -- ładuje obraz bezpośrednio do containerd w węzłach klastra.
+  \item \textbf{Mapowanie portów przy tworzeniu:} Flagi \texttt{--port} należy podać w~poleceniu \texttt{k3d cluster create} --- nie można ich dodać do działającego klastra bez jego rekonstrukcji.
+  \item \textbf{Import obrazów lokalnych:} Zamiast wypychać obraz do zewnętrznego rejestru podczas iteracji deweloperskiej, należy użyć \texttt{k3d image import <obraz> -c <klaster>} --- ładuje obraz bezpośrednio do containerd w~węzłach klastra.
   \item \textbf{Domyślny Ingress: Traefik:} k3s dostarcza Traefik zamiast nginx; manifesty Ingress muszą używać \texttt{ingressClassName: traefik}.
   \item \textbf{Wielowęzłowość:} Dla testów zbliżonych do produkcji warto dodać agentów (\texttt{--agents 2}), by sprawdzić zachowanie schedulera przy ograniczeniach \texttt{affinity}/\texttt{tolerations}.
 \end{itemize}
 
-\textbf{Rola w projekcie:} k3d stanowi lokalne środowisko deweloperskie i demonstracyjne dla całego stosu mikroserwisów. Zastąpił minikube ze względu na natywne mapowanie portów Ingress (brak \texttt{minikube tunnel}), czas startu klastra poniżej 30 sekund oraz pełną skryptowalność tworzenia klastra jednym poleceniem CLI.
+\textbf{Rola w~projekcie:} k3d stanowi lokalne środowisko deweloperskie i~demonstracyjne dla całego stosu mikroserwisów. Zastąpił minikube ze względu na natywne mapowanie portów Ingress (brak \texttt{minikube tunnel}), czas startu klastra poniżej 30 sekund oraz pełną skryptowalność tworzenia klastra jednym poleceniem CLI.
 
 \end{techcard}
 
 \subsubsection{Automatyzacja wdrożeń: GitOps (ArgoCD)}
-Zamiast tradycyjnych narzędzi \textit{Configuration Management} (jak Ansible), zdecydowano się na podejście \textbf{GitOps} przy użyciu narzędzia \textbf{ArgoCD} (ADR-0013). GitOps zakłada, że repozytorium Git jest jedynym źródłem prawdy o stanie infrastruktury -- kontroler stale monitoruje zmiany w chartach Helm i automatycznie synchronizuje stan klastra z definicją w kodzie, eliminując potrzebę ręcznego wykonywania poleceń \texttt{kubectl} z poziomu CI/CD.
+Zamiast tradycyjnych narzędzi \textit{Configuration Management} (jak Ansible), zdecydowano się na podejście \textbf{GitOps} przy użyciu narzędzia \textbf{ArgoCD} (ADR-0013). GitOps zakłada, że repozytorium Git jest jedynym źródłem prawdy o~stanie infrastruktury --- kontroler stale monitoruje zmiany w~chartach Helm i~automatycznie synchronizuje stan klastra z~definicją w~kodzie, eliminując potrzebę ręcznego wykonywania poleceń \texttt{kubectl} z~poziomu CI/CD.
 
-Model \textbf{pull-based} odwraca klasyczny przepływ CI/CD: zamiast procesu aktywnie wypychającego zmiany do klastra (\textit{push}), to \textbf{kontroler ArgoCD działający wewnątrz klastra} cyklicznie odpytuje źródło prawdy -- repozytorium Git lub rejestr OCI Helm -- i porównuje \textit{stan pożądany} ze \textit{stanem faktycznym} zasobów Kubernetes. Wykrytą rozbieżność (\textit{drift}) kontroler niweluje przez operację \textbf{uzgadniania} (\textit{reconciliation}) -- bez ingerencji człowieka i bez otwierania połączenia z zewnątrz do klastra. \textbf{Deklaratywna synchronizacja} (\textit{declarative sync}) oznacza, że operator opisuje \textit{co} ma działać w klastrze -- a nie \textit{jak} to wdrożyć -- i to ArgoCD odpowiada za doprowadzenie stanu aktualnego do opisanego stanu pożądanego.
-Pełną pętlę uzgadniania przedstawia rysunek~\ref{fig:gitops-flow}: kontroler odczytuje stan pożądany z zasobów \texttt{Application}, pobiera przypięty chart z rejestru i doprowadza stan bieżący klastra do zgodności. Wszystkie połączenia inicjuje kontroler od wewnątrz -- jedyną operacją przychodzącą jest jednorazowy bootstrap, a łańcuch CI nie posiada żadnych poświadczeń klastra.
+Model \textbf{pull-based} odwraca klasyczny przepływ CI/CD: zamiast procesu aktywnie wypychającego zmiany do klastra (\textit{push}), to \textbf{kontroler ArgoCD działający wewnątrz klastra} cyklicznie odpytuje źródło prawdy --- repozytorium Git lub rejestr OCI Helm --- i~porównuje \textit{stan pożądany} ze \textit{stanem faktycznym} zasobów Kubernetes. Wykrytą rozbieżność (\textit{drift}) kontroler niweluje przez operację \textbf{uzgadniania} (\textit{reconciliation}) --- bez ingerencji człowieka i~bez otwierania połączenia z~zewnątrz do klastra. \textbf{Deklaratywna synchronizacja} (\textit{declarative sync}) oznacza, że operator opisuje \textit{co} ma działać w~klastrze --- a~nie \textit{jak} to wdrożyć --- i~to ArgoCD odpowiada za doprowadzenie stanu aktualnego do opisanego stanu pożądanego.
+Pełną pętlę uzgadniania przedstawia rysunek~\ref{fig:gitops-flow}: kontroler odczytuje stan pożądany z~zasobów \texttt{Application}, pobiera przypięty chart z~rejestru i~doprowadza stan bieżący klastra do zgodności. Wszystkie połączenia inicjuje kontroler od wewnątrz --- jedyną operacją przychodzącą jest jednorazowy bootstrap, a~proces CI nie posiada żadnych poświadczeń klastra.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{img/diagrams/07-deploy/deploy-01-gitops-flow.png}
-    \caption{Pętla uzgadniania GitOps w modelu pull --- wszystkie połączenia inicjuje kontroler ArgoCD wewnątrz klastra; jednorazowy bootstrap jest jedyną operacją przychodzącą (opracowanie własne).}
+    \caption{Pętla uzgadniania GitOps w~modelu pull --- wszystkie połączenia inicjuje kontroler ArgoCD wewnątrz klastra; jednorazowy bootstrap jest jedyną operacją przychodzącą (opracowanie własne).}
     \label{fig:gitops-flow}
 \end{figure}
 
 \begin{techcard}{ArgoCD}
 
-\textbf{Opis:} ArgoCD to deklaratywny kontroler GitOps dla Kubernetes, będący projektem CNCF o statusie \textit{graduated}. Działa w modelu \textbf{pull-based}: nasłuchuje zmian w repozytorium Git lub rejestrze OCI i automatycznie synchronizuje stan klastra do zdefiniowanego tam stanu docelowego. Centralną abstrakcją jest zasób \texttt{Application}, który wiąże źródło (chart Helm, katalog manifestów) z docelowym klastrem i przestrzenią nazw. Wbudowany interfejs webowy pozwala w czasie rzeczywistym obserwować drzewo zasobów aplikacji oraz historię wdrożeń.
+\textbf{Opis:} ArgoCD to deklaratywny kontroler GitOps dla Kubernetes, będący projektem CNCF o~statusie \textit{graduated}. Działa w~modelu \textbf{pull-based}: nasłuchuje zmian w~repozytorium Git lub rejestrze OCI i~automatycznie synchronizuje stan klastra do zdefiniowanego tam stanu docelowego. Centralną abstrakcją jest zasób \texttt{Application}, który wiąże źródło (chart Helm, katalog manifestów) z~docelowym klastrem i~przestrzenią nazw. Wbudowany interfejs webowy pozwala w~czasie rzeczywistym obserwować drzewo zasobów aplikacji oraz historię wdrożeń.
 
 \textbf{Dobre nawyki:}
 \begin{itemize}
-  \item \textbf{Automated sync z \texttt{selfHeal}:} Włączenie \texttt{selfHeal: true} gwarantuje, że każda ręczna zmiana w klastrze zostanie natychmiast cofnięta -- klaster jest zawsze zgodny z tym, co opisuje Git.
-  \item \textbf{\texttt{prune: true} z rozwagą:} Automatyczne usuwanie zasobów odłączonych od charta ogranicza dług konfiguracyjny, ale wymaga pewności, że wszystkie zasoby są zarządzane przez ArgoCD.
-  \item \textbf{Application CRD w Git:} Plik \texttt{gitops/application.yaml} powinien być przechowywany w repozytorium obok charta -- cały opis wdrożenia jest wówczas wersjonowany i podlega audytowi.
-  \item \textbf{Przypinanie \texttt{targetRevision}:} Używanie konkretnego numeru wersji charta (nie \texttt{latest}) zapewnia powtarzalność wdrożeń i pełną historię zmian.
+  \item \textbf{Automated sync z~\texttt{selfHeal}:} Włączenie \texttt{selfHeal: true} gwarantuje, że każda ręczna zmiana w~klastrze zostanie natychmiast cofnięta --- klaster jest zawsze zgodny z~tym, co opisuje Git.
+  \item \textbf{\texttt{prune: true} z~rozwagą:} Automatyczne usuwanie zasobów odłączonych od charta ogranicza dług konfiguracyjny, ale wymaga pewności, że wszystkie zasoby są zarządzane przez ArgoCD.
+  \item \textbf{Application CRD w~Git:} Plik \texttt{gitops/application.yaml} powinien być przechowywany w~repozytorium obok charta --- cały opis wdrożenia jest wówczas wersjonowany i~podlega audytowi.
+  \item \textbf{Przypinanie \texttt{targetRevision}:} Używanie konkretnego numeru wersji charta (nie \texttt{latest}) zapewnia powtarzalność wdrożeń i~pełną historię zmian.
 \end{itemize}
 
-\textbf{Rola w projekcie:} ArgoCD zamyka pętlę CI/CD: GitHub Actions buduje obraz, publikuje chart do GHCR, a ArgoCD automatycznie wykrywa nową wersję charta i synchronizuje klaster k3d. Zasób \texttt{Application} wskazuje na chart \texttt{bsc-devops} w GHCR i wskazuje na lokalny klaster k3d. Wbudowany interfejs webowy dostarcza wizualizację drzewa zasobów przydatną jako materiał ilustracyjny pracy.
+\textbf{Rola w~projekcie:} ArgoCD zamyka pętlę CI/CD: GitHub Actions buduje obraz, publikuje chart do GHCR, a~ArgoCD automatycznie wykrywa nową wersję charta i~synchronizuje klaster k3d. Zasób \texttt{Application} wskazuje chart \texttt{bsc-devops-apps} w~GHCR oraz lokalny klaster k3d jako miejsce docelowe. Wbudowany interfejs webowy dostarcza wizualizację drzewa zasobów przydatną jako materiał ilustracyjny pracy.
 
 \end{techcard}
 
-\begin{lstlisting}[language=yaml, caption={ArgoCD Application CRD -- deklaracja wdrożenia charta \texttt{bsc-devops} z GHCR do klastra k3d (gitops/application.yaml)}, label={lst:argocd-application}]
+\begin{lstlisting}[language=yaml, caption={ArgoCD Application CRD --- deklaracja wdrożenia charta \texttt{bsc-devops} z~GHCR do klastra k3d (gitops/application.yaml)}, label={lst:argocd-application}]
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -132,9 +122,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: ghcr.io/mateuszwas/charts   # OCI Helm registry (GHCR)
+    repoURL: ghcr.io/mwas-inz/charts     # OCI Helm registry (GHCR)
     chart: bsc-devops-apps
-    targetRevision: "0.5.0"
+    targetRevision: "0.7.0"
     helm:
       valueFiles:
         - values.yaml
@@ -149,33 +139,33 @@ spec:
       - CreateNamespace=true
 \end{lstlisting}
 
-Zasób \texttt{Application} (listing~\ref{lst:argocd-application}) skupia w jednym pliku YAML trzy elementy niezbędne do opisania pełnego cyklu wdrożenia.
+Zasób \texttt{Application} (listing~\ref{lst:argocd-application}) skupia w~jednym pliku YAML trzy elementy niezbędne do opisania pełnego cyklu wdrożenia.
 
-Sekcja \texttt{source} wskazuje chart \texttt{bsc-devops} w rejestrze OCI GHCR -- pole \texttt{repoURL} przyjmuje adres rejestru, nie repozytorium Git, gdyż chart jest publikowany jako artefakt OCI przez łańcuch CD (listing~\ref{lst:cd-helm}). Wersja \texttt{targetRevision: "0.5.0"} jest jawnie przypięta: ten sam commit Git zawsze wdroży identyczną wersję aplikacji, co zapewnia pełną powtarzalność wdrożeń i możliwość ich audytu.
+Sekcja \texttt{source} wskazuje chart \texttt{bsc-devops-apps} w~rejestrze OCI GHCR --- pole \texttt{repoURL} przyjmuje adres rejestru, nie repozytorium Git, gdyż chart jest publikowany jako artefakt OCI przez proces CD (listing~\ref{lst:cd-helm}). Wersja \texttt{targetRevision: "0.7.0"} jest jawnie przypięta: ten sam commit Git zawsze wdroży identyczną wersję aplikacji, co zapewnia pełną powtarzalność wdrożeń i~możliwość ich audytu.
 
-Sekcja \texttt{destination} wskazuje klaster lokalny przez wewnętrzny adres serwera API (\texttt{kubernetes.default.svc}), eliminując potrzebę rejestrowania zewnętrznych klastrów w ArgoCD.
+Sekcja \texttt{destination} wskazuje klaster lokalny przez wewnętrzny adres serwera API (\texttt{kubernetes.default.svc}), eliminując potrzebę rejestrowania zewnętrznych klastrów w~ArgoCD.
 
-Sekcja \texttt{syncPolicy.automated} z \texttt{prune: true} i \texttt{selfHeal: true} czyni ArgoCD autonomicznym kontrolerem: usuwa zasoby odłączone od charta po każdej aktualizacji oraz cofa każdą ręczną rozbieżność (ang. \textit{drift}) wymuszoną bezpośrednio przez \texttt{kubectl}.
+Sekcja \texttt{syncPolicy.automated} z~\texttt{prune: true} i~\texttt{selfHeal: true} czyni ArgoCD autonomicznym kontrolerem: usuwa zasoby odłączone od charta po każdej aktualizacji oraz cofa każdą ręczną rozbieżność (ang. \textit{drift}) wymuszoną bezpośrednio przez \texttt{kubectl}.
 
-Działanie mechanizmu \texttt{selfHeal} w praktyce przedstawia rysunek~\ref{fig:selfheal}: ręczna zmiana liczby replik poleceniem \texttt{kubectl scale} zostaje wykryta w cyklu uzgadniania jako rozbieżność i automatycznie cofnięta --- klaster nie jest źródłem prawdy o własnym stanie.
+Działanie mechanizmu \texttt{selfHeal} w~praktyce przedstawia rysunek~\ref{fig:selfheal}: ręczna zmiana liczby replik poleceniem \texttt{kubectl scale} zostaje wykryta w~cyklu uzgadniania jako rozbieżność i~automatycznie cofnięta --- klaster nie jest źródłem prawdy o~własnym stanie.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{img/diagrams/07-deploy/deploy-02-flow-selfheal.png}
-    \caption{\texttt{drift} i \texttt{selfHeal} w praktyce --- ręczna zmiana w klastrze zostaje wykryta i automatycznie cofnięta przez ArgoCD (opracowanie własne).}
+    \caption{\texttt{drift} i~\texttt{selfHeal} w~praktyce --- ręczna zmiana w~klastrze zostaje wykryta i~automatycznie cofnięta przez ArgoCD (opracowanie własne).}
     \label{fig:selfheal}
 \end{figure}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.85\textwidth]{img/argocd.png}
-  \caption{Interfejs webowy ArgoCD -- zasób \texttt{Application} \texttt{bsc-devops} w stanie \textit{Healthy} i \textit{Synced}: chart \texttt{0.5.0} zsynchronizowany z rejestru OCI GHCR do klastra lokalnego (\texttt{in-cluster}, przestrzeń nazw \texttt{bsc-devops}).}
+  \caption{Interfejs webowy ArgoCD --- zasób \texttt{Application} \texttt{bsc-devops} w~stanie \textit{Healthy} i~\textit{Synced}: chart \texttt{0.5.0} zsynchronizowany z~rejestru OCI GHCR do klastra lokalnego (\texttt{in-cluster}, przestrzeń nazw \texttt{bsc-devops}; opracowanie własne).}
   \label{fig:argocd-ui}
 \end{figure}
 
-Aktualizacja wdrożenia do nowej wersji charta przebiega w dwóch krokach. Łańcuch CD (listing~\ref{lst:cd-helm}) publikuje nowy artefakt OCI do GHCR po oznaczeniu repozytorium tagiem \texttt{chart-apps-*}. Następnie pole \texttt{targetRevision} w \texttt{gitops/application.yaml} jest uaktualniane i zasób ponownie ładowany do klastra -- ArgoCD wykrywa zmianę i natychmiast inicjuje cykl uzgadniania. Operację automatyzuje skrypt \texttt{scripts/local/argocd-update.sh}:
+Aktualizacja wdrożenia do nowej wersji charta przebiega w~dwóch krokach. Proces CD (listing~\ref{lst:cd-helm}) publikuje nowy artefakt OCI do GHCR po oznaczeniu repozytorium tagiem \texttt{chart-apps-*}. Następnie pole \texttt{targetRevision} w~\texttt{gitops/application.yaml} jest uaktualniane i~zasób ponownie ładowany do klastra --- ArgoCD wykrywa zmianę i~natychmiast inicjuje cykl uzgadniania. Operację automatyzuje skrypt \texttt{scripts/local/argocd-update.sh}:
 
-\begin{lstlisting}[language=bash, caption={Aktualizacja \texttt{targetRevision} i ponowne załadowanie zasobu \texttt{Application} do klastra (scripts/local/argocd-update.sh)}, label={lst:argocd-update}]
+\begin{lstlisting}[language=bash, caption={Aktualizacja \texttt{targetRevision} i~ponowne załadowanie zasobu \texttt{Application} do klastra (scripts/local/argocd-update.sh)}, label={lst:argocd-update}]
 $ bash scripts/local/argocd-update.sh 0.7.0
 === BSC DevOps - ArgoCD Application Update ===
 Target version: 0.7.0
@@ -190,43 +180,43 @@ bsc-devops  Synced        Progressing
 bsc-devops  Synced        Healthy
 \end{lstlisting}
 
-Skrypt waliduje wersję wejściową, nadpisuje \texttt{targetRevision} wyrażeniem regularnym, tworzy commit z komunikatem \texttt{chore(gitops): bump targetRevision}, wypycha go do zdalnego repozytorium i re-aplikuje zasób \texttt{Application} do klastra. Obserwacja z flagą \texttt{-w} ujawnia trójfazowy przebieg synchronizacji: \textit{OutOfSync} (ArgoCD wykrył rozbieżność), \textit{Progressing} (pobieranie i nakładanie charta) oraz \textit{Healthy} (wszystkie pody zdrowe). Ponieważ zasób \texttt{Application} sam jest przechowywany w repozytorium Git, każde wdrożenie jest odwzorowaniem konkretnego commitu i podlega pełnemu audytowi.
+Skrypt waliduje wersję wejściową, nadpisuje \texttt{targetRevision} wyrażeniem regularnym, tworzy commit z~opisem \texttt{chore(gitops): bump targetRevision}, wypycha go do zdalnego repozytorium i~ponownie aplikuje zasób \texttt{Application} do klastra. Obserwacja z~flagą \texttt{-w} ujawnia trójfazowy przebieg synchronizacji: \textit{OutOfSync} (ArgoCD wykrył rozbieżność), \textit{Progressing} (pobieranie i~nakładanie charta) oraz \textit{Healthy} (wszystkie pody zdrowe). Ponieważ zasób \texttt{Application} sam jest przechowywany w~repozytorium Git, każde wdrożenie jest odwzorowaniem konkretnego commitu i~podlega pełnemu audytowi.
 
-\subsubsection{Zarządzanie sekretami w modelu GitOps: Sealed Secrets}
-Model GitOps wymaga, aby wszystkie zasoby konfiguracyjne -- łącznie z sekretami -- były przechowywane w repozytorium Git. Natywny zasób Kubernetes \texttt{Secret} koduje dane jedynie w Base64, co czyni jego publiczne przechowywanie równoważnym ujawnieniu haseł w jawnym tekście. Narzędzie \textbf{Bitnami Sealed Secrets} rozwiązuje ten problem przez \textbf{szyfrowanie asymetryczne}: kontroler działający w przestrzeni nazw \texttt{kube-system} generuje parę kluczy RSA i udostępnia klucz publiczny; lokalne narzędzie \texttt{kubeseal} szyfruje \texttt{Secret} tym kluczem przed committem, a kontroler odszyfrowuje wynikowy zasób \texttt{SealedSecret} kluczem prywatnym w czasie działania klastra. Zaszyfrowany plik jest bezpieczny w publicznym repozytorium -- bez klucza prywatnego klastra jest kryptograficznie bezużyteczny.
-Pełny przepływ --- od zaszyfrowania sekretu narzędziem \texttt{kubeseal}, przez przechowanie w repozytorium, po odszyfrowanie wewnątrz klastra --- wraz z kolejnością bootstrapu przedstawia rysunek~\ref{fig:sealed-secrets}.
+\subsubsection{Zarządzanie sekretami w~modelu GitOps: Sealed Secrets}
+Model GitOps wymaga, aby wszystkie zasoby konfiguracyjne --- łącznie z~sekretami --- były przechowywane w~repozytorium Git. Natywny zasób Kubernetes \texttt{Secret} koduje dane jedynie w~Base64, co czyni jego publiczne przechowywanie równoważnym ujawnieniu haseł w~jawnym tekście. Narzędzie \textbf{Bitnami Sealed Secrets} rozwiązuje ten problem przez \textbf{szyfrowanie asymetryczne}: kontroler działający w~przestrzeni nazw \texttt{kube-system} generuje parę kluczy RSA i~udostępnia klucz publiczny; lokalne narzędzie \texttt{kubeseal} szyfruje \texttt{Secret} tym kluczem przed committem, a~kontroler odszyfrowuje wynikowy zasób \texttt{SealedSecret} kluczem prywatnym w~czasie działania klastra. Zaszyfrowany plik jest bezpieczny w~publicznym repozytorium --- bez klucza prywatnego klastra jest kryptograficznie bezużyteczny.
+Pełny przepływ --- od zaszyfrowania sekretu narzędziem \texttt{kubeseal}, przez przechowanie w~repozytorium, po odszyfrowanie wewnątrz klastra --- wraz z~kolejnością bootstrapu przedstawia rysunek~\ref{fig:sealed-secrets}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{img/diagrams/07-deploy/deploy-03-sealed-secrets.png}
-    \caption{Sealed Secrets --- przepływ szyfrowania asymetrycznego i kolejność bootstrapu: sekrety aplikowane przed instalacją ArgoCD (opracowanie własne).}
+    \caption{Sealed Secrets --- przepływ szyfrowania asymetrycznego i~kolejność bootstrapu: sekrety aplikowane przed instalacją ArgoCD (opracowanie własne).}
     \label{fig:sealed-secrets}
 \end{figure}
 
 \begin{techcard}{Sealed Secrets}
 
-\textbf{Opis:} Bitnami Sealed Secrets to mechanizm bezpiecznego przechowywania sekretów Kubernetes w repozytorium Git. Narzędzie \texttt{kubeseal} szyfruje zasób \texttt{Secret} kluczem publicznym kontrolera klastra, tworząc zasób \texttt{SealedSecret} bezpieczny do commitowania. Kontroler w przestrzeni \texttt{kube-system} odszyfrowuje go kluczem prywatnym i odtwarza oryginalny \texttt{Secret} w docelowej przestrzeni nazw -- bez żadnej interwencji operatora.
+\textbf{Opis:} Bitnami Sealed Secrets to mechanizm bezpiecznego przechowywania sekretów Kubernetes w~repozytorium Git. Narzędzie \texttt{kubeseal} szyfruje zasób \texttt{Secret} kluczem publicznym kontrolera klastra, tworząc zasób \texttt{SealedSecret} bezpieczny do commitowania. Kontroler w~przestrzeni \texttt{kube-system} odszyfrowuje go kluczem prywatnym i~odtwarza oryginalny \texttt{Secret} w~docelowej przestrzeni nazw --- bez żadnej interwencji operatora.
 
 \textbf{Dobre nawyki:}
 \begin{itemize}
-  \item \textbf{Powiązanie z przestrzenią nazw:} Zaszyfrowany tekst jest ściśle powiązany ze wskazaną przestrzenią nazw -- \texttt{SealedSecret} zaszyfrowany dla \texttt{argocd} nie może zostać odszyfrowany w \texttt{bsc-devops}.
+  \item \textbf{Powiązanie z~przestrzenią nazw:} Zaszyfrowany tekst jest ściśle powiązany ze wskazaną przestrzenią nazw --- \texttt{SealedSecret} zaszyfrowany dla \texttt{argocd} nie może zostać odszyfrowany w~\texttt{bsc-devops}.
   \item \textbf{Kopia zapasowa klucza:} Przed usunięciem klastra należy wykonać kopię klucza prywatnego kontrolera (\texttt{kubectl get secret -n kube-system -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml}). Bez niej wszystkie \texttt{SealedSecret} trzeba ponownie zaszyfrować nowym kluczem.
-  \item \textbf{Rotacja tokenów:} Po zmianie tokenu wystarczy ponownie uruchomić skrypt uszczelniający i zaktualizować plik w Git -- kontroler automatycznie zaktualizuje \texttt{Secret} w klastrze.
+  \item \textbf{Rotacja tokenów:} Po zmianie tokenu wystarczy ponownie uruchomić skrypt uszczelniający i~zaktualizować plik w~Git --- kontroler automatycznie zaktualizuje \texttt{Secret} w~klastrze.
 \end{itemize}
 
-\textbf{Rola w projekcie:} Dwa \texttt{SealedSecret} umożliwiają beztokenowy bootstrap klastra: \texttt{ghcr-docker-config} w przestrzeni \texttt{argocd} zawiera konfigurację Docker uprawniającą repo-serwer ArgoCD do pobierania chartów OCI z GHCR; \texttt{dockerhub-pull-secret} w przestrzeni \texttt{bsc-devops} uprawnia węzły klastra do pobierania obrazów z Docker Hub. Oba są aplikowane przed instalacją ArgoCD -- kontroler Sealed Secrets odszyfrowuje je synchronicznie, więc ArgoCD startuje z gotowymi sekretami i natychmiast pobiera chart bez ręcznego podawania tokenów.
+\textbf{Rola w~projekcie:} Dwa \texttt{SealedSecret} umożliwiają beztokenowy bootstrap klastra: \texttt{ghcr-docker-config} w~przestrzeni \texttt{argocd} zawiera konfigurację Docker uprawniającą repo-serwer ArgoCD do pobierania chartów OCI z~GHCR; \texttt{dockerhub-pull-secret} w~przestrzeni \texttt{bsc-devops} uprawnia węzły klastra do pobierania obrazów z~Docker Hub. Oba są aplikowane przed instalacją ArgoCD --- kontroler Sealed Secrets odszyfrowuje je synchronicznie, więc ArgoCD startuje z~gotowymi sekretami i~natychmiast pobiera chart bez ręcznego podawania tokenów.
 
 \end{techcard}
 
 \begin{lstlisting}[language=bash, caption={Uszczelnianie sekretu GHCR narzędziem \texttt{kubeseal} (scripts/local/seal-secrets.sh)}, label={lst:kubeseal}]
 # Zakoduj token GHCR jako Docker auth JSON
-DOCKER_AUTH=$(echo -n "mwas-inz:${GHCR_TOKEN}" | base64 -w0)
-DOCKER_JSON=$(printf '{"auths":{"ghcr.io":{"auth":"%s"}}}' "$DOCKER_AUTH")
+DOCKER_AUTH=$(echo -n "${GHCR_USER}:${GHCR_TOKEN}" | base64 -w0)
+DOCKER_CONFIG_JSON=$(printf '{"auths":{"ghcr.io":{"auth":"%s"}}}' "$DOCKER_AUTH")
 
 # Wygeneruj Secret (--dry-run), zaszyfruj kubeseal i zapisz SealedSecret
 kubectl create secret generic ghcr-docker-config \
     --namespace argocd \
-    --from-literal=config.json="$DOCKER_JSON" \
+    --from-literal=config.json="$DOCKER_CONFIG_JSON" \
     --dry-run=client -o yaml \
 | kubeseal \
     --controller-namespace kube-system \
@@ -235,18 +225,18 @@ kubectl create secret generic ghcr-docker-config \
     > gitops/secrets/ghcr-docker-config.sealed.yaml
 \end{lstlisting}
 
-Zaszyfrowany plik \texttt{ghcr-docker-config.sealed.yaml} jest commitowany do repozytorium obok pozostałych manifestów GitOps. Skrypt \texttt{scripts/local/gitops-bootstrap.sh} aplikuje go do klastra \textbf{przed} instalacją ArgoCD -- kontroler Sealed Secrets odszyfrowuje go synchronicznie, tworząc gotowy \texttt{Secret} w przestrzeni \texttt{argocd}. Dzięki temu ArgoCD nie wymaga żadnego ręcznego przekazywania tokenów przy odtwarzaniu środowiska.
+Zaszyfrowany plik \texttt{ghcr-docker-config.sealed.yaml} jest commitowany do repozytorium obok pozostałych manifestów GitOps. Skrypt \texttt{scripts/local/gitops-bootstrap.sh} aplikuje go do klastra \textbf{przed} instalacją ArgoCD --- kontroler Sealed Secrets odszyfrowuje go synchronicznie, tworząc gotowy \texttt{Secret} w~przestrzeni \texttt{argocd}. Dzięki temu ArgoCD nie wymaga żadnego ręcznego przekazywania tokenów przy odtwarzaniu środowiska.
 
-Ten sam mechanizm zabezpiecza poświadczenia aplikacyjne. Hasło bazy danych PostgreSQL oraz hasło źródła danych mikroserwisów nie występują w pliku \texttt{values.yaml} charta Helm -- dostarczają je dwa zasoby \texttt{SealedSecret} (\texttt{db-secret} oraz \texttt{postgres-secret} w przestrzeni \texttt{bsc-devops}). Chart Helm nie renderuje już żadnego zasobu \texttt{Secret}: dane niewrażliwe (adres JDBC, nazwa użytkownika) trafiają do \texttt{ConfigMap}, a poufne hasła pochodzą wyłącznie z odszyfrowanych \texttt{SealedSecret}. W rezultacie repozytorium nie zawiera żadnego hasła w jawnym tekście (decyzja \textit{ADR-0016}).
+Ten sam mechanizm zabezpiecza poświadczenia aplikacyjne. Hasło bazy danych PostgreSQL oraz hasło źródła danych mikroserwisów nie występują w~pliku \texttt{values.yaml} charta Helm --- dostarczają je dwa zasoby \texttt{SealedSecret} (\texttt{db-secret} oraz \texttt{postgres-secret} w~przestrzeni \texttt{bsc-devops}). Chart Helm nie renderuje już żadnego zasobu \texttt{Secret}: dane niewrażliwe (adres JDBC, nazwa użytkownika) trafiają do \texttt{ConfigMap}, a~poufne hasła pochodzą wyłącznie z~odszyfrowanych \texttt{SealedSecret}. W~rezultacie repozytorium nie zawiera żadnego hasła w~jawnym tekście (decyzja \textit{ADR-0016}).
 
-\subsubsection{Izolacja przestrzeni nazw, RBAC i konta usług}
+\subsubsection{Izolacja przestrzeni nazw, RBAC i~konta usług}
 Bezpieczeństwo środowiska uruchomieniowego opiera się na zasadzie \textbf{minimalnych uprawnień} (ang. \textit{least privilege}) realizowanej na trzech poziomach: izolacji przestrzeni nazw, dedykowanych kont usług oraz ściśle ograniczonego dostępu do serwera API Kubernetes.
 
-Wszystkie zasoby platformy działają w wydzielonej przestrzeni nazw \texttt{bsc-devops}, odseparowanej od komponentów systemowych klastra oraz od kontrolera GitOps w przestrzeni \texttt{argocd}. Każdy mikroserwis otrzymuje \textbf{własne konto usługi} (\texttt{ServiceAccount}) zamiast współdzielonego konta domyślnego -- dzięki temu naruszenie jednego poda nie daje dostępu do tożsamości pozostałych usług.
+Wszystkie zasoby platformy działają w~wydzielonej przestrzeni nazw \texttt{bsc-devops}, odseparowanej od komponentów systemowych klastra oraz od kontrolera GitOps w~przestrzeni \texttt{argocd}. Każdy mikroserwis otrzymuje \textbf{własne konto usługi} (\texttt{ServiceAccount}) zamiast współdzielonego konta domyślnego --- dzięki temu naruszenie jednego poda nie daje dostępu do tożsamości pozostałych usług.
 
-Ponieważ mikroserwisy nie komunikują się z serwerem API Kubernetes, ich kontom usług wyłączono automatyczne montowanie tokenu (\texttt{automountServiceAccountToken: false}). Token, który nie trafia do poda, nie może zostać z niego wykradziony -- jest to forma obrony w głąb (ang. \textit{defense in depth}). Uzupełnia ją minimalna rola \texttt{Role}, powiązana ze wszystkimi kontami usług przez \texttt{RoleBinding} i nadająca wyłącznie prawo odczytu zasobów \texttt{ConfigMap} w obrębie przestrzeni nazw.
+Ponieważ mikroserwisy nie komunikują się z~serwerem API Kubernetes, ich kontom usług wyłączono automatyczne montowanie tokenu (\texttt{automountServiceAccountToken: false}). Token, który nie trafia do poda, nie może zostać z~niego wykradziony --- jest to forma obrony w~głąb (ang. \textit{defense in depth}). Uzupełnia ją minimalna rola \texttt{Role}, powiązana ze wszystkimi kontami usług przez \texttt{RoleBinding} i~nadająca wyłącznie prawo odczytu zasobów \texttt{ConfigMap} w~obrębie przestrzeni nazw.
 
-\begin{lstlisting}[language=yaml, caption={Minimalna rola i powiązanie RBAC dla kont usług (infrastructure/helm/bsc-devops/templates/rbac.yaml)}, label={lst:rbac}]
+\begin{lstlisting}[language=yaml, caption={Minimalna rola i~powiązanie RBAC dla kont usług (infrastructure/helm/bsc-devops/templates/rbac.yaml)}, label={lst:rbac}]
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -273,7 +263,7 @@ subjects:
   # ... pozostałe konta usług
 \end{lstlisting}
 
-Poprawność ograniczeń potwierdza polecenie \texttt{kubectl auth can-i}, które dla każdego konta usługi wskazuje operacje dozwolone i zabronione -- konto może jedynie odczytywać \texttt{ConfigMap}, a wszystkie pozostałe operacje są odrzucane:
+Poprawność ograniczeń potwierdza polecenie \texttt{kubectl auth can-i}, które dla każdego konta usługi wskazuje operacje dozwolone i~zabronione --- konto może jedynie odczytywać \texttt{ConfigMap}, a~wszystkie pozostałe operacje są odrzucane:
 
 \begin{lstlisting}[language=bash, caption={Weryfikacja minimalnych uprawnień konta usługi \texttt{users-sa}}, label={lst:authcani}]
 $ kubectl auth can-i list configmaps \
@@ -287,4 +277,4 @@ $ kubectl auth can-i delete pods \
 no
 \end{lstlisting}
 
-Tożsamość konta usługi pełni również rolę nośnika poświadczeń do rejestru obrazów. Zamiast powielać sekcję \texttt{imagePullSecrets} w każdym zasobie \texttt{Deployment}, dołączono ją bezpośrednio do każdego \texttt{ServiceAccount} -- sekret \texttt{dockerhub-pull-secret} jest wówczas automatycznie stosowany do wszystkich podów uruchamianych przez dane konto. Ogranicza to powielanie konfiguracji i ryzyko pominięcia poświadczeń przy dodawaniu nowej usługi.
+Tożsamość konta usługi pełni również rolę nośnika poświadczeń do rejestru obrazów. Zamiast powielać sekcję \texttt{imagePullSecrets} w~każdym zasobie \texttt{Deployment}, dołączono ją bezpośrednio do każdego \texttt{ServiceAccount} --- sekret \texttt{dockerhub-pull-secret} jest wówczas automatycznie stosowany do wszystkich podów uruchamianych przez dane konto. Ogranicza to powielanie konfiguracji i~ryzyko pominięcia poświadczeń przy dodawaniu nowej usługi.

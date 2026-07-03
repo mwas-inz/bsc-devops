@@ -1,6 +1,6 @@
 # Adopt OpenTelemetry as the Unified Observability Standard
 
-* Status: proposed
+* Status: accepted
 * Date: 2026-04-26
 * Decision-makers: Mateusz Waś
 * Consulted:

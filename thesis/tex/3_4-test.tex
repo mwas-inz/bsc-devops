@@ -1,11 +1,11 @@
 \subsection{Etap Test}
-Automatyzacja testów jest fundamentem zaufania do procesu CI/CD. W projekcie testy są integralną częścią każdego łańcucha budowania i stanowią bramkę blokującą przejście do dalszych, kosztownych etapów.
+Automatyzacja testów jest fundamentem zaufania do procesu CI/CD. W~projekcie testy są integralną częścią każdego procesu budowania i~stanowią bramkę blokującą przejście do dalszych, kosztownych etapów.
 
-\subsubsection{Testy integracyjne: JUnit 5 i @QuarkusTest}
-Podstawowym narzędziem weryfikacji poprawności logiki biznesowej jest framework \textbf{JUnit 5}, zintegrowany z biblioteką testową Quarkusa poprzez zależność \texttt{quarkus-junit5}.
+\subsubsection{Testy integracyjne: JUnit 5 i~@QuarkusTest}
+Podstawowym narzędziem weryfikacji poprawności logiki biznesowej jest framework \textbf{JUnit 5}, zintegrowany z~biblioteką testową Quarkusa poprzez zależność \texttt{quarkus-junit5}.
 
 \textbf{Adnotacja \texttt{@QuarkusTest}:}
-W odróżnieniu od klasycznych testów jednostkowych, adnotacja \texttt{@QuarkusTest} uruchamia przed zestawem testów pełny kontekst aplikacji Quarkus -- z kontenerem CDI, warstwą REST i skonfigurowanymi połączeniami do zewnętrznych usług. Testy mogą zatem weryfikować rzeczywiste zachowanie endpointów HTTP przy użyciu zintegrowanej biblioteki \textbf{RestAssured}. Jej API wzoruje się na notacji \textbf{Gherkin} (\textit{Given/When/Then}), stosowanej w metodykach BDD (\textit{Behaviour-Driven Development}): blok \texttt{given()} definiuje warunki wstępne żądania (nagłówki, ciało), \texttt{when()} wykonuje wywołanie HTTP, a \texttt{then()} weryfikuje odpowiedź. Dzięki temu intencja testu jest czytelna bez znajomości samej biblioteki:
+W~odróżnieniu od klasycznych testów jednostkowych, adnotacja \texttt{@QuarkusTest} uruchamia przed zestawem testów pełny kontekst aplikacji Quarkus --- z~kontenerem CDI, warstwą REST i~skonfigurowanymi połączeniami do zewnętrznych usług. Testy mogą zatem weryfikować rzeczywiste zachowanie endpointów HTTP przy użyciu zintegrowanej biblioteki \textbf{RestAssured}. Jej API wzoruje się na notacji \textbf{Gherkin} (\textit{Given/When/Then}), stosowanej w~metodykach BDD (ang. \textit{Behaviour-Driven Development}): blok \texttt{given()} definiuje warunki wstępne żądania (nagłówki, ciało), \texttt{when()} wykonuje wywołanie HTTP, a~\texttt{then()} weryfikuje odpowiedź. Dzięki temu intencja testu jest czytelna bez znajomości samej biblioteki:
 
 \begin{lstlisting}[language=java, caption={Test integracyjny endpointu REST mikroserwisu \textit{users} (apps/users/src/test/.../UserResourceTest.java)}, label={lst:quarkus-test-users}]
 @QuarkusTest
@@ -31,13 +31,13 @@ class UserResourceTest {
 }
 \end{lstlisting}
 
-\textbf{Dev Services -- automatyczna infrastruktura testowa:}
-Kluczową cechą ekosystemu Quarkusa jest mechanizm \textbf{Dev Services}: jeśli w konfiguracji aplikacji nie podano jawnego adresu URL bazy danych, Quarkus automatycznie uruchamia kontener PostgreSQL przy użyciu biblioteki \textit{Testcontainers}. Programista nie musi konfigurować środowiska testowego ani utrzymywać lokalnej instancji bazy -- wystarczy wywołanie \texttt{./gradlew test}. Testy zawsze działają na izolowanej, świeżej instancji bazy danych, co eliminuje klasyczny problem współdzielonego stanu testowego.
+\textbf{Dev Services --- automatyczna infrastruktura testowa:}
+Kluczową cechą ekosystemu Quarkusa jest mechanizm \textbf{Dev Services}: jeśli w~konfiguracji aplikacji nie podano jawnego adresu URL bazy danych, Quarkus automatycznie uruchamia kontener PostgreSQL przy użyciu biblioteki \textit{Testcontainers}. Programista nie musi konfigurować środowiska testowego ani utrzymywać lokalnej instancji bazy --- wystarczy wywołanie \texttt{./gradlew test}. Testy zawsze działają na izolowanej, świeżej instancji bazy danych, co eliminuje klasyczny problem współdzielonego stanu testowego.
 
-\textbf{Izolacja transakcyjna -- \texttt{@TestTransaction}:}
-Dla testów weryfikujących logikę utrwalania danych stosowana jest adnotacja \texttt{@TestTransaction}: każdy test jest wykonywany w ramach transakcji bazodanowej, która po jego zakończeniu jest automatycznie wycofywana (ang. \textit{rollback}). Zapewnia to pełną izolację między testami bez konieczności ręcznego czyszczenia stanu bazy. Wzorzec ten zastosowano w testach konsumenta zdarzeń mikroserwisu \textit{tasks}:
+\textbf{Izolacja transakcyjna --- \texttt{@TestTransaction}:}
+Dla testów weryfikujących logikę utrwalania danych stosowana jest adnotacja \texttt{@TestTransaction}: każdy test jest wykonywany w~ramach transakcji bazodanowej, która po jego zakończeniu jest automatycznie wycofywana (ang. \textit{rollback}). Zapewnia to pełną izolację między testami bez konieczności ręcznego czyszczenia stanu bazy. Wzorzec ten zastosowano w~testach konsumenta zdarzeń mikroserwisu \textit{tasks}:
 
-\begin{lstlisting}[language=java, caption={Test konsumenta zdarzeń z izolacją @TestTransaction (apps/tasks/src/test/.../UserEventConsumerTest.java)}, label={lst:test-transaction}]
+\begin{lstlisting}[language=java, caption={Test konsumenta zdarzeń z~izolacją \texttt{@TestTransaction} (apps/tasks/src/test/.../UserEventConsumerTest.java)}, label={lst:test-transaction}]
 @QuarkusTest
 class UserEventConsumerTest {
 
@@ -64,23 +64,23 @@ class UserEventConsumerTest {
 }
 \end{lstlisting}
 
-Współdziałanie opisanych mechanizmów --- od uruchomienia testów, przez automatyczne dostarczenie bazy danych przez Dev Services, po wycofywanie transakcji po każdym teście --- przedstawia w ujęciu sekwencyjnym rysunek~\ref{fig:devservices-test}.
+Współdziałanie opisanych mechanizmów --- od uruchomienia testów, przez automatyczne dostarczenie bazy danych przez Dev Services, po wycofywanie transakcji po każdym teście --- przedstawia w~ujęciu sekwencyjnym rysunek~\ref{fig:devservices-test}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{img/diagrams/05-test/test-01-flow-devservices-test.png}
-    \caption{Przebieg testu integracyjnego z Dev Services --- brak adresu bazy w konfiguracji uruchamia świeży kontener PostgreSQL (Testcontainers), a \texttt{@TestTransaction} wycofuje zmiany po każdym teście (opracowanie własne).}
+    \caption{Przebieg testu integracyjnego z~Dev Services --- brak adresu bazy w~konfiguracji uruchamia świeży kontener PostgreSQL (Testcontainers), a~\texttt{@TestTransaction} wycofuje zmiany po każdym teście (opracowanie własne).}
     \label{fig:devservices-test}
 \end{figure}
 
-\subsubsection{Testy jako bramka w łańcuchu CI/CD}
-Użycie testów w łańcuchu CI na początku jest celowe i ma bezpośredni wpływ na efektywność procesu (listing~\ref{lst:github-actions-build}). Krok \texttt{Run tests} poprzedza budowanie natywnego obrazu kontenera (\texttt{imageBuild}), które korzysta z kompilatora GraalVM AOT i trwa kilkanaście minut. Niepowodzenie testu natychmiast przerywa łańcuch -- bez zbędnego zużycia zasobów CI na kosztowną kompilację natywną.
+\subsubsection{Testy jako bramka w~procesie CI/CD}
+Umieszczenie testów na początku procesu CI jest celowe i~ma bezpośredni wpływ na efektywność procesu (listing~\ref{lst:github-actions-build}). Krok \texttt{Run tests} poprzedza budowanie natywnego obrazu kontenera (\texttt{imageBuild}), które korzysta z~kompilatora GraalVM AOT i~trwa kilkanaście minut. Niepowodzenie testu natychmiast przerywa proces --- bez zbędnego zużycia zasobów CI na kosztowną kompilację natywną.
 
 \begin{itemize}
-    \item \textbf{Zakres:} Testy pokrywają kluczowe komponenty domeny (logika REST, utrwalanie danych przez Panache) oraz integrację z bazą danych uruchamianą przez Dev Services, bez konieczności mocków.
-    \item \textbf{Anulowanie przestarzałych uruchomień:} Konfiguracja w sekcji \texttt{concurrency} z ustawieniem \texttt{cancel-in-progress: true} gwarantuje, że nowe uruchomienie łańcucha dla tej samej gałęzi automatycznie anuluje poprzednie, wciąż aktywne uruchomienie. Eliminuje to sytuacje, w których wyniki przestarzałych łańcuchów blokują lub dezorientują recenzentów kodu.
-    \item \textbf{Izolacja na poziomie serwisu:} Każdy mikroserwis posiada oddzielny plik workflow uruchamiany wyłącznie przy zmianach w jego katalogu. Testy serwisu \textit{users} nie są uruchamiane przy zmianie kodu \textit{tasks} -- co skraca czas informacji zwrotnej i obniża koszty CI.
+    \item \textbf{Zakres:} Testy pokrywają kluczowe komponenty domeny (logika REST, utrwalanie danych przez Panache) oraz integrację z~bazą danych uruchamianą przez Dev Services, bez konieczności stosowania mocków.
+    \item \textbf{Anulowanie przestarzałych uruchomień:} Konfiguracja w~sekcji \texttt{concurrency} z~ustawieniem \texttt{cancel-in-progress: true} gwarantuje, że nowe uruchomienie procesu dla tej samej gałęzi automatycznie anuluje poprzednie, wciąż aktywne uruchomienie. Eliminuje to sytuacje, w~których wyniki przestarzałych uruchomień blokują lub dezorientują recenzentów kodu.
+    \item \textbf{Izolacja na poziomie serwisu:} Każdy mikroserwis posiada oddzielny plik \textit{workflow} uruchamiany wyłącznie przy zmianach w~jego katalogu. Testy serwisu \textit{users} nie są uruchamiane przy zmianie kodu \textit{tasks} --- co skraca czas informacji zwrotnej i~obniża koszty CI.
 \end{itemize}
 
-\subsubsection{Widoczność wyników w procesie Pull Request}
-GitHub Actions raportuje wyniki każdego zadania (ang. \textit{job}) jako \textbf{status check} bezpośrednio w widoku Pull Requesta. Zadanie \texttt{Build, Test, Scan \& Push} dla każdego serwisu widoczne jest jako oddzielny, nazwany check -- programista natychmiast identyfikuje, który z mikroserwisów jest \textit{czerwony} i z jakiego powodu. Dopóki wszystkie aktywowane łańcuchy nie zakończą się sukcesem, scalenie PR jest zablokowane, co egzekwuje zasadę \textit{green build before merge} bez konieczności ręcznej interwencji recenzenta. Rozgałęzienie zachowania łańcucha między zdarzeniem \textit{pull request} a \textit{push} do \texttt{main} przedstawia rysunek~\ref{fig:ci-governance}.
+\subsubsection{Widoczność wyników w~procesie Pull Request}
+GitHub Actions raportuje wyniki każdego zadania (ang. \textit{job}) jako \textbf{status check} bezpośrednio w~widoku Pull Requesta. Zadanie \texttt{Build, Test, Scan \& Push} dla każdego serwisu widoczne jest jako oddzielny, nazwany check --- programista natychmiast identyfikuje, który z~mikroserwisów jest \textit{czerwony} i~z~jakiego powodu. Dopóki wszystkie aktywowane procesy CI nie zakończą się sukcesem, scalenie PR jest zablokowane, co egzekwuje zasadę \textit{green build before merge} bez konieczności ręcznej interwencji recenzenta. Rozgałęzienie zachowania procesu między zdarzeniem \textit{pull request} a~\textit{push} do \texttt{main} przedstawia rysunek~\ref{fig:ci-governance}.
