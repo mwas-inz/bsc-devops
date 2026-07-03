@@ -1,102 +1,108 @@
 \subsection{Etap Code}
-Faza wytwarzania (\textit{Code}) obejmuje implementację wymagań przy zachowaniu standardów jakości kodu i spójności historii zmian. Fundamentem tego etapu jest rozproszony system kontroli wersji Git, a konwencje nazewnictwa zatwierdzeń są wymuszane na poziomie łańcucha CI.
+Faza wytwarzania (\textit{Code}) obejmuje implementację wymagań przy zachowaniu standardów jakości kodu i~spójności historii zmian. Fundamentem tego etapu jest rozproszony system kontroli wersji Git, a~konwencje nazewnictwa zatwierdzeń są wymuszane na poziomie procesu CI.
 
-Proces kodowania realizowany jest przy użyciu nowoczesnych środowisk programistycznych (\textit{IntelliJ IDEA}, \textit{VS Code}), a sama implementacja opiera się na technologiach realizujących paradygmat mikroserwisów.
+Proces kodowania realizowany jest przy użyciu nowoczesnych środowisk programistycznych (\textit{IntelliJ IDEA}, \textit{VS Code}), a~sama implementacja opiera się na technologiach realizujących paradygmat mikroserwisów.
 
-Wszystkie komponenty systemu są projektowane zgodnie z zasadami \textit{Twelve-Factor App}. Kluczowe aspekty to:
+Wszystkie komponenty systemu są projektowane zgodnie z~zasadami \textit{Twelve-Factor App}. Kluczowe aspekty to:
 \begin{itemize}
-    \item \textbf{Konfiguracja:} Cała konfiguracja specyficzna dla środowiska jest wstrzykiwana przez zmienne środowiskowe, a nie zaszyta w kodzie.
-    \item \textbf{Procesy:} Aplikacje są bezstanowe (ang. \textit{stateless}), co umożliwia ich łatwe skalowanie w poziomie wewnątrz klastra Kubernetes.
-    \item \textbf{Logowanie:} Logi są traktowane jako strumień zdarzeń wysyłany na standardowe wyjście, co umożliwia ich centralizację przez narzędzia observability.
+    \item \textbf{Konfiguracja:} Cała konfiguracja specyficzna dla środowiska jest wstrzykiwana przez zmienne środowiskowe, a~nie zapisana na stałe w~kodzie.
+    \item \textbf{Procesy:} Aplikacje są bezstanowe (ang. \textit{stateless}), co umożliwia ich łatwe skalowanie w~poziomie wewnątrz klastra Kubernetes.
+    \item \textbf{Logi:} Są traktowane jako strumień zdarzeń wysyłany na standardowe wyjście, co umożliwia ich centralizację przez narzędzia obserwowalności.
 \end{itemize}
 
 
 \subsubsection{Backend (Java + Quarkus + Native Image)}
-Mikroserwisy backendowe zbudowano z użyciem frameworka \textit{Quarkus} skompilowanego do natywnych plików wykonywalnych za pomocą \textit{GraalVM Native Image} (kompilacja \textit{Ahead-of-Time}, AOT). W trybie natywnym Quarkus analizuje ścieżki wykonania kodu w czasie kompilacji i wyklucza nieużywane klasy, co skutkuje:
+Mikroserwisy backendowe zbudowano z~użyciem frameworka \textit{Quarkus} i~skompilowano do natywnych plików wykonywalnych za pomocą \textit{GraalVM Native Image} (kompilacja \textit{Ahead-of-Time}, AOT). W~trybie natywnym Quarkus analizuje ścieżki wykonania kodu w~czasie kompilacji i~wyklucza nieużywane klasy, co skutkuje:
 \begin{itemize}
-    \item \textbf{Błyskawicznym startem} -- aplikacja jest gotowa do obsługi żądań w czasie poniżej 100 ms, co skraca czas wznowienia po awarii i przyspiesza skalowanie poziome w Kubernetes.
-    \item \textbf{Niskim zużyciem pamięci} -- brak środowiska uruchomieniowego JVM zmniejsza ślad pamięciowy kontenera, co bezpośrednio przekłada się na opłacalność w środowiskach chmurowych.
-    \item \textbf{Minimalnym obrazem kontenera} -- obraz oparty na \texttt{ubi-minimal} zawiera wyłącznie system operacyjny i skompilowany plik binarny, bez JDK ani bibliotek środowiska uruchomieniowego.
+    \item \textbf{Błyskawicznym startem} --- aplikacja jest gotowa do obsługi żądań w~czasie poniżej 100 ms, co skraca czas wznowienia po awarii i~przyspiesza skalowanie poziome w~Kubernetes.
+    \item \textbf{Niskim zużyciem pamięci} --- brak środowiska uruchomieniowego JVM zmniejsza ślad pamięciowy kontenera, co bezpośrednio przekłada się na efektywność kosztową w~środowiskach chmurowych.
+    \item \textbf{Minimalnym obrazem kontenera} --- obraz oparty na \texttt{ubi-minimal} zawiera wyłącznie system operacyjny i~skompilowany plik binarny, bez JDK ani bibliotek środowiska uruchomieniowego.
 \end{itemize}
-Wstrzykiwanie zależności realizowane jest przez mechanizm CDI Quarkusa (\textit{ArC}), który w trybie AOT przetwarza wszystkie adnotacje w czasie kompilacji, a nie w czasie uruchomienia.
+Wstrzykiwanie zależności realizowane jest przez mechanizm CDI Quarkusa (\textit{ArC}), który w~trybie AOT przetwarza wszystkie adnotacje w~czasie kompilacji, a~nie w~czasie uruchomienia.
 
 \begin{techcard}{Quarkus}
 
-\textbf{Opis:} Quarkus to nowoczesny stos technologiczny Java, określany jako \textit{Supersonic Subatomic Java}. Zaprojektowany z myślą o środowiskach \textit{Cloud Native} i kontenerach, charakteryzuje się bardzo niskim zużyciem pamięci i błyskawicznym czasem uruchamiania, co jest kluczowe w architekturze mikrousługowej.
+\textbf{Opis:} Quarkus to nowoczesny stos technologiczny Java, określany jako \textit{Supersonic Subatomic Java}. Zaprojektowany z~myślą o~środowiskach \textit{Cloud Native} i~kontenerach, charakteryzuje się bardzo niskim zużyciem pamięci i~błyskawicznym czasem uruchamiania, co jest kluczowe w~architekturze mikrousługowej.
 
 \textbf{Dobre nawyki:}
 \begin{itemize}
-  \item \textbf{Testowanie natywne (\texttt{@NativeImageTest}):} Testy w trybie natywnym weryfikują, czy optymalizacje AOT nie usunęły elementów wymaganych przez refleksję.
-  \item \textbf{Dev Services:} Automatyczne podnoszenie baz danych i brokerów w kontenerach podczas prac programistycznych zapewnia spójność środowisk u wszystkich programistów.
-  \item \textbf{Umiar w refleksji:} Należy preferować rozwiązania obsługujące indeksowanie Jandex i unikać bibliotek intensywnie korzystających z dynamicznego ładowania klas.
-  \item \textbf{Continuous Testing:} Tryb ciągłego testowania w konsoli zapewnia natychmiastową informację zwrotną podczas pisania kodu.
+  \item \textbf{Testowanie natywne (\texttt{@QuarkusIntegrationTest}):} Testy w~trybie natywnym weryfikują, czy optymalizacje AOT nie usunęły elementów wymaganych przez refleksję.
+  \item \textbf{Dev Services:} Automatyczne uruchamianie baz danych i~brokerów w~kontenerach podczas prac programistycznych zapewnia spójność środowisk u~wszystkich programistów.
+  \item \textbf{Umiar w~refleksji:} Należy preferować rozwiązania obsługujące indeksowanie Jandex i~unikać bibliotek intensywnie korzystających z~dynamicznego ładowania klas.
+  \item \textbf{Continuous Testing:} Tryb ciągłego testowania w~konsoli zapewnia natychmiastową informację zwrotną podczas pisania kodu.
 \end{itemize}
 
-\textbf{Rola w projekcie:} Quarkus buduje wydajne mikroserwisy o wysokiej gęstości upakowania w klastrze Kubernetes. Aplikacje zużywają minimalną ilość zasobów, co przekłada się na niższe koszty infrastruktury. Konfigurację natywnego buildu w Gradle prezentuje listing \ref{lst:quarkus-native-build}.
+\textbf{Rola w~projekcie:} Quarkus służy do budowy wydajnych mikroserwisów o~wysokiej gęstości upakowania w~klastrze Kubernetes. Aplikacje zużywają minimalną ilość zasobów, co przekłada się na niższe koszty infrastruktury. Konfigurację aplikacji prezentuje listing \ref{lst:quarkus-app-properties}, a~konfigurację natywnego buildu w~Gradle --- listing \ref{lst:quarkus-native-build} (etap Build).
 
 \end{techcard}
 
-\begin{lstlisting}[caption={Konfiguracja Quarkusa dla trybu natywnego i Dev Services (apps/users/src/main/resources/application.properties)}, label={lst:quarkus-app-properties}]
-# Kompilacja do natywnego pliku wykonywalnego w kontenerze Mandrel
-quarkus.package.type=native
-quarkus.native.container-build=true
+\begin{lstlisting}[caption={Fragment konfiguracji aplikacji (apps/users/src/main/resources/application.properties)}, label={lst:quarkus-app-properties}]
+quarkus.application.name=users
+quarkus.http.port=8080
 
-# Dev Services -- automatyczne uruchomienie PostgreSQL w kontenerze podczas testow
 quarkus.datasource.db-kind=postgresql
-quarkus.datasource.username=quarkus
-quarkus.datasource.password=quarkus
+quarkus.hibernate-orm.schema-management.strategy=update
+
+mp.messaging.outgoing.user-events.connector=smallrye-pulsar
+mp.messaging.outgoing.user-events.topic=persistent://public/default/user-events
 \end{lstlisting}
+
+Zwraca uwagę brak jawnych danych uwierzytelniających w~pliku konfiguracyjnym: w~środowisku deweloperskim ich nieobecność aktywuje mechanizm Dev Services, który automatycznie uruchamia bazę PostgreSQL w~kontenerze, natomiast w~klastrze Kubernetes dane te wstrzykiwane są przez zmienne środowiskowe, zgodnie z~zasadami \textit{Twelve-Factor App}.
 
 
 \subsubsection{Frontend (Vue 3 + Vite)}
-Zgodnie z decyzją \textit{ADR-0014}, warstwę prezentacji zbudowano z użyciem frameworka \textit{Vue 3} i narzędzia budującego \textit{Vite}. Kod pisany jest w \textit{TypeScript}, a poprawność typów weryfikuje \textit{vue-tsc} przed każdym buildem produkcyjnym. Komponenty interfejsu komunikują się z mikroserwisami backendowymi przez REST API.
+Zgodnie z~decyzją \textit{ADR-0014}, warstwę prezentacji zbudowano z~użyciem frameworka \textit{Vue 3} i~narzędzia budującego \textit{Vite}. Kod pisany jest w~\textit{TypeScript}, a~poprawność typów weryfikuje \textit{vue-tsc} przed każdym buildem produkcyjnym. Komponenty interfejsu komunikują się z~mikroserwisami backendowymi przez REST API.
 
 \begin{techcard}{Vue~3}
 
-\textbf{Opis:} Vue~3 to progresywny framework JavaScript do budowania interfejsów użytkownika. Wprowadza \textit{Composition API} -- umożliwiające organizowanie logiki komponentu według funkcjonalności. Projekt kompilowany jest narzędziem Vite, które wykorzystuje natywne moduły ES podczas prac programistycznych i Rollup podczas produkcyjnego budowania.
+\textbf{Opis:} Vue~3 to progresywny framework JavaScript do budowania interfejsów użytkownika. Wprowadza \textit{Composition API} --- umożliwiające organizowanie logiki komponentu według funkcjonalności. Projekt kompilowany jest narzędziem Vite, które wykorzystuje natywne moduły ES podczas prac programistycznych i~Rollup podczas produkcyjnego budowania.
 
 \textbf{Dobre nawyki:}
 \begin{itemize}
-  \item \textbf{TypeScript przez \texttt{vue-tsc}:} Weryfikacja typów w komponentach \texttt{.vue} przed buildem produkcyjnym bez generowania plików wyjściowych.
-  \item \textbf{Proxy Vite:} Transparentne przekierowanie zapytań do \texttt{/api} na serwer backendowy eliminuje potrzebę konfigurowania CORS w środowisku deweloperskim.
-  \item \textbf{Multi-stage w Dockerze:} Etap \texttt{npm ci \&\& vite build} produkuje statyczne pliki; obraz docelowy zawiera wyłącznie \texttt{nginx} bez środowiska Node.js.
+  \item \textbf{TypeScript przez \texttt{vue-tsc}:} Weryfikacja typów w~komponentach \texttt{.vue} przed buildem produkcyjnym bez generowania plików wyjściowych.
+  \item \textbf{Proxy Vite:} Transparentne przekierowanie zapytań do \texttt{/api} na serwer backendowy eliminuje potrzebę konfigurowania CORS w~środowisku deweloperskim.
+  \item \textbf{Multi-stage w~Dockerze:} Etap \texttt{npm ci \&\& vite build} produkuje statyczne pliki; obraz docelowy zawiera wyłącznie \texttt{nginx} bez środowiska Node.js.
 \end{itemize}
 
-\textbf{Rola w projekcie:} Vue~3 pełni rolę cienkiej warstwy prezentacji (ang. \textit{thin client}) nad REST API mikroserwisów. Warstwa frontendowa wdrażana jest jako osobny mikroserwis w Kubernetes z własnym łańcuchem CI/CD, analogicznie do serwisów backendowych.
+\textbf{Rola w~projekcie:} Vue~3 pełni rolę cienkiej warstwy prezentacji (ang. \textit{thin client}) nad REST API mikroserwisów. Warstwa frontendowa wdrażana jest jako osobny mikroserwis w~Kubernetes z~własnym procesem CI/CD, analogicznie do serwisów backendowych.
 
 \end{techcard}
 
-\begin{lstlisting}[caption={Konfiguracja Vite z proxy dla \'{s}rodowiska deweloperskiego (apps/frontend/vite.config.ts)}, label={lst:vite-config}]
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+\begin{lstlisting}[caption={Fragment konfiguracji Vite z~proxy dla środowiska deweloperskiego (apps/frontend/vite.config.ts)}, label={lst:vite-config}]
+import { defineConfig } from 'vitest/config';
+import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
   plugins: [vue()],
   server: {
     proxy: {
-      '/api': {
+      '/api/users': {
         target: 'http://localhost:8080',
-        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/users/, '/users'),
+      },
+      '/api/tasks': {
+        target: 'http://localhost:8080',
+        rewrite: (path) => path.replace(/^\/api\/tasks/, ''),
       },
     },
   },
-})
+});
 \end{lstlisting}
 
 
 \subsubsection{System kontroli wersji: GitHub}
-Jako system kontroli wersji i platformę współpracy wybrano \textbf{GitHub}, oparty na rozproszonym systemie Git. Jest on centralnym punktem prawdy (ang. \textit{Single Source of Truth}) dla całego monorepozytorium.
+Jako system kontroli wersji i~platformę współpracy wybrano \textbf{GitHub}, oparty na rozproszonym systemie Git. Jest on jedynym źródłem prawdy (ang. \textit{single source of truth}) dla całego monorepozytorium.
 
 \textbf{Standard Conventional Commits:}
-Zgodnie z decyzją projektową \textit{ADR-0004}, wprowadzono standard \textbf{Conventional Commits}. Polega on na nadawaniu wiadomościom zatwierdzeń ustrukturyzowanej formy (np. \texttt{feat:}, \texttt{fix:}, \texttt{chore:}) \cite{conventionalCommits}.
+Zgodnie z~decyzją projektową \textit{ADR-0004}, wprowadzono standard \textbf{Conventional Commits}. Polega on na nadawaniu opisom zatwierdzeń ustrukturyzowanej formy (np. \texttt{feat:}, \texttt{fix:}, \texttt{chore:}) \cite{conventionalCommits}.
 \begin{itemize}
     \item \textbf{Uzasadnienie:} Standaryzacja pozwala na automatyczne generowanie list zmian (ang. \textit{changelogs}) oraz automatyzację wersjonowania semantycznego (ang. \textit{Semantic Versioning}).
-    \item \textbf{Rola w CI/CD:} Czytelna historia zmian umożliwia narzędziom automatyzującym precyzyjne określenie, które komponenty systemu wymagają przebudowania i wdrożenia po każdej zmianie w monorepozytorium.
+    \item \textbf{Rola w~CI/CD:} Czytelna historia zmian umożliwia narzędziom automatyzującym precyzyjne określenie, które komponenty systemu wymagają przebudowania i~wdrożenia po każdej zmianie w~monorepozytorium.
 \end{itemize}
 
-Poniższy przykład ilustruje kompletną wiadomość zatwierdzenia zgodną ze standardem. Nagłówek zawiera typ, zakres oraz zwięzły opis zmiany, a stopka (ang. \textit{footer}) powiązuje commit z konkretnym zadaniem w systemie Jira:
+Poniższy przykład ilustruje kompletny opis zatwierdzenia zgodny ze standardem. Nagłówek zawiera typ, zakres oraz zwięzły opis zmiany, a~stopka (ang. \textit{footer}) powiązuje commit z~konkretnym zadaniem w~systemie Jira:
 
-\begin{lstlisting}[caption={Przykład wiadomości zatwierdzenia zgodnej ze standardem Conventional Commits}, label={lst:conventional-commit}]
+\begin{lstlisting}[caption={Przykład opisu zatwierdzenia zgodnego ze standardem Conventional Commits}, label={lst:conventional-commit}]
 feat(helm): create umbrella chart for all 7 services
 
 Aggregates all microservice charts under a single parent

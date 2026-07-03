@@ -1,6 +1,6 @@
 # Adopt LGTM as the Observability Backend Stack
 
-* Status: proposed
+* Status: accepted
 * Date: 2026-04-26
 * Decision-makers: Mateusz Waś
 * Consulted:

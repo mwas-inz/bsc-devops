@@ -4,392 +4,389 @@
 
 \subsection{Twelve-Factor App}
 
-Twelve-Factor App (rów. 12-factor app, skr. 12FA) to zestaw zasad dotyczących budowy skalowalnych, łatwych w utrzymaniu aplikacji sieciowych w nowoczesnych środowiskach chmurowych.
-Kładzie nacisk na konfigurację deklaratywną, utrwalanie kodu źródłowego, konfiguracji  i opisu infrastruktury jako kod. Ułatwia obsługę usług wspierających oraz możliwość szybkiego uruchamiania,
-łatwe odtwarzanie środowisk. Ma umożliwić przenośność, odporność i szybkie iteracje w rozproszonych systemach.
-W praktyce współczesnego oprogramowania 12FA jest często używany jako punkt odniesienia dla projektowania usług Software-as-a-Service (SaaS),
-systemów mikroserwisowych i procesów DevOps.
-\cite{Wiggins2012TwelveFactor,Kosinska2023CloudNativeKnowledge}
+Twelve-Factor App (inaczej \textit{12-factor app}, w~skrócie 12FA) to zestaw zasad dotyczących budowy skalowalnych, łatwych w~utrzymaniu aplikacji sieciowych w~nowoczesnych środowiskach chmurowych.
+Kładzie nacisk na konfigurację deklaratywną oraz utrwalanie kodu źródłowego, konfiguracji i~opisu infrastruktury w~postaci kodu. Ułatwia obsługę usług wspierających, szybkie uruchamianie oraz łatwe odtwarzanie środowisk. Ma umożliwić przenośność, odporność i~szybkie iteracje w~rozproszonych systemach.
+W~praktyce współczesnego oprogramowania 12FA jest często używany jako punkt odniesienia dla projektowania usług Software-as-a-Service (SaaS),
+systemów mikroserwisowych i~procesów DevOps~\cite{Wiggins2012TwelveFactor,Kosinska2023CloudNativeKnowledge}.
 
 \subsubsection{Zasady Twelve-Factor App}
 
 \begin{enumerate}[label=\Roman*., font=\bfseries]
-    \item \textbf{Kod źródłowy} --- Jedno źródło kodu śledzone systemem kontroli wersji, wiele wdrożeń.
+    \item \textbf{Kod źródłowy} --- Jedno źródło kodu śledzone systemem kontroli wersji, wiele wdrożeń
 
-          Aplikacja zawsze jest zarządzana w systemie kontroli wersji takim jak Git, czy Subversion.
-          Miejsce, w którym trzymany i wersjonowany jest kod nazywane jest repozytorium kodu źródłowego lub po prostu repozytorium.
-          Repozytorium jest pojedynczym źródłem prawdy dla kodu aplikacji, co oznacza, że wszystkie zmiany w kodzie są śledzone i zarządzane przez system kontroli wersji.
-          Każde wdrożenie aplikacji jest powiązane z konkretną wersją kodu w repozytorium, co umożliwia łatwe odtwarzanie i zarządzanie różnymi środowiskami (np. deweloperskim, testowym, produkcyjnym) bez konieczności duplikowania kodu.
-          Jeśli aplikacja jest rozproszona na wiele usług, każda usługa powinna być zarządzana w oddzielnym repozytorium, co ułatwia zarządzanie i skalowanie poszczególnych komponentów aplikacji.
+          Aplikacja zawsze jest zarządzana w~systemie kontroli wersji takim jak Git czy Subversion.
+          Miejsce, w~którym przechowywany i~wersjonowany jest kod, nazywane jest repozytorium kodu źródłowego lub po prostu repozytorium.
+          Repozytorium jest pojedynczym źródłem prawdy dla kodu aplikacji, co oznacza, że wszystkie zmiany w~kodzie są śledzone i~zarządzane przez system kontroli wersji.
+          Każde wdrożenie aplikacji jest powiązane z~konkretną wersją kodu w~repozytorium, co umożliwia łatwe odtwarzanie i~zarządzanie różnymi środowiskami (np. deweloperskim, testowym, produkcyjnym) bez konieczności duplikowania kodu.
+          Jeśli aplikacja jest rozproszona na wiele usług, każda usługa powinna być zarządzana w~oddzielnym repozytorium, co ułatwia zarządzanie i~skalowanie poszczególnych komponentów aplikacji.
 
-          Współczesnym trendem, szczególnie w dużych organizacjach (np. Google, Meta), jest wykorzystywanie \textit{monorepozytoriów}. W takim podejściu kod wielu usług jest przechowywany w jednym, wspólnym repozytorium. Pozwala to na łatwiejsze zarządzanie współdzielonymi zależnościami, spójne wersjonowanie całego systemu oraz uproszczenie procesów refaktoryzacji międzyprojektowej. Niniejsza praca również wykorzystuje strukturę monorepozytorium, co pozwala na ścisłe powiązanie kodu aplikacji z definicjami infrastruktury i procesów CI/CD.
+          Współczesnym trendem, szczególnie w~dużych organizacjach (np. Google, Meta), jest wykorzystywanie \textit{monorepozytoriów}. W~takim podejściu kod wielu usług jest przechowywany w~jednym, wspólnym repozytorium. Pozwala to na łatwiejsze zarządzanie współdzielonymi zależnościami, spójne wersjonowanie całego systemu oraz uproszczenie procesów refaktoryzacji międzyprojektowej. Niniejsza praca również wykorzystuje strukturę monorepozytorium, co pozwala na ścisłe powiązanie kodu aplikacji z~definicjami infrastruktury i~procesów CI/CD.
 
-    \item \textbf{Zależności} --- Jawnie zadeklaruj i wydziel zależności
+    \item \textbf{Zależności} --- Jawnie zadeklaruj i~wydziel zależności
 
-          Aplikacja powinna jawnie deklarować wszystkie swoje zależności, takie jak biblioteki, frameworki i narzędzia, które są wymagane do jej działania.
-          Deklaracja ta jest zazwyczaj realizowana poprzez pliki konfiguracyjne (np. \texttt{requirements.txt} dla Pythona, \texttt{package.json} dla Node.js, \texttt{build.gradle} dla Java),
-          które zawierają listę wszystkich zależności wraz z ich wersjami.
-          Dzięki temu można łatwo odtworzyć środowisko aplikacji na różnych maszynach i uniknąć problemów związanych z brakującymi lub niekompatybilnymi zależnościami.
-          Wydzielanie zależności oznacza, że aplikacja nie powinna polegać na globalnie zainstalowanych bibliotekach lub narzędziach, co zwiększa przenośność i izolację środowiska aplikacji.
+          Aplikacja powinna jawnie deklarować wszystkie swoje zależności, takie jak biblioteki, frameworki i~narzędzia, które są wymagane do jej działania.
+          Deklaracja ta jest zazwyczaj realizowana poprzez pliki konfiguracyjne (np. \texttt{requirements.txt} dla Pythona, \texttt{package.json} dla Node.js, \texttt{build.gradle} dla Javy),
+          które zawierają listę wszystkich zależności wraz z~ich wersjami.
+          Dzięki temu można łatwo odtworzyć środowisko aplikacji na różnych maszynach i~uniknąć problemów związanych z~brakującymi lub niekompatybilnymi zależnościami.
+          Wydzielanie zależności oznacza, że aplikacja nie powinna polegać na globalnie zainstalowanych bibliotekach lub narzędziach, co zwiększa przenośność i~izolację środowiska aplikacji.
 
-    \item \textbf{Konfiguracja} --- Przechowuj konfigurację w środowisku
+    \item \textbf{Konfiguracja} --- Przechowuj konfigurację w~środowisku
 
-          Konfiguracja aplikacji, taka jak dane uwierzytelniające, adresy URL usług zewnętrznych, powinna być przechowywana w środowisku, a nie w kodzie źródłowym.
-          Jedną z implementacji takiego podejścia są zmienne środowiskowe (ang. environment variables, env vars), które pozwalają na łatwe dostosowanie aplikacji nawet po jej wdrożeniu, bez konieczności modyfikowania kodu.
-          Zmienne środowiskowe zapobiegają też wyciekowi wrażliwych danych (np. haseł, kluczy API) w repozytorium kodu, co poprawia bezpieczeństwo aplikacji.
+          Konfiguracja aplikacji, taka jak dane uwierzytelniające, adresy URL usług zewnętrznych, powinna być przechowywana w~środowisku, a~nie w~kodzie źródłowym.
+          Jedną z~implementacji takiego podejścia są zmienne środowiskowe (ang. \textit{environment variables}), które pozwalają na łatwe dostosowanie aplikacji nawet po jej wdrożeniu, bez konieczności modyfikowania kodu.
+          Zmienne środowiskowe zapobiegają też wyciekowi wrażliwych danych (np. haseł, kluczy API) w~repozytorium kodu, co poprawia bezpieczeństwo aplikacji.
 
     \item \textbf{Usługi wspierające} --- Traktuj usługi wspierające jako dołączone zasoby
 
           Usługi wspierające, takie jak bazy danych, kolejki wiadomości, systemy cache, powinny być traktowane jako dołączone zasoby,
-          co oznacza, że aplikacja powinna być w stanie łatwo zastąpić jedną usługę inną bez konieczności modyfikowania kodu.
-          Na przykład, jeśli aplikacja korzysta z bazy danych, powinna być w stanie przełączyć się z jednej bazy danych na inną (np. zmiana z MySQL na PostgreSQL)
+          co oznacza, że aplikacja powinna być w~stanie łatwo zastąpić jedną usługę inną bez konieczności modyfikowania kodu.
+          Na przykład, jeśli aplikacja korzysta z~bazy danych, powinna być w~stanie przełączyć się z~jednej bazy danych na inną (np. zmiana z~MySQL na PostgreSQL)
           bez konieczności zmiany kodu aplikacji, poprzez odpowiednią konfigurację.
 
     \item \textbf{Buduj, publikuj, uruchamiaj} --- Oddzielaj etap budowania od uruchamiania
 
           Proces wdrażania kodu powinien być podzielony na trzy niezależne etapy:
           \begin{itemize}
-              \item \textit{Build} (budowanie): zamiana kodu źródłowego w gotowy do uruchomienia pakiet (tzw. artefakt).
-              \item \textit{Release} (publikowanie): połączenie zbudowanego pakietu z aktualną konfiguracją środowiska. Każdy \textit{release} powinien mieć unikalny identyfikator i być niezmienny (ang. \textit{immutable}).
-              \item \textit{Run} (uruchamianie): uruchomienie konkretnej wersji publikacji w środowisku wykonawczym.
+              \item \textit{Build} (budowanie): zamiana kodu źródłowego w~gotowy do uruchomienia pakiet (tzw. artefakt).
+              \item \textit{Release} (publikowanie): połączenie zbudowanego pakietu z~aktualną konfiguracją środowiska. Każdy \textit{release} powinien mieć unikalny identyfikator i~być niezmienny (ang. \textit{immutable}).
+              \item \textit{Run} (uruchamianie): uruchomienie konkretnej wersji publikacji w~środowisku wykonawczym.
           \end{itemize}
-          Rozdzielenie tych faz zapobiega wprowadzaniu zmian bezpośrednio w działającym środowisku i ułatwia szybkie wycofywanie zmian (ang. \textit{rollback}) do poprzedniej, stabilnej wersji publikacji.
+          Rozdzielenie tych faz zapobiega wprowadzaniu zmian bezpośrednio w~działającym środowisku i~ułatwia szybkie wycofywanie zmian (ang. \textit{rollback}) do poprzedniej, stabilnej wersji publikacji.
 
     \item \textbf{Procesy} --- Uruchamiaj aplikację jako jeden lub więcej bezstanowych procesów
 
-          Aplikacje 12-factor są bezstanowe (ang. \textit{stateless}) i niczego nie współdzielą (ang. \textit{share-nothing}).
-          Wszelkie dane, które muszą zostać zachowane (trwałe), powinny być przechowywane w usługach wspierających, takich jak bazy danych lub magazyny obiektowe.
+          Aplikacje 12-factor są bezstanowe (ang. \textit{stateless}) i~niczego nie współdzielą (ang. \textit{share-nothing}).
+          Wszelkie dane, które muszą zostać zachowane (trwałe), powinny być przechowywane w~usługach wspierających, takich jak bazy danych lub magazyny obiektowe.
           Pamięć lokalna procesu może być używana jedynie jako tymczasowa pamięć podręczna (ang. \textit{cache}).
-          Takie podejście umożliwia łatwe skalowanie aplikacji poprzez uruchamianie wielu kopii procesów bez obawy o spójność danych między nimi.
+          Takie podejście umożliwia łatwe skalowanie aplikacji poprzez uruchamianie wielu kopii procesów bez obawy o~spójność danych między nimi.
 
     \item \textbf{Przydzielanie portów} --- Udostępniaj usługi przez przydzielanie portów
 
-          Aplikacja nie powinna polegać na obecności zewnętrznego serwera WWW (jak Apache czy Tomcat) w środowisku wykonawczym.
-          Zamiast tego, powinna być całkowicie samowystarczalna i udostępniać swoje usługi poprzez przypisanie się (ang. \textit{binding}) do określonego portu sieciowego.
-          W środowisku chmurowym (np. Kubernetes) to infrastruktura zajmuje się kierowaniem ruchu z publicznych adresów do odpowiednich portów przypisanych przez procesy aplikacji.
+          Aplikacja nie powinna polegać na obecności zewnętrznego serwera WWW (jak Apache czy Tomcat) w~środowisku wykonawczym.
+          Zamiast tego powinna być całkowicie samowystarczalna i~udostępniać swoje usługi poprzez przypisanie się (ang. \textit{binding}) do określonego portu sieciowego.
+          W~środowisku chmurowym (np. Kubernetes) to infrastruktura zajmuje się kierowaniem ruchu z~publicznych adresów do odpowiednich portów przypisanych przez procesy aplikacji.
 
     \item \textbf{Współbieżność} --- Skaluj przez odpowiednio dobrane procesy
 
-          W modelu 12-factor procesy są traktowane jako obywatele pierwszej kategorii.
-          Aplikacja powinna być zaprojektowana tak, aby mogła być łatwo skalowana poprzez uruchamianie wielu kopii procesów, które mogą obsługiwać różne zadania (np. obsługa żądań HTTP, przetwarzanie zadań w tle, renderowanie).
+          W~modelu 12-factor procesy są traktowane jako obywatele pierwszej kategorii (ang. \textit{first-class citizens}).
+          Aplikacja powinna być zaprojektowana tak, aby mogła być łatwo skalowana poprzez uruchamianie wielu kopii procesów, które mogą obsługiwać różne zadania (np. obsługa żądań HTTP, przetwarzanie zadań w~tle, renderowanie).
           Skalowanie jest osiągane poprzez uruchamianie wielu instancji tych procesów, zależnie od potrzeb, co pozwala na elastyczne dostosowanie się do zmieniającego się obciążenia.
 
-    \item \textbf{Jednorazowość} --- Zwiększ elastyczność pozwalając na szybkie uruchamianie i zatrzymywanie aplikacji
+    \item \textbf{Jednorazowość} --- Zwiększ elastyczność pozwalając na szybkie uruchamianie i~zatrzymywanie aplikacji
 
-          Procesy aplikacji powinny być "jednorazowe" (ang. \textit{disposable}), co oznacza, że mogą być uruchamiane lub zatrzymywane w dowolnym momencie bez negatywnego wpływu na system.
-          Dąży się do minimalizacji czasu uruchamiania (\textit{startup time}) oraz zapewnienia bezpiecznego wyłączania (\textit{graceful shutdown}).
-          W przypadku zatrzymania, proces powinien przestać przyjmować nowe zadania, dokończyć bieżące i czysto zwolnić zasoby.
-          Zwiększa to odporność systemu na awarie i ułatwia szybkie wdrażanie nowych wersji.
+          Procesy aplikacji powinny być „jednorazowe” (ang. \textit{disposable}), co oznacza, że mogą być uruchamiane lub zatrzymywane w~dowolnym momencie bez negatywnego wpływu na system.
+          Dąży się do minimalizacji czasu uruchamiania (ang. \textit{startup time}) oraz zapewnienia bezpiecznego wyłączania (ang. \textit{graceful shutdown}).
+          W~przypadku zatrzymania, proces powinien przestać przyjmować nowe zadania, dokończyć bieżące i~czysto zwolnić zasoby.
+          Zwiększa to odporność systemu na awarie i~ułatwia szybkie wdrażanie nowych wersji.
 
-    \item \textbf{Jednolitość środowisk} --- Utrzymuj konfigurację środowisk jak najbardziej zbliżoną do siebie
+    \item \textbf{Jednolitość środowisk} --- Utrzymuj konfiguracje środowisk jak najbardziej zbliżone do siebie
 
-          Różnice między środowiskiem deweloperskim a produkcyjnym powinny być minimalizowane w trzech obszarach:
+          Różnice między środowiskiem deweloperskim a~produkcyjnym powinny być minimalizowane w~trzech obszarach:
           \begin{itemize}
-              \item Czasu: deweloperzy powinni wdrażać kod jak najszybciej po jego napisaniu.
-              \item Osób: twórcy kodu powinni być zaangażowani w jego wdrażanie i monitorowanie.
-              \item Narzędzi: stosowanie tych samych wersji oprogramowania i usług wspierających (np. ta sama wersja bazy danych) na wszystkich etapach.
+              \item Czas: deweloperzy powinni wdrażać kod jak najszybciej po jego napisaniu.
+              \item Osoby: twórcy kodu powinni być zaangażowani w~jego wdrażanie i~monitorowanie.
+              \item Narzędzia: stosowanie tych samych wersji oprogramowania i~usług wspierających (np. ta sama wersja bazy danych) na wszystkich etapach.
           \end{itemize}
-          Pomaga to uniknąć błędów typu "u mnie działa", które często wynikają z subtelnych różnic w konfiguracji systemów.
+          Pomaga to uniknąć błędów typu „u~mnie działa”, które często wynikają z~subtelnych różnic w~konfiguracji systemów.
 
     \item \textbf{Logi} --- Traktuj logi jako strumień zdarzeń
 
           Aplikacja nie powinna zajmować się zarządzaniem plikami dziennika (logami) ani ich przechowywaniem.
-          Zamiast tego, każdy proces powinien wypisywać strumień zdarzeń bezpośrednio na standardowe wyjście (ang. \textit{stdout}).
-          W środowiskach produkcyjnych to infrastruktura przejmuje te strumienie, agreguje je i przesyła do wyspecjalizowanych systemów analizy danych (takich jak ELK Stack lub Splunk).
+          Zamiast tego każdy proces powinien wypisywać strumień zdarzeń bezpośrednio na standardowe wyjście (ang. \textit{stdout}).
+          W~środowiskach produkcyjnych to infrastruktura przejmuje te strumienie, agreguje je i~przesyła do wyspecjalizowanych systemów analizy danych (takich jak ELK Stack lub Splunk).
           Daje to lepszą obserwowalność (ang. \textit{observability}) stanu systemu bez obciążania logiką logowania samej aplikacji.
 
-    \item \textbf{Zarządzanie aplikacją} --- Uruchamiaj zadania administracyjne jako jednorazowe procesy
+    \item \textbf{Procesy administracyjne} --- Uruchamiaj zadania administracyjne jako jednorazowe procesy
 
-          Zadania administracyjne lub konserwacyjne (np. migracje bazy danych, inspekcja danych za pomocą skryptów) powinny być uruchamiane jako jednorazowe procesy (ang. \textit{one-off processes}) w tym samym środowisku, w którym działa aplikacja.
-          Powinny one korzystać z tej samej wersji kodu i tej samej konfiguracji co procesy obsługujące regularny ruch.
-          Kod zadania administracyjnego musi zostać dołączony do kodu aplikacji, a jego uruchomienie powinno być możliwe poprzez proste polecenie, co zapewnia spójność i łatwość zarządzania zadaniami administracyjnymi.
+          Zadania administracyjne lub konserwacyjne (np. migracje bazy danych, inspekcja danych za pomocą skryptów) powinny być uruchamiane jako jednorazowe procesy (ang. \textit{one-off processes}) w~tym samym środowisku, w~którym działa aplikacja.
+          Powinny one korzystać z~tej samej wersji kodu i~tej samej konfiguracji co procesy obsługujące regularny ruch.
+          Kod zadania administracyjnego musi zostać dołączony do kodu aplikacji, a~jego uruchomienie powinno być możliwe poprzez proste polecenie, co zapewnia spójność i~łatwość zarządzania zadaniami administracyjnymi.
 \end{enumerate}
 
 \subsubsection{Znaczenie Twelve-Factor App dla projektu}
-Zasady sformułowane w ramach metodologii Twelve-Factor App stanowią fundament techniczny niniejszej pracy. Ich zastosowanie w części praktycznej pozwala na budowę systemu, który jest w pełni gotowy do działania w nowoczesnych środowiskach chmurowych. Kluczowe aspekty, takie jak ścisła izolacja zależności, przechowywanie konfiguracji w środowisku czy traktowanie logów jako strumieni zdarzeń, bezpośrednio przekładają się na łatwość konteneryzacji aplikacji oraz jej późniejszej orkiestracji w klastrze Kubernetes. Implementacja tych zasad jest niezbędnym krokiem do osiągnięcia wysokiego poziomu automatyzacji w procesach CI/CD, co stanowi główny cel pracy.
-Zestawienie wszystkich dwunastu zasad z miejscami ich realizacji w części praktycznej przedstawia rysunek~\ref{fig:twelve-factor-map}.
+Zasady sformułowane w~ramach metodyki Twelve-Factor App stanowią fundament techniczny niniejszej pracy. Ich zastosowanie w~części praktycznej pozwala na budowę systemu, który jest w~pełni gotowy do działania w~nowoczesnych środowiskach chmurowych. Kluczowe aspekty, takie jak ścisła izolacja zależności, przechowywanie konfiguracji w~środowisku czy traktowanie logów jako strumieni zdarzeń, bezpośrednio przekładają się na łatwość konteneryzacji aplikacji oraz jej późniejszej orkiestracji w~klastrze Kubernetes. Implementacja tych zasad jest niezbędnym krokiem do osiągnięcia wysokiego poziomu automatyzacji w~procesach CI/CD, co stanowi główny cel pracy.
+Zestawienie wszystkich dwunastu zasad z~miejscami ich realizacji w~części praktycznej przedstawia rysunek~\ref{fig:twelve-factor-map}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{img/diagrams/01-teoria/teoria-01-twelve-factor.png}
-    \caption{Mapa zgodności projektu z zasadami Twelve-Factor App --- każda zasada wraz z miejscem jej realizacji w części praktycznej (opracowanie własne).}
+    \caption{Mapa zgodności projektu z~zasadami Twelve-Factor App --- każda zasada wraz z~miejscem jej realizacji w~części praktycznej (opracowanie własne).}
     \label{fig:twelve-factor-map}
 \end{figure}
 
 \subsection{DevOps}
 
-DevOps to podejście do rozwoju oprogramowania, które łączy praktyki i narzędzia z obszarów deweloperskich (Dev) i operacyjnych (Ops) w celu zwiększenia efektywności, jakości i szybkości dostarczania oprogramowania.
-Początki tego podejścia sięgają około 2007 roku, kiedy to inżynierowie i liderzy IT zaczęli dostrzegać potrzebę lepszej współpracy między zespołami deweloperskimi a operacyjnymi, aby sprostać rosnącym wymaganiom rynku i użytkowników.
-Jego prekursorami byli m.in. Patrick Debois, Nicole Forsgren, Jez Humble, Gene Kim i John Willis, którzy promowali idee takie jak ciągła integracja (CI), ciągłe dostarczanie (CD) i automatyzacja procesów.
-Ich prace i działalność przyczyniły się do rozwoju DevOps jako kultury, filozofii i praktyki, która zyskała szerokie uznanie w branży IT i stała się kluczowym elementem nowoczesnego rozwoju oprogramowania.
-\cite{AtlassianDevOpsHistory,Kim2021DevOpsHandbook}
-Rosnącą popularność tego podejścia dobrze ilustruje zainteresowanie hasłem \textit{DevOps} w wyszukiwarce Google (rysunek~\ref{fig:google-trends}).
+DevOps to podejście do rozwoju oprogramowania, które łączy praktyki i~narzędzia z~obszarów deweloperskich (Dev) i~operacyjnych (Ops) w~celu zwiększenia efektywności, jakości i~szybkości dostarczania oprogramowania.
+Początki tego podejścia sięgają około 2007 roku, kiedy to inżynierowie i~liderzy IT zaczęli dostrzegać potrzebę lepszej współpracy między zespołami deweloperskimi a~operacyjnymi, aby sprostać rosnącym wymaganiom rynku i~użytkowników.
+Jego prekursorami byli m.in. Patrick Debois, Nicole Forsgren, Jez Humble, Gene Kim i~John Willis, którzy promowali idee takie jak ciągła integracja (CI), ciągłe dostarczanie (CD) i~automatyzacja procesów.
+Ich prace i~działalność przyczyniły się do rozwoju DevOps jako kultury, filozofii i~praktyki, która zyskała szerokie uznanie w~branży IT i~stała się kluczowym elementem nowoczesnego rozwoju oprogramowania~\cite{AtlassianDevOpsHistory,Kim2021DevOpsHandbook}.
+Rosnącą popularność tego podejścia dobrze ilustruje zainteresowanie hasłem \textit{DevOps} w~wyszukiwarce Google (rysunek~\ref{fig:google-trends}).
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{img/google-trends.png}
-    \caption{Zainteresowanie hasłem \textit{DevOps} w wyszukiwarce Google \cite{GoogleTrendsDevOps}.}
+    \caption{Zainteresowanie hasłem \textit{DevOps} w~wyszukiwarce Google \cite{GoogleTrendsDevOps}.}
     \label{fig:google-trends}
 \end{figure}
 
-Kultura DevOps promuje otwartą komunikację i współpracę między zespołami deweloperskimi a operacyjnymi, co pozwala na szybsze rozwiązywanie problemów i lepsze zrozumienie wymagań biznesowych.
-Automatyzacja jest kluczowym elementem, który umożliwia eliminację manualnych procesów, co z kolei przyspiesza cykle wydania i redukuje ryzyko błędów \cite{Leite2019DevOpsConcepts}.
+Kultura DevOps promuje otwartą komunikację i~współpracę między zespołami deweloperskimi a~operacyjnymi, co pozwala na szybsze rozwiązywanie problemów i~lepsze zrozumienie wymagań biznesowych.
+Automatyzacja jest kluczowym elementem, który umożliwia eliminację manualnych procesów, co z~kolei przyspiesza cykle wydania i~redukuje ryzyko błędów \cite{Leite2019DevOpsConcepts}.
 
-\subsubsection{Kluczowe wartości i modele dojrzałości DevOps}
+\subsubsection{Kluczowe wartości i~modele dojrzałości DevOps}
 
-DevOps koncentruje się nie na technicznej implementacji, tylko na wskazówkach, w jaki sposób wytwarzać oprogramowanie, tak by proces był bardziej powtarzalny, stabilny i szybki.
-Wartości i zasady DevOps są fundamentem, na którym opiera się kultura i praktyki DevOps, a ich celem jest stworzenie środowiska pracy, które sprzyja współpracy, innowacji i ciągłemu doskonaleniu.
-Mimo tego, że w branży IT bardzo często utożsamia się go z użyciem konkretnych narzędzi, to są one jednak tylko implementacją kluczowych wartości, które zaproponowała ta metodologia.
+DevOps koncentruje się nie na technicznej implementacji, lecz na wskazówkach, w~jaki sposób wytwarzać oprogramowanie, tak by proces był bardziej powtarzalny, stabilny i~szybki.
+Wartości i~zasady DevOps są fundamentem, na którym opiera się kultura i~praktyki DevOps, a~ich celem jest stworzenie środowiska pracy, które sprzyja współpracy, innowacji i~ciągłemu doskonaleniu.
+Mimo że w~branży IT bardzo często utożsamia się go z~użyciem konkretnych narzędzi, to są one jednak tylko implementacją kluczowych wartości, które zaproponowała ta metodyka.
 
 
-Głównymi wartościami, które wynikają ze źródeł i publikacji głównego nurtu, są:
+Głównymi wartościami, które wynikają ze źródeł i~publikacji głównego nurtu~\cite{Kim2021DevOpsHandbook,Leite2019DevOpsConcepts}, są:
 \begin{itemize}[font=\bfseries]
-    \item \textbf{Współpraca i Komunikacja} --- Promowanie otwartej i ciągłej komunikacji między zespołami w celu szybszego rozwiązywania problemów i lepszego zrozumienia celów.
-    \item \textbf{Wspólna Odpowiedzialność} --- Deweloperzy i specjaliści od operacji dzielą odpowiedzialność za cały cykl życia aplikacji, co zwiększa zaangażowanie i jakość pracy.
-    \item \textbf{Ciągłe Doskonalenie} --- Stałe dążenie do ulepszania procesów, narzędzi i produktów poprzez iteracyjne podejście i informację zwrotną.
-    \item \textbf{Automatyzacja} --- Wykorzystanie narzędzi do automatyzacji zadań takich jak testowanie, wdrażanie i monitorowanie w celu zwiększenia efektywności i redukcji błędów.
-    \item \textbf{Uczenie się na Błędach} --- Kultura, która traktuje błędy jako okazje do nauki (ang. no blame culture), zachęcając do otwartości, dzielenia się wiedzą, a także wspierająca ciągłe eksperymentowanie i doskonalenie.
-    \item \textbf{Pomiar i Analiza} --- Używanie metryk i danych, jako głównego narzędzia do podejmowania świadomych decyzji i monitorowania postępów.
-    \item \textbf{Orientacja na Klienta} --- Skupienie na dostarczaniu wartości dla użytkownika końcowego poprzez szybkie i niezawodne wydawanie oprogramowania.
-    \item \textbf{Eliminacja Silosów} --- Rozbijanie barier komunikacyjnych i organizacyjnych między działami organizacji w celu tworzenia zintegrowanego i spójnego środowiska pracy.
+    \item \textbf{Współpraca i~komunikacja} --- Promowanie otwartej i~ciągłej komunikacji między zespołami w~celu szybszego rozwiązywania problemów i~lepszego zrozumienia celów.
+    \item \textbf{Wspólna odpowiedzialność} --- Deweloperzy i~specjaliści od operacji dzielą odpowiedzialność za cały cykl życia aplikacji, co zwiększa zaangażowanie i~jakość pracy.
+    \item \textbf{Ciągłe doskonalenie} --- Stałe dążenie do ulepszania procesów, narzędzi i~produktów poprzez iteracyjne podejście i~informację zwrotną.
+    \item \textbf{Automatyzacja} --- Wykorzystanie narzędzi do automatyzacji zadań takich jak testowanie, wdrażanie i~monitorowanie w~celu zwiększenia efektywności i~redukcji błędów.
+    \item \textbf{Uczenie się na błędach} --- Kultura, która traktuje błędy jako okazje do nauki (ang. \textit{no blame culture}), zachęcając do otwartości, dzielenia się wiedzą, a~także wspierająca ciągłe eksperymentowanie i~doskonalenie.
+    \item \textbf{Pomiar i~analiza} --- Używanie metryk i~danych jako głównego narzędzia do podejmowania świadomych decyzji i~monitorowania postępów.
+    \item \textbf{Orientacja na klienta} --- Skupienie na dostarczaniu wartości dla użytkownika końcowego poprzez szybkie i~niezawodne wydawanie oprogramowania.
+    \item \textbf{Eliminacja silosów} --- Rozbijanie barier komunikacyjnych i~organizacyjnych między działami organizacji w~celu tworzenia zintegrowanego i~spójnego środowiska pracy.
 \end{itemize}
 
-Aby obiektywnie mierzyć stopień wdrożenia i skuteczność powyższych zasad w organizacji, stosuje się uznane modele dojrzałości oraz zestawy metryk.
-Jest to próba przełożenia wartości i zasad DevOps na konkretne, skodyfikowane wskaźniki, które pozwalają organizacjom ocenić swoje praktyki i ich aktualny poziom, a potem zidentyfikować kierunki do poprawy.
+Aby obiektywnie mierzyć stopień wdrożenia i~skuteczność powyższych zasad w~organizacji, stosuje się uznane modele dojrzałości oraz zestawy metryk.
+Jest to próba przełożenia wartości i~zasad DevOps na konkretne, skodyfikowane wskaźniki, które pozwalają organizacjom ocenić swoje praktyki i~ich aktualny poziom, a~potem zidentyfikować kierunki do poprawy.
 Dwoma najbardziej wpływowymi podejściami są model CALMS oraz metryki DORA.
 
 \begin{description}[font=\bfseries]
-    \item[Model CALMS] \cite{Kim2021DevOpsHandbook,Maroukian2020DevOpsAdoption} Opracowany przez Johna Willisa i Damona Edwardsa (a później uzupełniony przez Jeza Humble'a), model ten definiuje pięć fundamentów sukcesu DevOps:
+    \item[Model CALMS] \cite{Kim2021DevOpsHandbook,Maroukian2020DevOpsAdoption} Opracowany przez Johna Willisa i~Damona Edwardsa (a~później uzupełniony przez Jeza Humble'a), model ten definiuje pięć fundamentów sukcesu DevOps:
           \begin{itemize}
-              \item \textbf{C (Culture)} --- Kultura oparta na zaufaniu, współpracy i wspólnym celu. Jest to najważniejszy element, bez którego inne narzędzia i procesy tracą na znaczeniu.
-              \item \textbf{A (Automation)} --- Automatyzacja powtarzalnych zadań (np. testowanie, wdrażanie), co pozwala na eliminację błędów ludzkich i szybsze dostarczanie wartości.
-              \item \textbf{L (Lean)} --- Stosowanie zasad szczupłego zarządzania, takich jak eliminacja marnotrawstwa (\textit{muda}), praca w małych partiach (\textit{small batches}) i optymalizacja przepływu wartości.
-              \item \textbf{M (Measurement)} --- Gromadzenie i analiza danych dotyczących procesów i wydajności w celu podejmowania decyzji w oparciu o fakty.
-              \item \textbf{S (Sharing)} --- Dzielenie się wiedzą, sukcesami i porażkami wewnątrz organizacji, co wspiera ciągłe uczenie się i buduje spójność zespołu.
+              \item \textbf{C (Culture)} --- Kultura oparta na zaufaniu, współpracy i~wspólnym celu. Jest to najważniejszy element, bez którego inne narzędzia i~procesy tracą na znaczeniu.
+              \item \textbf{A (Automation)} --- Automatyzacja powtarzalnych zadań (np. testowanie, wdrażanie), co pozwala na eliminację błędów ludzkich i~szybsze dostarczanie wartości.
+              \item \textbf{L (Lean)} --- Stosowanie zasad szczupłego zarządzania, takich jak eliminacja marnotrawstwa (\textit{muda}), praca w~małych partiach (\textit{small batches}) i~optymalizacja przepływu wartości.
+              \item \textbf{M (Measurement)} --- Gromadzenie i~analiza danych dotyczących procesów i~wydajności w~celu podejmowania decyzji w~oparciu o~fakty.
+              \item \textbf{S (Sharing)} --- Dzielenie się wiedzą, sukcesami i~porażkami wewnątrz organizacji, co wspiera ciągłe uczenie się i~buduje spójność zespołu.
           \end{itemize}
 
-    \item[Metryki DORA] \cite{Google2022StateOfDevOps,DoraCapabilities} DevOps Research and Assessment (DORA) zaproponowany przez Nicole Forsgren w Google to model,
-          który zidentyfikował cztery kluczowe wskaźniki (ang. \textit{Four Key Metrics}) pozwalające obiektywnie mierzyć wydajność dostarczania oprogramowania:
+    \item[Metryki DORA] \cite{Google2022StateOfDevOps,DoraCapabilities} DevOps Research and Assessment (DORA) to zespół badawczy założony przez Nicole Forsgren, Jeza Humble'a i~Gene'a Kima, przejęty w~2018 roku przez Google.
+          Zidentyfikował on cztery kluczowe wskaźniki (ang. \textit{Four Key Metrics}) pozwalające obiektywnie mierzyć wydajność dostarczania oprogramowania:
           \begin{itemize}
               \item \textbf{Deployment Frequency} (Częstotliwość wdrożeń) --- Mierzy, jak często organizacja pomyślnie wdraża kod do produkcji. Wysoka częstotliwość wskazuje na zwinność zespołu.
-              \item \textbf{Lead Time for Changes} (Czas realizacji zmian) --- Czas od zatwierdzenia zmiany w kodzie do jej pomyślnego uruchomienia na produkcji. Krótki czas pozwala na szybką reakcję na potrzeby rynku.
+              \item \textbf{Lead Time for Changes} (Czas realizacji zmian) --- Czas od zatwierdzenia zmiany w~kodzie do jej pomyślnego uruchomienia na produkcji. Krótki czas pozwala na szybką reakcję na potrzeby rynku.
               \item \textbf{Change Failure Rate} (Wskaźnik awaryjności zmian) --- Odsetek wdrożeń, które kończą się awarią lub wymagają natychmiastowych działań naprawczych (np. \textit{rollback}).
               \item \textbf{Time to Restore Service} (Czas przywracania usługi) --- Średni czas potrzebny na przywrócenie sprawności systemu po wystąpieniu incydentu krytycznego na produkcji.
           \end{itemize}
 \end{description}
 
-Są one powszechnie używane do klasyfikowania organizacji według poziomów wydajności (elita, wysoka, średnia, niska) i diagnozowania wąskich gardeł w dostarczaniu i niezawodności.
+Są one powszechnie używane do klasyfikowania organizacji według poziomów wydajności (elitarny, wysoki, średni, niski) i~diagnozowania wąskich gardeł w~dostarczaniu i~niezawodności.
 Raporty publikowane przez Google każdego roku \cite{DoraResearchArchives} są też dobrym wskaźnikiem stanu rozwoju oprogramowania na rynku.
-Pokazują problemy, które organizacje napotykają na swojej drodze i trendy rozwoju.
-Od 2024 roku raporty uwzględniają też wpływ sztucznej inteligencji na rozwój oprogramowania, co jest bardzo istotne w kontekście tego, co dzieje się obecnie w branży IT.
+Pokazują problemy, które organizacje napotykają na swojej drodze i~trendy rozwoju.
+Od 2024 roku raporty uwzględniają też wpływ sztucznej inteligencji na rozwój oprogramowania, co odzwierciedla obecne przemiany w~branży IT.
 
 
-\subsubsection{Cykl Ciągłego Doskonalenia (\textit{ang.} Continuous Improvement)}
+\subsubsection{Cykl ciągłego doskonalenia (ang. \textit{Continuous Improvement})}
 
-Jedną z centralnych idei metodologii DevOps jest pętla ciągłego doskonalenia, która składa się z ośmiu etapów powtarzanych cyklicznie.
-Każdy z nich jest kluczowy dla zapewnienia, że proces wytwarzania oprogramowania jest nie tylko szybki, ale także stabilny i bezpieczny.
+Jedną z~centralnych idei metodyki DevOps jest pętla ciągłego doskonalenia, która składa się z~ośmiu etapów powtarzanych cyklicznie (rysunek~\ref{fig:devops-cycle}).
+Każdy z~nich jest kluczowy dla zapewnienia, że proces wytwarzania oprogramowania jest nie tylko szybki, ale także stabilny i~bezpieczny.
 
 \begin{figure}[!htbp]
-    \label{fig:devops-cycle}
     \centering \includegraphics[width=0.5\linewidth]{devops-cycle.png}
-    \caption{Etapy rozwoju aplikacji w metodologii DevOps \cite{DynatraceDevOpsGuide}}
+    \caption{Etapy rozwoju aplikacji w~metodyce DevOps \cite{DynatraceDevOpsGuide}.}
+    \label{fig:devops-cycle}
 \end{figure}
 
 \begin{description}[font=\bfseries]
-    \item[1. Planowanie] z wykorzystaniem narzędzi do zarządzania projektami.
-    \item[2. Kodowanie] przy użyciu nowoczesnych technologii i narzędzi programistycznych.
-    \item[3. Budowanie] w zautomatyzowanych procesach CI/CD.
-    \item[4. Testowanie] jednostkowe, integracyjne i end-to-end, z automatyzacją testów.
-    \item[5. Wydawanie] stabilnych wersji aplikacji poprzez konteneryzację i zarządzanie pakietami.
-    \item[6. Wdrażanie] na skalowalnej infrastrukturze chmurowej z wykorzystaniem IaC i orkiestracji kontenerów.
-    \item[7. Operacje] z zapewnieniem wysokiej dostępności i elastyczności dzięki usługom chmurowym.
-    \item[8. Monitorowanie] aplikacji i infrastruktury w celu szybkiego reagowania na incydenty oraz zbieranie informacji o wydajności i użyciu systemu.
+    \item[1. Planowanie] z~wykorzystaniem narzędzi do zarządzania projektami.
+    \item[2. Kodowanie] przy użyciu nowoczesnych technologii i~narzędzi programistycznych.
+    \item[3. Budowanie] w~zautomatyzowanych procesach CI/CD.
+    \item[4. Testowanie] jednostkowe, integracyjne i~end-to-end, z~automatyzacją testów.
+    \item[5. Wydawanie] stabilnych wersji aplikacji poprzez konteneryzację i~zarządzanie pakietami.
+    \item[6. Wdrażanie] na skalowalnej infrastrukturze chmurowej z~wykorzystaniem IaC i~orkiestracji kontenerów.
+    \item[7. Operacje] z~zapewnieniem wysokiej dostępności i~elastyczności dzięki usługom chmurowym.
+    \item[8. Monitorowanie] aplikacji i~infrastruktury w~celu szybkiego reagowania na incydenty oraz zbieranie informacji o~wydajności i~użyciu systemu.
 \end{description}
 
-Kolejne iteracje mają za zadanie w sposób ciągły dostarczać wartość dla odbiorcy systemu.
-Pętla ta jest podstawą kultury DevOps. Promuje ciągłe uczenie się, eksperymentowanie i doskonalenie procesów, narzędzi i produktów.
-Z założenia jest to proces, który osiąga sprzężenie zwrotne (ang. feedback loop), gdzie każda iteracja dostarcza informacji zwrotnej, która jest wykorzystywana do poprawy następnych iteracji.
+Kolejne iteracje mają za zadanie w~sposób ciągły dostarczać wartość dla odbiorcy systemu.
+Pętla ta jest podstawą kultury DevOps. Promuje ciągłe uczenie się, eksperymentowanie i~doskonalenie procesów, narzędzi i~produktów.
+Z~założenia jest to proces, który wykorzystuje sprzężenie zwrotne (ang. \textit{feedback loop}), gdzie każda iteracja dostarcza informacji zwrotnej, która jest wykorzystywana do poprawy następnych iteracji.
 
 
-\subsubsection{Rozwój DevOps --- nowe kierunki i specjalizacje}
-W miarę rozwoju metodologii DevOps, pojawiło się wiele specjalizacji i podejść, które rozszerzają lub uzupełniają jej podstawowe zasady.
-Wybrane z nich to:
+\subsubsection{Rozwój DevOps --- nowe kierunki i~specjalizacje}
+W~miarę rozwoju metodyki DevOps pojawiło się wiele specjalizacji i~podejść, które rozszerzają lub uzupełniają jej podstawowe zasady.
+Wybrane z~nich to:
 \begin{description}[style=nextline, font=\bfseries]
-    % Wykorzystane w części praktycznej:
-    \item[GitOps] Podejście, które wykorzystuje Git jako jedyne źródło prawdy dla infrastruktury i aplikacji. Automatyzacja wdrożeń jest osiągana poprzez monitorowanie zmian w repozytorium Git i automatyczne zastosowanie ich w środowisku produkcyjnym.
-    \item[DevSecOps] Integracja bezpieczeństwa (Security) w procesie DevOps. Bezpieczeństwo jest uwzględniane na każdym etapie cyklu życia aplikacji, od planowania po wdrożenie i utrzymanie, co pozwala na szybsze wykrywanie i eliminowanie zagrożeń.
+    % Wykorzystane w~części praktycznej:
+    \item[GitOps] Podejście, które wykorzystuje Git jako jedyne źródło prawdy dla infrastruktury i~aplikacji. Automatyzacja wdrożeń jest osiągana poprzez monitorowanie zmian w~repozytorium Git i~automatyczne zastosowanie ich w~środowisku produkcyjnym.
+    \item[DevSecOps] Integracja bezpieczeństwa (Security) w~procesie DevOps. Bezpieczeństwo jest uwzględniane na każdym etapie cyklu życia aplikacji, od planowania po wdrożenie i~utrzymanie, co pozwala na szybsze wykrywanie i~eliminowanie zagrożeń.
           % Specjalizacje inżynierskie
-    \item[Cloud Engineering] Projektowanie, budowanie i zarządzanie infrastrukturą chmurową, która wspiera procesy DevOps, z naciskiem na skalowalność, bezpieczeństwo i opłacalność.
-    \item[Site Reliability Engineering] Podejście skupiające się na niezawodności, skalowaniu i efektywności systemów produkcyjnych poprzez inżynierię i automatyzację.
-    \item[Platform Engineering] Tworzenie i utrzymywanie wewnętrznych platform wspierających zespoły deweloperskie w szybszym i łatwiejszym wdrażaniu aplikacji.
+    \item[Cloud Engineering] Projektowanie, budowanie i~zarządzanie infrastrukturą chmurową, która wspiera procesy DevOps, z~naciskiem na skalowalność, bezpieczeństwo i~opłacalność.
+    \item[Site Reliability Engineering] Podejście skupiające się na niezawodności, skalowaniu i~efektywności systemów produkcyjnych poprzez inżynierię i~automatyzację.
+    \item[Platform Engineering] Tworzenie i~utrzymywanie wewnętrznych platform wspierających zespoły deweloperskie w~szybszym i~łatwiejszym wdrażaniu aplikacji.
           % Pozostałe:    
-    \item[FinOps] Połączenie praktyk finansowych z operacjami IT. Celem jest optymalizacja kosztów chmury poprzez lepszą współpracę między działami finansowymi, technicznymi i biznesowymi, co prowadzi do świadomego zarządzania wydatkami na infrastrukturę.
-    \item[MLOps] Integracja praktyk DevOps w dziedzinie uczenia maszynowego (Machine Learning). Ułatwia zarządzanie cyklem życia modeli ML, od trenowania po wdrażanie i monitorowanie, zapewniając spójność i skalowalność modeli w produkcji.
-    \item[DataOps] Zastosowanie zasad DevOps w inżynierii danych. Skupia się na automatyzacji procesów związanych z danymi, poprawie ich jakości oraz współpracy między zespołami, co przyspiesza dostarczanie wartościowych informacji biznesowych.
-    \item[AIOps] Wykorzystanie sztucznej inteligencji (AI) w operacjach IT. Pomaga w automatyzacji i optymalizacji zarządzania infrastrukturą poprzez analizę dużych zbiorów danych i predykcyjne wykrywanie problemów.
-    \item[ChatOps] Wykorzystanie platform komunikacyjnych (np. Slack, Microsoft Teams) do zarządzania operacjami i automatyzacją zadań poprzez interakcje w czasie rzeczywistym, co zwiększa przejrzystość i szybkość reakcji zespołów.
+    \item[FinOps] Połączenie praktyk finansowych z~operacjami IT. Celem jest optymalizacja kosztów chmury poprzez lepszą współpracę między działami finansowymi, technicznymi i~biznesowymi, co prowadzi do świadomego zarządzania wydatkami na infrastrukturę.
+    \item[MLOps] Integracja praktyk DevOps w~dziedzinie uczenia maszynowego (Machine Learning). Ułatwia zarządzanie cyklem życia modeli ML, od trenowania po wdrażanie i~monitorowanie, zapewniając spójność i~skalowalność modeli w~produkcji.
+    \item[DataOps] Zastosowanie zasad DevOps w~inżynierii danych. Skupia się na automatyzacji procesów związanych z~danymi, poprawie ich jakości oraz współpracy między zespołami, co przyspiesza dostarczanie wartościowych informacji biznesowych.
+    \item[AIOps] Wykorzystanie sztucznej inteligencji (AI) w~operacjach IT. Pomaga w~automatyzacji i~optymalizacji zarządzania infrastrukturą poprzez analizę dużych zbiorów danych i~predykcyjne wykrywanie problemów.
+    \item[ChatOps] Wykorzystanie platform komunikacyjnych (np. Slack, Microsoft Teams) do zarządzania operacjami i~automatyzacją zadań poprzez interakcje w~czasie rzeczywistym, co zwiększa przejrzystość i~szybkość reakcji zespołów.
 \end{description}
 
-Elementy GitOps, DevSecOps i Site Reliability Engineering będą wykorzystywane w części praktycznej pracy, a pozostałe specjalizacje są opisane dla pokazania kontekstu i trendów rozwoju metodologii DevOps.
+Elementy GitOps, DevSecOps i~Site Reliability Engineering będą wykorzystywane w~części praktycznej pracy, a~pozostałe specjalizacje są opisane dla pokazania kontekstu i~trendów rozwoju metodyki DevOps.
 
-\subsection{Cloud computing}
+\subsection{Cloud Computing}
 
-Model przetwarzania w chmurze (ang. \textit{cloud computing}) definiuje się jako rozwiązanie umożliwiające wygodny dostęp sieciowy do współdzielonej puli konfigurowalnych zasobów obliczeniowych (np. sieci, serwerów, pamięci masowej, aplikacji i usług), które mogą być szybko udostępnione i zwolnione przy minimalnym nakładzie pracy zarządczej lub interakcji z dostawcą usług \cite{Mell2011NISTCloudDefinition}.
+Model przetwarzania w~chmurze (ang. \textit{cloud computing}) definiuje się jako rozwiązanie umożliwiające wygodny dostęp sieciowy do współdzielonej puli konfigurowalnych zasobów obliczeniowych (np. sieci, serwerów, pamięci masowej, aplikacji i~usług), które mogą być szybko udostępnione i~zwolnione przy minimalnym nakładzie pracy zarządczej lub interakcji z~dostawcą usług \cite{Mell2011NISTCloudDefinition}.
 
 \subsubsection{Rodzaje chmur}
 \begin{description}[style=nextline, font=\bfseries]
     \item[Chmura publiczna]
-          Chmura publiczna to model usług chmurowych, w którym zasoby obliczeniowe są dostarczane przez zewnętrznego dostawcę usług za pośrednictwem internetu dla ogółu społeczeństwa lub dużej grupy branżowej \cite{Mell2011NISTCloudDefinition}.
-          W tym modelu infrastruktura jest współdzielona między wieloma użytkownikami (ang. \textit{tenants}), a dostawca chmury jest odpowiedzialny za zarządzanie, utrzymanie i zabezpieczenie zasobów.
-          Użytkownicy płacą zazwyczaj za rzeczywiste wykorzystanie zasobów według modelu "pay-as-you-go".
-          Chmury publiczne oferują wysoką skalowalność i elastyczność, co pozwala na szybkie dostosowanie się do zmieniających się potrzeb biznesowych bez konieczności inwestowania w infrastrukturę sprzętową.
+          Chmura publiczna to model usług chmurowych, w~którym zasoby obliczeniowe są dostarczane przez zewnętrznego dostawcę usług za pośrednictwem internetu dla ogółu społeczeństwa lub dużej grupy branżowej \cite{Mell2011NISTCloudDefinition}.
+          W~tym modelu infrastruktura jest współdzielona między wieloma użytkownikami (ang. \textit{tenants}), a~dostawca chmury jest odpowiedzialny za zarządzanie, utrzymanie i~zabezpieczenie zasobów.
+          Użytkownicy płacą zazwyczaj za rzeczywiste wykorzystanie zasobów według modelu \textit{pay-as-you-go}.
+          Chmury publiczne oferują wysoką skalowalność i~elastyczność, co pozwala na szybkie dostosowanie się do zmieniających się potrzeb biznesowych bez konieczności inwestowania w~infrastrukturę sprzętową.
 
     \item[Chmura prywatna]
           Chmura prywatna to infrastruktura chmurowa wykorzystywana wyłącznie przez jedną organizację obejmującą wielu konsumentów (np. jednostki biznesowe) \cite{Mell2011NISTCloudDefinition}.
-          Może być zarządzana przez tę organizację lub przez zewnętrznego dostawcę usług, ale zasoby i usługi są dostępne tylko dla tej konkretnej firmy, co zapewnia wyższy poziom kontroli nad danymi, bezpieczeństwem i zgodnością z regulacjami.
+          Może być zarządzana przez tę organizację lub przez zewnętrznego dostawcę usług, ale zasoby i~usługi są dostępne tylko dla tej konkretnej firmy, co zapewnia wyższy poziom kontroli nad danymi, bezpieczeństwem i~zgodnością z~regulacjami.
           Chmury prywatne są często wykorzystywane przez przedsiębiorstwa, które mają wysokie wymagania dotyczące bezpieczeństwa, poufności danych lub regulacji prawnych (np. instytucje finansowe, rządowe, medyczne).
-          Mogą być utrzymane w lokalnym centrum danych organizacji lub w wydzielonym ośrodku danych dostawcy usług.
+          Mogą być utrzymywane w~lokalnym centrum danych organizacji lub w~wydzielonym ośrodku danych dostawcy usług.
 
           Chmura prywatna oferuje:
           \begin{itemize}[leftmargin=*]
-              \item \textbf{Wyższy poziom bezpieczeństwa i prywatności}: Dane są przechowywane na wydzielonych serwerach.
-              \item \textbf{Dostosowanie}: Możliwość konfiguracji infrastruktury zgodnie z konkretnymi potrzebami.
-              \item \textbf{Kontrola}: Pełny wgląd i zarządzanie zasobami oraz politykami bezpieczeństwa.
+              \item \textbf{Wyższy poziom bezpieczeństwa i~prywatności}: Dane są przechowywane na wydzielonych serwerach.
+              \item \textbf{Dostosowanie}: Możliwość konfiguracji infrastruktury zgodnie z~konkretnymi potrzebami.
+              \item \textbf{Kontrola}: Pełny wgląd i~zarządzanie zasobami oraz politykami bezpieczeństwa.
           \end{itemize}
 
     \item[Chmura hybrydowa]
-          Chmura hybrydowa to kompozycja dwóch lub więcej odrębnych infrastruktur chmurowych (prywatnych, społecznościowych lub publicznych), które pozostają rozdzielne, ale są powiązane ze sobą standaryzowaną technologią umożliwiającą przenoszenie danych i aplikacji \cite{Mell2011NISTCloudDefinition}.
-          Umożliwia to organizacjom korzystanie z zalet obu modeli:
+          Chmura hybrydowa to kompozycja dwóch lub więcej odrębnych infrastruktur chmurowych (prywatnych, społecznościowych lub publicznych), które pozostają rozdzielne, ale są powiązane ze sobą standaryzowaną technologią umożliwiającą przenoszenie danych i~aplikacji \cite{Mell2011NISTCloudDefinition}.
+          Umożliwia to organizacjom korzystanie z~zalet obu modeli:
 
           \begin{itemize}[leftmargin=*]
-              \item \textbf{Elastyczność i skalowalność chmury publicznej}: Możliwość szybkiego zwiększenia zasobów w razie potrzeby.
-              \item \textbf{Bezpieczeństwo i kontrola chmury prywatnej}: Przechowywanie wrażliwych danych w zabezpieczonym środowisku.
+              \item \textbf{Elastyczność i~skalowalność chmury publicznej}: Możliwość szybkiego zwiększenia zasobów w~razie potrzeby.
+              \item \textbf{Bezpieczeństwo i~kontrola chmury prywatnej}: Przechowywanie wrażliwych danych w~zabezpieczonym środowisku.
           \end{itemize}
 
-          Chmura hybrydowa jest idealna dla firm, które chcą utrzymać kontrolę nad krytycznymi danymi i aplikacjami, jednocześnie korzystając z mocy obliczeniowej chmury publicznej.
+          Chmura hybrydowa jest idealna dla firm, które chcą utrzymać kontrolę nad krytycznymi danymi i~aplikacjami, jednocześnie korzystając z~mocy obliczeniowej chmury publicznej.
 
           Przykładowe scenariusze użycia chmury hybrydowej:
           \begin{itemize}[leftmargin=*]
-              \item \textbf{Disaster Recovery}: Kopie zapasowe danych w chmurze publicznej.
+              \item \textbf{Disaster Recovery}: Kopie zapasowe danych w~chmurze publicznej.
               \item \textbf{Burst Computing}: Przenoszenie dodatkowego obciążenia do chmury publicznej podczas szczytów.
-              \item \textbf{Testowanie i rozwój}: Wykorzystanie chmury publicznej do tworzenia i testowania aplikacji przed wdrożeniem w środowisku prywatnym.
+              \item \textbf{Testowanie i~rozwój}: Wykorzystanie chmury publicznej do tworzenia i~testowania aplikacji przed wdrożeniem w~środowisku prywatnym.
           \end{itemize}
 
     \item[Chmura społecznościowa]
-          Chmura społecznościowa (ang. \textit{community cloud}) to infrastruktura udostępniana wyłącznie specyficznej społeczności konsumentów z organizacji, które mają wspólne interesy (np. misję, wymagania dotyczące bezpieczeństwa, politykę lub względy zgodności) \cite{Mell2011NISTCloudDefinition}.
+          Chmura społecznościowa (ang. \textit{community cloud}) to infrastruktura udostępniana wyłącznie specyficznej społeczności konsumentów z~organizacji, które mają wspólne interesy (np. misję, wymagania dotyczące bezpieczeństwa, politykę lub względy zgodności) \cite{Mell2011NISTCloudDefinition}.
           Może być zarządzana przez same organizacje lub stronę trzecią.
 
-          Infrastruktura jest współdzielona między organizacjami o podobnych potrzebach, takich jak:
+          Infrastruktura jest współdzielona między organizacjami o~podobnych potrzebach, takich jak:
           \begin{itemize}[leftmargin=*]
-              \item \textbf{Regulacje prawne i zgodność}: Branże podlegające restrykcyjnym regulacjom (np. służba zdrowia, finanse).
+              \item \textbf{Regulacje prawne i~zgodność}: Branże podlegające restrykcyjnym regulacjom (np. służba zdrowia, finanse).
               \item \textbf{Wymagania dotyczące bezpieczeństwa}: Potrzeba wysokiego poziomu ochrony danych.
               \item \textbf{Specyficzne potrzeby branżowe}: Wymagania dotyczące wydajności, integracji czy specjalistycznych aplikacji.
           \end{itemize}
 
-          Chmura społecznościowa łączy zalety chmur prywatnych (bezpieczeństwo, kontrola) i publicznych (skalowalność, opłacalność) w kontekście specyficznych potrzeb grupy. Przykłady:
+          Chmura społecznościowa łączy zalety chmur prywatnych (bezpieczeństwo, kontrola) i~publicznych (skalowalność, opłacalność) w~kontekście specyficznych potrzeb grupy. Przykłady:
           \begin{itemize}[leftmargin=*]
-              \item \textbf{Chmura dla sektora publicznego}: Spełniająca wymogi rządowe dotyczące bezpieczeństwa i przechowywania danych.
-              \item \textbf{Chmura dla służby zdrowia}: Zgodna z regulacjami dotyczącymi ochrony danych pacjentów (np. RODO, HIPAA).
-              \item \textbf{Chmura edukacyjna}: Wspierająca instytucje edukacyjne w dostarczaniu zasobów i aplikacji dla studentów i pracowników.
+              \item \textbf{Chmura dla sektora publicznego}: Spełniająca wymogi rządowe dotyczące bezpieczeństwa i~przechowywania danych.
+              \item \textbf{Chmura dla służby zdrowia}: Zgodna z~regulacjami dotyczącymi ochrony danych pacjentów (np. RODO, HIPAA).
+              \item \textbf{Chmura edukacyjna}: Wspierająca instytucje edukacyjne w~dostarczaniu zasobów i~aplikacji dla studentów i~pracowników.
           \end{itemize}
 \end{description}
 
-Najpopularniejsi dostawcy chmur (ang. \textit{Cloud Service Providers}) to:
+Najpopularniejsi dostawcy chmur (ang. \textit{Cloud Service Providers}) według udziału w~globalnym rynku usług infrastruktury chmurowej~\cite{SynergyCloudMarketShare2026} to:
 \begin{itemize}
-    \item \textbf{Amazon Web Services (AWS)} --- lider rynku z ok. 31\% udziałem, oferujący najszerszą gamę usług (ponad 200) i rozbudowaną globalną infrastrukturę.
-    \item \textbf{Microsoft Azure} --- drugi gracz z ok. 24\% udziałem, silnie zintegrowany z ekosystemem Microsoft (Windows Server, Active Directory), dominujący w sektorze korporacyjnym.
-    \item \textbf{Google Cloud Platform (GCP)} --- trzeci dostawca z ok. 11\% udziałem, wyróżniający się zaawansowanymi rozwiązaniami w obszarze analizy danych, sztucznej inteligencji oraz natywną obsługą technologii Kubernetes.
+    \item \textbf{Amazon Web Services (AWS)} --- lider rynku z~ok. 28\% udziałem, oferujący najszerszą gamę usług (ponad 200) i~rozbudowaną globalną infrastrukturę.
+    \item \textbf{Microsoft Azure} --- drugi gracz z~ok. 21\% udziałem, silnie zintegrowany z~ekosystemem Microsoft (Windows Server, Active Directory), dominujący w~sektorze korporacyjnym.
+    \item \textbf{Google Cloud Platform (GCP)} --- trzeci dostawca z~ok. 14\% udziałem, wyróżniający się zaawansowanymi rozwiązaniami w~obszarze analizy danych, sztucznej inteligencji oraz natywną obsługą technologii Kubernetes.
 \end{itemize}
 
-Oprócz powyższych liderów, na rynku funkcjonuje wielu innych dostawców o profilu globalnym lub regionalnym, takich jak Alibaba Cloud (lider rynku azjatyckiego), IBM Cloud oraz Oracle Cloud. Istnieją również platformy wyspecjalizowane, jak Salesforce (model SaaS), DigitalOcean i Linode (popularne wśród deweloperów i startupów) oraz dostawcy europejscy kładący szczególny nacisk na suwerenność danych, m.in. OVHcloud, Hetzner Online czy Scaleway.
+Oprócz powyższych liderów, na rynku funkcjonuje wielu innych dostawców o~profilu globalnym lub regionalnym, takich jak Alibaba Cloud (lider rynku azjatyckiego), IBM Cloud oraz Oracle Cloud. Istnieją również platformy wyspecjalizowane, jak Salesforce (model SaaS), DigitalOcean i~Linode (popularne wśród deweloperów i~startupów) oraz dostawcy europejscy kładący szczególny nacisk na suwerenność danych, m.in. OVHcloud, Hetzner Online czy Scaleway.
 
 \subsubsection{Modele usług chmurowych}
 Obok modeli wdrożenia standard NIST wyróżnia trzy modele usług chmurowych, różniące się zakresem odpowiedzialności przejmowanym przez dostawcę \cite{Mell2011NISTCloudDefinition}:
 
 \begin{itemize}
-    \item \textbf{IaaS (Infrastructure as a Service)} --- dostawca udostępnia podstawowe zasoby obliczeniowe (maszyny wirtualne, sieć, pamięć masową), a użytkownik odpowiada za system operacyjny oraz wszystkie warstwy powyżej niego.
-    \item \textbf{PaaS (Platform as a Service)} --- dostawca zarządza dodatkowo systemem operacyjnym i platformą uruchomieniową; użytkownik dostarcza jedynie aplikację wraz z danymi. Przykładem jest zarządzany Kubernetes (np. Amazon EKS), w którym dostawca utrzymuje płaszczyznę sterowania klastra.
-    \item \textbf{SaaS (Software as a Service)} --- użytkownik korzysta z gotowej aplikacji dostawcy, zachowując kontrolę wyłącznie nad własnymi danymi i konfiguracją.
+    \item \textbf{IaaS (Infrastructure as a~Service)} --- dostawca udostępnia podstawowe zasoby obliczeniowe (maszyny wirtualne, sieć, pamięć masową), a~użytkownik odpowiada za system operacyjny oraz wszystkie warstwy powyżej niego.
+    \item \textbf{PaaS (Platform as a~Service)} --- dostawca zarządza dodatkowo systemem operacyjnym i~platformą uruchomieniową; użytkownik dostarcza jedynie aplikację wraz z~danymi. Przykładem jest zarządzany Kubernetes (np. Amazon EKS), w~którym dostawca utrzymuje płaszczyznę sterowania klastra.
+    \item \textbf{SaaS (Software as a~Service)} --- użytkownik korzysta z~gotowej aplikacji dostawcy, zachowując kontrolę wyłącznie nad własnymi danymi i~konfiguracją.
 \end{itemize}
 
-Granica odpowiedzialności między użytkownikiem a dostawcą przesuwa się zatem stopniowo wraz z przejściem od IaaS do SaaS, co ilustruje rysunek~\ref{fig:shared-responsibility}. Środowisko części praktycznej niniejszej pracy --- lokalny klaster k3d --- odpowiada skrajnie lewej kolumnie tego podziału: autor zarządza wszystkimi warstwami, od sprzętu po aplikację. Rozważana w części praktycznej migracja do zarządzanego Kubernetes (Amazon EKS) przeniosłaby odpowiedzialność za płaszczyznę sterowania na dostawcę, a użycie zarządzanej instancji Grafany stanowiłoby przykład modelu SaaS.
+Granica odpowiedzialności między użytkownikiem a~dostawcą przesuwa się zatem stopniowo wraz z~przejściem od IaaS do SaaS, co ilustruje rysunek~\ref{fig:shared-responsibility}. Środowisko części praktycznej niniejszej pracy --- lokalny klaster k3d --- odpowiada skrajnie lewej kolumnie tego podziału: autor zarządza wszystkimi warstwami, od sprzętu po aplikację. Rozważana w~części praktycznej migracja do zarządzanego Kubernetes (Amazon EKS) przeniosłaby odpowiedzialność za płaszczyznę sterowania na dostawcę, a~użycie zarządzanej instancji Grafany stanowiłoby przykład modelu SaaS.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{img/diagrams/01-teoria/teoria-02-shared-responsibility.png}
-    \caption{Podział odpowiedzialności między użytkownika a dostawcę w modelach usług chmurowych --- od lokalnego klastra k3d do usługi zarządzanej (opracowanie własne).}
+    \caption{Podział odpowiedzialności między użytkownika a~dostawcę w~modelach usług chmurowych --- od lokalnego klastra k3d do usługi zarządzanej (opracowanie własne).}
     \label{fig:shared-responsibility}
 \end{figure}
 
 \subsection{Cloud Native}
 
-Metodologia Cloud Native to podejście do projektowania, budowania i uruchamiania aplikacji, które w pełni wykorzystuje zalety modelu dostarczania usług w chmurze obliczeniowej (ang. \textit{Cloud Computing}) \cite{Kosinska2023CloudNativeKnowledge}. Aplikacje te są tworzone celowo z myślą o środowisku chmurowym, a nie jedynie do niego przenoszone (ang. \textit{cloud-ready}) \cite{CNCFCloudNativeDefinition}.
+Metodyka Cloud Native to podejście do projektowania, budowania i~uruchamiania aplikacji, które w~pełni wykorzystuje zalety modelu dostarczania usług w~chmurze obliczeniowej (ang. \textit{cloud computing}) \cite{Kosinska2023CloudNativeKnowledge}. Aplikacje te są tworzone celowo z~myślą o~środowisku chmurowym, a~nie jedynie do niego przenoszone (ang. \textit{cloud-ready}) \cite{CNCFCloudNativeDefinition}.
 
-Główne aspekty i cechy metodologii Cloud Native obejmują:
+Główne aspekty i~cechy metodyki Cloud Native obejmują:
 
 \begin{description}
-    \item[Cztery filary technologiczne] Fundamentem tego podejścia są DevOps, ciągła integracja i dostarczanie (CI/CD), konteneryzacja oraz architektura mikroserwisów \cite{Kratzke2017CloudNative}.
-    \item[Kluczowe cele projektowe] Podejście to ma na celu zwiększenie szybkości dostarczania oprogramowania, poprawę jego skalowalności i odporności (ang. \textit{resilience}) oraz redukcję ryzyka technicznego związanego z wdrożeniem \cite{Oyekunle2024CloudNativeReview}.
-    \item[Agnostyczność technologiczna] Aplikacje Cloud Native są projektowane jako niezależne od konkretnej infrastruktury, systemu operacyjnego czy języka programowania. Pozwala to na uniknięcie uzależnienia od jednego dostawcy chmury (ang. \textit{vendor lock-in}) i traktowanie zasobów jako uniwersalnych komponentów chmurowych \cite{Alonso2023MultiCloudNative}.
-    \item[Architektura mikroserwisów] Systemy Cloud Native składają się z małych, niezależnych usług, które realizują konkretne funkcje biznesowe, komunikują się przez interfejsy API (często REST/HTTP) i mogą być niezależnie wdrażane oraz skalowane \cite{Balalaie2016MicroservicesDevOps}.
-    \item[Konteneryzacja i orkiestracja] Kontenery zapewniają spójne i odizolowane środowisko wykonawcze, które działa identycznie niezależnie od miejsca wdrożenia. Niezbędnym elementem jest orkiestrator (np. Kubernetes), który automatyzuje tworzenie, monitorowanie i skalowanie zasobów w kontenerach \cite{Mondal2023KubernetesAutoscaling}.
-    \item[Wzorce projektowe] Projektowanie opiera się na sprawdzonych wzorcach, takich jak \textit{Twelve Factor App}. Wzorce te kładą nacisk na szybkość, bezpieczeństwo i skalowalność aplikacji SaaS \cite{Wiggins2012TwelveFactor}.
-    \item[Niezmienna infrastruktura] (ang. \textit{Immutable Infrastructure}) Zamiast modyfikować istniejące komponenty, w metodologii tej promuje się zastępowanie ich nowymi wersjami, co zwiększa przewidywalność i stabilność systemu.
-    \item[Ewolucja w stronę Serverless] Nowoczesne podejście Cloud-native obejmuje również model \textit{Function-as-a-Service} (FaaS), gdzie logika biznesowa jest uruchamiana w formie bezstanowych funkcji wyzwalanych zdarzeniami, co pozwala na optymalizację kosztów poprzez skalowanie do zera (ang. \textit{scale-to-zero}).
+    \item[Cztery filary technologiczne] Fundamentem tego podejścia są DevOps, ciągła integracja i~dostarczanie (CI/CD), konteneryzacja oraz architektura mikroserwisów \cite{Kratzke2017CloudNative}.
+    \item[Kluczowe cele projektowe] Podejście to ma na celu zwiększenie szybkości dostarczania oprogramowania, poprawę jego skalowalności i~odporności (ang. \textit{resilience}) oraz redukcję ryzyka technicznego związanego z~wdrożeniem \cite{Oyekunle2024CloudNativeReview}.
+    \item[Agnostyczność technologiczna] Aplikacje Cloud Native są projektowane jako niezależne od konkretnej infrastruktury, systemu operacyjnego czy języka programowania. Pozwala to na uniknięcie uzależnienia od jednego dostawcy chmury (ang. \textit{vendor lock-in}) i~traktowanie zasobów jako uniwersalnych komponentów chmurowych \cite{Alonso2023MultiCloudNative}.
+    \item[Architektura mikroserwisów] Systemy Cloud Native składają się z~małych, niezależnych usług, które realizują konkretne funkcje biznesowe, komunikują się przez interfejsy API (często REST/HTTP) i~mogą być niezależnie wdrażane oraz skalowane \cite{Balalaie2016MicroservicesDevOps}.
+    \item[Konteneryzacja i~orkiestracja] Kontenery zapewniają spójne i~odizolowane środowisko wykonawcze, które działa identycznie niezależnie od miejsca wdrożenia. Niezbędnym elementem jest orkiestrator (np. Kubernetes), który automatyzuje tworzenie, monitorowanie i~skalowanie zasobów w~kontenerach \cite{Mondal2023KubernetesAutoscaling}.
+    \item[Wzorce projektowe] Projektowanie opiera się na sprawdzonych wzorcach, takich jak \textit{Twelve Factor App}. Wzorce te kładą nacisk na szybkość, bezpieczeństwo i~skalowalność aplikacji SaaS \cite{Wiggins2012TwelveFactor}.
+    \item[Niezmienna infrastruktura] (ang. \textit{Immutable Infrastructure}) Zamiast modyfikować istniejące komponenty, w~metodyce tej promuje się zastępowanie ich nowymi wersjami, co zwiększa przewidywalność i~stabilność systemu.
+    \item[Ewolucja w~stronę Serverless] Nowoczesne podejście Cloud Native obejmuje również model \textit{Function-as-a-Service} (FaaS), gdzie logika biznesowa jest uruchamiana w~formie bezstanowych funkcji wyzwalanych zdarzeniami, co pozwala na optymalizację kosztów poprzez skalowanie do zera (ang. \textit{scale-to-zero}).
 \end{description}
 
-W szerszym ujęciu metodologia ta dzieli środowisko wykonawcze na warstwy \cite{Kratzke2016CloudNativeReferenceModel}:
+W~szerszym ujęciu metodyka ta dzieli środowisko wykonawcze na warstwy \cite{Kratzke2016CloudNativeReferenceModel}:
 \begin{enumerate}
-    \item \textbf{Infrastruktury} --- maszyny wirtualne, sieć i magazyny danych.
-    \item \textbf{Konteneryzacji i klastra} --- środowisko uruchomieniowe (ang. \textit{runtime}) oraz orkiestrator zarządzający zasobami.
+    \item \textbf{Infrastruktury} --- maszyny wirtualne, sieć i~magazyny danych.
+    \item \textbf{Konteneryzacji i~klastra} --- środowisko uruchomieniowe (ang. \textit{runtime}) oraz orkiestrator zarządzający zasobami.
     \item \textbf{Aplikacji} --- mikroserwisy dostarczające funkcjonalność dla użytkownika końcowego.
 \end{enumerate}
 
 
 \subsection{Kubernetes}
 
-Kubernetes (często skracany jako K8s) jest powszechnie uznawany za wiodącą platformę orkiestracji kontenerów i de facto standard dla nowoczesnych wdrożeń chmurowych (ang. \textit{cloud-native}) \cite{Mondal2023KubernetesAutoscaling}. Jego pozycja wynika z dominacji w usługach zarządzanych oraz rozbudowanego ekosystemu narzędzi wspierających.
+Kubernetes (często skracany do k8s) jest powszechnie uznawany za wiodącą platformę orkiestracji kontenerów i~de facto standard dla nowoczesnych wdrożeń chmurowych (ang. \textit{cloud-native}) \cite{Mondal2023KubernetesAutoscaling}. Jego pozycja wynika z~dominacji w~usługach zarządzanych oraz rozbudowanego ekosystemu narzędzi wspierających.
 
-\subsubsection{Pozycja rynkowa i porównanie rozwiązań}
-W porównaniu do alternatyw takich jak Docker Swarm czy Apache Mesos, Kubernetes oferuje znacznie szerszy zestaw funkcji, bogatszy ekosystem oraz bardziej dojrzałe możliwości w zakresie planowania i skalowania zasobów \cite{Alonso2023MultiCloudNative}. Choć Docker Swarm pozostaje prostszy w obsłudze dla mniejszych wdrożeń, to Kubernetes prowadzi pod względem liczby funkcji i dojrzałości rynkowej.
+\subsubsection{Pozycja rynkowa i~porównanie rozwiązań}
+W~porównaniu do alternatyw takich jak Docker Swarm czy Apache Mesos, Kubernetes oferuje znacznie szerszy zestaw funkcji, bogatszy ekosystem oraz bardziej dojrzałe możliwości w~zakresie planowania i~skalowania zasobów \cite{Alonso2023MultiCloudNative}. Choć Docker Swarm pozostaje prostszy w~obsłudze dla mniejszych wdrożeń, to Kubernetes prowadzi pod względem liczby funkcji i~dojrzałości rynkowej.
 
 \subsubsection{Usługi zarządzane (ang. \textit{Managed Kubernetes})}
-Praktycznym przejawem dominacji tej technologii są usługi oferowane przez głównych dostawców chmury: \textit{Elastic Kubernetes Service} (AWS EKS), \textit{Google Kubernetes Engine} (GKE) oraz \textit{Azure Kubernetes Service} (AKS). Usługi te stanowią fundament wdrażania w przedsiębiorstwach, redukując bariery operacyjne poprzez automatyzację zarządzania warstwą sterowania (ang. \textit{control plane}), aktualizacji i zabezpieczeń \cite{Mondal2023KubernetesAutoscaling}. Pozwalają one na traktowanie klastra jako zasobu chmurowego, co jest kluczowe w nowoczesnych architekturach.
+Praktycznym przejawem dominacji tej technologii są usługi oferowane przez głównych dostawców chmury: \textit{Amazon Elastic Kubernetes Service} (EKS), \textit{Google Kubernetes Engine} (GKE) oraz \textit{Azure Kubernetes Service} (AKS). Usługi te stanowią fundament wdrażania w~przedsiębiorstwach, redukując bariery operacyjne poprzez automatyzację zarządzania warstwą sterowania (ang. \textit{control plane}), aktualizacji i~zabezpieczeń \cite{Mondal2023KubernetesAutoscaling}. Pozwalają one na traktowanie klastra jako zasobu chmurowego, co jest kluczowe w~nowoczesnych architekturach.
 
-Z perspektywy przenośności aplikacji kluczowe jest to, że wszystkie te usługi realizują ten sam deklaratywny kontrakt API Kubernetes. Jak pokazuje rysunek~\ref{fig:portability-layers}, kolejne warstwy abstrakcji --- obraz OCI, chart Helm i API Kubernetes --- czynią artefakty aplikacji niezmiennymi względem środowiska: migracja między klastrem lokalnym a dowolną usługą zarządzaną sprowadza się do wskazania innego klastra, bez zmian w artefaktach ani w procesie wdrożenia.
+Z~perspektywy przenośności aplikacji kluczowe jest to, że wszystkie te usługi realizują ten sam deklaratywny kontrakt API Kubernetes. Jak pokazuje rysunek~\ref{fig:portability-layers}, kolejne warstwy abstrakcji --- obraz OCI, chart Helm i~API Kubernetes --- czynią artefakty aplikacji niezmiennymi względem środowiska: migracja między klastrem lokalnym a~dowolną usługą zarządzaną sprowadza się do wskazania innego klastra, bez zmian w~artefaktach ani w~procesie wdrożenia.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{img/diagrams/01-teoria/teoria-03-portability-layers.png}
-    \caption{Przenośność przez warstwy abstrakcji --- artefakty powyżej API Kubernetes są identyczne w każdym środowisku; wymianie podlega wyłącznie warstwa runtime (opracowanie własne).}
+    \caption{Przenośność przez warstwy abstrakcji --- artefakty powyżej API Kubernetes są identyczne w~każdym środowisku; wymianie podlega wyłącznie warstwa runtime (opracowanie własne).}
     \label{fig:portability-layers}
 \end{figure}
 
-\subsubsection{Kubernetes w ekosystemie CNCF}
-Zgodnie z systematycznymi przeglądami literatury, Kubernetes nie funkcjonuje jako izolowana warstwa, lecz jako centralny punkt krajobrazu technicznego \textit{Cloud Native Computing Foundation} (CNCF) \cite{Alonso2023MultiCloudNative}. Integruje on różnorodne komponenty, takie jak środowiska uruchomieniowe (ang. \textit{runtimes}), sieci usług (ang. \textit{service mesh}), systemy monitorowania oraz narzędzia CI/CD, tworząc spójny ekosystem dla nowoczesnego cyklu wytwarzania oprogramowania (ang. \textit{Software Development Life Cycle}, SDLC).
+\subsubsection{Kubernetes w~ekosystemie CNCF}
+Zgodnie z~systematycznymi przeglądami literatury, Kubernetes nie funkcjonuje jako izolowana warstwa, lecz jako centralny punkt krajobrazu technicznego \textit{Cloud Native Computing Foundation} (CNCF) \cite{Alonso2023MultiCloudNative}. Integruje on różnorodne komponenty, takie jak środowiska uruchomieniowe (ang. \textit{runtimes}), sieci usług (ang. \textit{service mesh}), systemy monitorowania oraz narzędzia CI/CD, tworząc spójny ekosystem dla nowoczesnego cyklu wytwarzania oprogramowania (ang. \textit{Software Development Life Cycle}, SDLC).
 
 \subsubsection{Przyczyny dominacji Kubernetes}
-Istnieje kilka kluczowych czynników, które sprawiły, że Kubernetes i technologie CNCF stały się standardem dla aplikacji o dużej skali:
+Istnieje kilka kluczowych czynników, które sprawiły, że Kubernetes i~technologie CNCF stały się standardem dla aplikacji o~dużej skali:
 \begin{enumerate}
-    \item \textbf{Model deklaratywny i automatyzacja} --- Kubernetes opiera się na API i modelu deklaratywnym, co umożliwia automatyzację wdrażania, skalowania i operacji (np. poprzez mechanizmy HPA/VPA czy CRD). Wspiera to podejście Infrastruktura jako Kod (ang. \textit{Infrastructure as Code}) oraz procesy typu GitOps \cite{Mondal2023KubernetesAutoscaling, Oyekunle2024CloudNativeReview}.
-    \item \textbf{Dojrzałość ekosystemu} --- Głęboka integracja z projektami takimi jak Prometheus czy Grafana oraz wsparcie dla standardów sieciowych i magazynowania danych znacząco skraca czas dostarczania wartości (ang. \textit{time-to-value}) \cite{Alonso2023MultiCloudNative}.
-    \item \textbf{Prostota operacyjna w chmurze} --- Dzięki usługom zarządzanym organizacje mogą skupić się na dostarczaniu logiki biznesowej, przenosząc ciężar utrzymania infrastruktury na dostawców usług chmurowych.
-    \item \textbf{Obserwowalność i bezpieczeństwo} --- Rozszerzalna architektura pozwala na łatwą integrację zaawansowanych mechanizmów monitoringu, zarządzania sekretami i zabezpieczeń, co jest niezbędne dla systemów o znaczeniu krytycznym \cite{Oyekunle2024CloudNativeReview, Kosinska2023Observability}.
+    \item \textbf{Model deklaratywny i~automatyzacja} --- Kubernetes opiera się na API i~modelu deklaratywnym, co umożliwia automatyzację wdrażania, skalowania i~operacji (np. poprzez mechanizmy HPA/VPA czy CRD). Wspiera to podejście infrastruktura jako kod (ang. \textit{Infrastructure as Code}) oraz procesy typu GitOps \cite{Mondal2023KubernetesAutoscaling, Oyekunle2024CloudNativeReview}.
+    \item \textbf{Dojrzałość ekosystemu} --- Głęboka integracja z~projektami takimi jak Prometheus czy Grafana oraz wsparcie dla standardów sieciowych i~magazynowania danych znacząco skraca czas dostarczania wartości (ang. \textit{time-to-value}) \cite{Alonso2023MultiCloudNative}.
+    \item \textbf{Prostota operacyjna w~chmurze} --- Dzięki usługom zarządzanym organizacje mogą skupić się na dostarczaniu logiki biznesowej, przenosząc ciężar utrzymania infrastruktury na dostawców usług chmurowych.
+    \item \textbf{Obserwowalność i~bezpieczeństwo} --- Rozszerzalna architektura pozwala na łatwą integrację zaawansowanych mechanizmów monitoringu, zarządzania sekretami i~zabezpieczeń, co jest niezbędne dla systemów o~znaczeniu krytycznym \cite{Oyekunle2024CloudNativeReview, Kosinska2023Observability}.
 \end{enumerate}
 
-\subsection{Wnioski z analizy literatury i wybór technologii}
+\subsection{Wnioski z~analizy literatury i~wybór technologii}
 
-Analiza literatury pozwoliła na zidentyfikowanie kluczowych praktyk i technologii, które stanowią fundament nowoczesnego procesu wytwarzania oprogramowania (ang. \textit{Software Development Life Cycle}, SDLC). Zasady metodologii DevOps oraz podejście Cloud-native wyznaczają kierunek rozwoju współczesnych systemów, kładąc nacisk na elastyczność, szybkość i niezawodność.
+Analiza literatury pozwoliła na zidentyfikowanie kluczowych praktyk i~technologii, które stanowią fundament nowoczesnego procesu wytwarzania oprogramowania (ang. \textit{Software Development Life Cycle}, SDLC). Zasady metodyki DevOps oraz podejście Cloud Native wyznaczają kierunek rozwoju współczesnych systemów, kładąc nacisk na elastyczność, szybkość i~niezawodność.
 
-Jako autor niniejszej pracy, w części projektowej postaram się w miarę możliwości implementować rozwiązania zbliżone do tzw. „Złotego Standardu” (ang. \textit{Golden Standard}), bazując na sprawdzonych wzorcach DevOps/GitOps oraz najlepszych praktykach projektowania aplikacji chmurowych. Główne wartości i praktyki, które będą realizowane w projekcie, to:
+W~części projektowej autor stara się w~miarę możliwości implementować rozwiązania zbliżone do tzw. „złotego standardu” (ang. \textit{gold standard}), bazując na sprawdzonych wzorcach DevOps/GitOps oraz najlepszych praktykach projektowania aplikacji chmurowych. Główne wartości i~praktyki, które będą realizowane w~projekcie, to:
 
 \begin{description}[font=\bfseries]
-    \item[Wszystko jako kod] (ang. \textit{Everything as Code}) --- Przechowywanie definicji infrastruktury, konfiguracji oraz procesów w systemie kontroli wersji, co zapewnia pełną przejrzystość zmian, możliwość ich audytu oraz powtarzalność środowisk.
-    \item[Automatyzacja] --- Kluczowym elementem jest automatyzacja procesów, takich jak testowanie, wdrażanie i monitorowanie, co pozwala na zwiększenie efektywności i redukcję błędów.
+    \item[Wszystko jako kod] (ang. \textit{Everything as Code}) --- Przechowywanie definicji infrastruktury, konfiguracji oraz procesów w~systemie kontroli wersji, co zapewnia pełną przejrzystość zmian, możliwość ich audytu oraz powtarzalność środowisk.
+    \item[Automatyzacja] --- Kluczowym elementem jest automatyzacja procesów, takich jak testowanie, wdrażanie i~monitorowanie, co pozwala na zwiększenie efektywności i~redukcję błędów.
     \item[Konteneryzacja] --- Wykorzystanie kontenerów do zapewnienia spójnego środowiska uruchomieniowego, co ułatwia przenoszenie aplikacji między różnymi środowiskami.
-    \item[Orkiestracja] --- Użycie platformy orkiestracji (Kubernetes) do zarządzania kontenerami, automatyzacji wdrożeń i skalowania zasobów.
-    \item[Architektura mikroserwisów] --- Projektowanie aplikacji jako zbioru małych, niezależnych usług, które mogą być rozwijane, wdrażane i skalowane niezależnie.
-    \item[Wzorce projektowe] --- Stosowanie sprawdzonych wzorców, takich jak \textit{Twelve-Factor App}, które kładą nacisk na szybkość, bezpieczeństwo i skalowalność aplikacji.
-    \item[Niezmienna infrastruktura] --- Zamiast modyfikować istniejące komponenty, promowanie zastępowania ich nowymi wersjami, co zwiększa przewidywalność i stabilność systemu.
-    \item[Obserwowalność] --- Zapewnienie zaawansowanych mechanizmów monitoringu, zarządzania sekretami i zabezpieczeń, co jest niezbędne dla systemów o znaczeniu krytycznym.
+    \item[Orkiestracja] --- Użycie platformy orkiestracji (Kubernetes) do zarządzania kontenerami, automatyzacji wdrożeń i~skalowania zasobów.
+    \item[Architektura mikroserwisów] --- Projektowanie aplikacji jako zbioru małych, niezależnych usług, które mogą być rozwijane, wdrażane i~skalowane niezależnie.
+    \item[Wzorce projektowe] --- Stosowanie sprawdzonych wzorców, takich jak \textit{Twelve-Factor App}, które kładą nacisk na szybkość, bezpieczeństwo i~skalowalność aplikacji.
+    \item[Niezmienna infrastruktura] --- Zamiast modyfikować istniejące komponenty, promowanie zastępowania ich nowymi wersjami, co zwiększa przewidywalność i~stabilność systemu.
+    \item[Obserwowalność] --- Zapewnienie wglądu w~stan systemu poprzez metryki, logi i~śledzenie rozproszone (ang. \textit{traces}), co jest niezbędne dla systemów o~znaczeniu krytycznym.
 \end{description}
