@@ -10,10 +10,21 @@ Architecture and flow diagrams for the thesis, authored as Mermaid sources under
 
 ## Configuration
 
-- Every source carries frontmatter with a `title` and `config: theme: neo` (clean white/black base suited to print). The CLI `-t` flag rejects `neo`, so the theme **must** be set via frontmatter.
+- Every source sets `config: theme: neo` via frontmatter (clean white/black base suited to print). The CLI `-t` flag rejects `neo`, so the theme **must** be set via frontmatter.
+- **Print legibility contract:** every diagram must yield an effective font size of **≥ 7 pt** when scaled to its `\includegraphics` width (`\textwidth` ≈ 15.4 cm ≈ 437 pt). Effective pt = `fontPx / naturalSvgWidthPx × 437 × widthFactor`. PNG resolution (`-s 3`) does **not** affect print size — only the font-to-layout-width ratio does. Check the natural width in the rendered SVG's `viewBox` before wiring a figure.
+- **Shared config pattern** (flowcharts): `themeVariables: fontSize: 22px` plus `flowchart: nodeSpacing/rankSpacing/padding/diagramPadding` tuned per diagram and `wrappingWidth: 600` (disables ragged auto-wrap at 200 px — line breaks are set manually with `<br/>`, aiming at ≤ ~26 chars per line).
+- **Sequence diagrams** ignore `sequence.*FontSize` and `themeVariables.fontSize`; the working knob is top-level `config: fontSize: 22`. Margins come from `sequence:` keys (`actorMargin`, `diagramMarginX`, ...). `autonumber` badges are hardcoded at 12 px (illegible in print) — not used.
+- **Titles are not rendered into the images**: each figure's description lives in the LaTeX `\caption`; the former frontmatter `title` is kept as a `%%` comment. This avoids duplication and reclaims height.
 - **Labels are Polish** (the thesis figure language); product names, identifiers, and config keys stay as-is.
 - A shared semantic `classDef` palette keeps the set consistent: blue = services/steps, orange = artifacts/data, green = cluster/live, purple = Git/GitOps, pink = security, dashed grey = notes and hypothetical alternatives.
-- Mermaid quirks to remember: parentheses in **edge** labels must be quoted (`|"...(x)"|`); an edge into a subgraph-internal node overrides that subgraph's `direction` — route the edge to the subgraph itself and order internals with invisible `~~~` links.
+- Mermaid quirks to remember:
+  - Parentheses in **edge** labels must be quoted (`|"...(x)"|`).
+  - An edge into a subgraph-internal node overrides that subgraph's `direction` — route the edge to the subgraph itself and order internals with invisible `~~~` links.
+  - **Snake (boustrophedon) layouts** — used to fold wide chains into two rows — are built as `flowchart TB` with two invisible subgraphs (`fill:none,stroke:none`) of `direction LR` / `direction RL`; the cross-subgraph connector always renders as a centered boundary stub (dagre limitation), which is accepted.
+  - Subgraph titles must be **single-line** (a `<br/>` second line is clipped by the first node) and no wider than the subgraph body (otherwise it overlaps neighbours).
+  - Disconnected components render **in reverse declaration order** (last-declared leftmost).
+  - Multi-line labels overflow stadium `([...])` shapes — use rounded rects `(...)` for multi-line nodes.
+  - Reversed feedback edges (`A <-.- B`) are normalized to `B → A` for layout too, so they cannot force rank placement — but declaring the cycle this way still lets dagre break it at the intended edge.
 
 Render a diagram to its thesis PNG (needs a local Chromium/Chrome):
 

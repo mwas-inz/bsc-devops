@@ -1,17 +1,25 @@
 ---
-title: Zdarzenia i bramki CI — ten sam łańcuch dla PR i dla main
 config:
   theme: neo
+  themeVariables:
+    fontSize: 22px
+  flowchart:
+    nodeSpacing: 30
+    rankSpacing: 40
+    padding: 4
+    diagramPadding: 8
+    wrappingWidth: 600
 ---
-flowchart LR
+%% Zdarzenia i bramki CI — ten sam proces dla PR i dla main
+flowchart TB
     ev(["zdarzenie GitHub"])
     prE["pull_request"]
     mainE["push na main"]
-    filt["filtr ścieżek: tylko zmieniona usługa<br/>(apps/users/**)"]
-    conc["concurrency: nowy bieg anuluje<br/>poprzedni (cancel-in-progress)"]
-    pipe["łańcuch: testy → obraz natywny<br/>→ skanowanie Trivy"]
-    check["status check per usługa<br/>„Build, Test, Scan &amp; Push — users”"]
-    gate{{"ochrona gałęzi: scalenie zablokowane<br/>do zielonego buildu"}}
+    filt["filtr ścieżek:<br/>tylko zmieniona usługa<br/>(apps/users/**)"]
+    conc["concurrency:<br/>nowy bieg anuluje poprzedni<br/>(cancel-in-progress)"]
+    pipe["proces: testy → obraz<br/>natywny → skanowanie Trivy"]
+    check["status check per usługa<br/>„Build, Test, Scan<br/>&amp; Push — users”"]
+    gate{{"ochrona gałęzi:<br/>scalenie zablokowane<br/>do zielonego buildu"}}
     pushi["push obrazu do Docker Hub<br/>tagi: SHA commitu + latest"]
     sign["podpis Cosign (keyless)<br/>po digeście obrazu"]
 

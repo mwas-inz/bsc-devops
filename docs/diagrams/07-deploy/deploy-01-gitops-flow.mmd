@@ -1,31 +1,40 @@
 ---
-title: Dostarczanie GitOps — pętla uzgadniania w modelu pull (ArgoCD)
 config:
   theme: neo
+  themeVariables:
+    fontSize: 22px
+  flowchart:
+    nodeSpacing: 30
+    rankSpacing: 40
+    padding: 6
+    subGraphTitleMargin:
+      top: 6
+      bottom: 14
+    diagramPadding: 8
+    wrappingWidth: 600
 ---
-flowchart LR
-    subgraph outside["Poza klastrem"]
-        git["Repozytorium Git<br/>gitops/ — definicje Application"]
-        ghcr[("GHCR — rejestr OCI<br/>charty: bsc-devops-apps, observability")]
-        ci["cd-helm publikuje charty<br/>(zob. etap Release)"]
-        ci -.-> ghcr
-    end
+%% Dostarczanie GitOps — pętla uzgadniania w modelu pull (ArgoCD)
+flowchart TB
+    git["Repozytorium Git<br/>gitops/ — definicje Application"]
+    ci["cd-helm publikuje charty<br/>(zob. etap Release)"]
+    ghcr[("GHCR — rejestr OCI<br/>charty: bsc-devops-apps,<br/>observability")]
 
-    subgraph cluster["Klaster k3d"]
+    subgraph cluster["Klaster k3d&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         apps["2 × Application<br/>chart + przypięty targetRevision"]
         argocd["Kontroler ArgoCD"]
         state["Bieżący stan klastra<br/>Deployment, Service, ..."]
     end
 
-    git -.->|"jednorazowy bootstrap:<br/>kubectl apply definicji Application"| apps
+    ci -.-> ghcr
+    git -.->|"jednorazowy bootstrap:<br/>kubectl apply<br/>definicji Application"| apps
 
     apps -->|"1. stan pożądany:<br/>chart + wersja"| argocd
-    argocd -->|"2. pull chartu — połączenie<br/>inicjowane z klastra"| ghcr
-    state -->|"3. obserwacja stanu<br/>bieżącego"| argocd
+    argocd -->|"2. pull chartu<br/>— połączenie<br/>inicjowane z klastra"| ghcr
+    state -->|"3. obserwacja<br/>stanu bieżącego"| argocd
     argocd -->|"4. synchronizacja:<br/>prune + selfHeal"| state
 
-    note["pętla powtarzana cyklicznie — poza jednorazowym bootstrapem<br/>żadna strzałka nie prowadzi do wnętrza klastra: CI nie ma poświadczeń klastra"]
-    cluster -.- note
+    note["pętla powtarzana cyklicznie — poza jednorazowym<br/>bootstrapem żadna strzałka nie prowadzi do wnętrza<br/>klastra: CI nie ma poświadczeń klastra"]
+    state ~~~ note
 
     classDef hub fill:#ede7f6,stroke:#4527a0,color:#311b92;
     classDef gitops fill:#ede7f6,stroke:#4527a0,color:#311b92;

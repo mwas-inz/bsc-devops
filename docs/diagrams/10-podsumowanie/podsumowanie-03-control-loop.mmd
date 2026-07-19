@@ -1,34 +1,34 @@
 ---
-title: Cykl SDLC jako układ regulacji — dwie pętle sprzężenia zwrotnego
 config:
   theme: neo
+  themeVariables:
+    fontSize: 22px
+  flowchart:
+    nodeSpacing: 30
+    rankSpacing: 40
+    padding: 4
+    diagramPadding: 8
+    wrappingWidth: 600
 ---
+%% Cykl SDLC jako układ regulacji — dwie pętle sprzężenia zwrotnego
 flowchart LR
-    dev["Deweloper<br/>(regulator zewnętrzny)"]
-    setpoint["Stan pożądany<br/>Git: kod, manifesty, wersje chartów"]
-    ci["Aktuator I: CI/CD<br/>zmiana → zweryfikowane artefakty"]
-    argo["Aktuator II: ArgoCD<br/>uzgodnienie"]
-    plant["Obiekt regulacji<br/>klaster Kubernetes"]
-    sensor["Czujnik<br/>OpenTelemetry / stos LGTM"]
+    dev["Deweloper<br/>(regulator<br/>zewnętrzny)"]
+    setpoint["Stan pożądany<br/>Git: kod, manifesty,<br/>wersje chartów"]
+    ci["Aktuator I: CI/CD<br/>zmiana → zweryfikowane<br/>artefakty"]
+    argo["Aktuator II:<br/>ArgoCD<br/>uzgodnienie"]
+    plant["Obiekt regulacji<br/>klaster<br/>Kubernetes"]
+    sensor["Czujnik<br/>OpenTelemetry<br/>/ stos LGTM"]
 
-    dev -->|commit| setpoint
-    setpoint --> ci --> argo -->|synchronizacja| plant
-    plant --> sensor
-    plant -.->|"pętla wewnętrzna (maszynowa, sekundy):<br/>rozbieżność korygowana przez selfHeal"| argo
-    sensor -.->|"pętla zewnętrzna (ludzka):<br/>obserwacja → świadoma korekta"| dev
-
-    note["dwie pętle o różnych skalach czasu: wewnętrzna utrzymuje zgodność klastra z Git bez udziału człowieka;<br/>zewnętrzna zmienia sam stan pożądany na podstawie obserwacji"]
-    plant -.- note
+    dev --> setpoint
+    setpoint --> ci --> argo --> plant --> sensor
+    argo <-.-|selfHeal| plant
+    dev <-.- sensor
 
     classDef person fill:#ede7f6,stroke:#4527a0,color:#311b92;
-    classDef set fill:#ede7f6,stroke:#4527a0,color:#311b92;
     classDef act fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
     classDef plantc fill:#fff3e0,stroke:#e65100,color:#e65100;
     classDef sensorc fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
-    classDef notec fill:#fffde7,stroke:#f9a825,color:#795548;
-    class dev person;
-    class setpoint set;
+    class dev,setpoint person;
     class ci,argo act;
     class plant plantc;
     class sensor sensorc;
-    class note notec;

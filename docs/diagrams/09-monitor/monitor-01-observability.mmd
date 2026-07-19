@@ -1,29 +1,41 @@
 ---
-title: Trzy sygnały, dwa wzorce transportu — OpenTelemetry i stos LGTM
 config:
   theme: neo
+  themeVariables:
+    fontSize: 22px
+  flowchart:
+    nodeSpacing: 30
+    rankSpacing: 40
+    padding: 4
+    subGraphTitleMargin:
+      top: 6
+      bottom: 14
+    diagramPadding: 8
+    wrappingWidth: 600
 ---
+%% Trzy sygnały, dwa wzorce transportu — OpenTelemetry i stos LGTM
 flowchart LR
-    subgraph app["Usługa Quarkus (każda z czterech)"]
+    subgraph app["Każda usługa Quarkus"]
         direction TB
-        logs["logi: JSON na stdout<br/>quarkus-logging-json, MDC: traceId"]
-        traces["ślady: quarkus-opentelemetry<br/>traceId / spanId"]
+        logs["logi: JSON na stdout<br/>quarkus-logging-json,<br/>MDC: traceId"]
+        traces["ślady:<br/>quarkus-opentelemetry<br/>traceId / spanId"]
         metrics["metryki: Micrometer<br/>punkt /q/metrics"]
     end
 
     subgraph obs["Przestrzeń nazw: observability"]
-        collector["OTel Collector<br/>wspólny punkt wejścia OTLP"]
+        collector["OTel Collector<br/>wspólny punkt<br/>wejścia OTLP"]
         loki[("Loki<br/>logi")]
         tempo[("Tempo<br/>ślady")]
         prom[("Prometheus<br/>metryki")]
-        grafana["Grafana — wspólny interfejs<br/>trzy źródła danych"]
+        grafana["Grafana<br/>wspólny interfejs,<br/>trzy źródła danych"]
     end
 
-    logs -->|"push: OTLP"| collector
-    traces -->|"push: OTLP"| collector
-    collector -->|potok logów| loki
-    collector -->|potok śladów| tempo
-    metrics -.->|"pull: inicjowane przez Prometheus (scrape /q/metrics)"| prom
+    logs ~~~ traces ~~~ metrics
+
+    app -->|"push: OTLP<br/>(logi, ślady)"| collector
+    collector -->|"potok<br/>logów"| loki
+    collector -->|"potok<br/>śladów"| tempo
+    app -.->|"pull: scrape<br/>/q/metrics"| prom
 
     loki --> grafana
     tempo --> grafana

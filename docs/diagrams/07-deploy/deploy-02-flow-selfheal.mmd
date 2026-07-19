@@ -1,21 +1,33 @@
 ---
-title: Rozbieżność (drift) i selfHeal — klaster nie jest źródłem prawdy
 config:
   theme: neo
+  fontSize: 22
+  themeVariables:
+    fontSize: 22px
+  sequence:
+    actorFontSize: 22
+    messageFontSize: 22
+    noteFontSize: 20
+    actorMargin: 24
+    boxMargin: 8
+    noteMargin: 8
+    messageMargin: 30
+    diagramMarginX: 8
+    diagramMarginY: 8
 ---
+%% Rozbieżność (drift) i selfHeal — klaster nie jest źródłem prawdy
 sequenceDiagram
-    autonumber
-    participant op as Operator (kubectl)
-    participant api as API Kubernetes
-    participant argo as ArgoCD (kontroler)
-    participant des as Stan pożądany (chart bsc-devops-apps, GHCR)
+    participant op as Operator<br/>(kubectl)
+    participant api as API<br/>Kubernetes
+    participant argo as ArgoCD<br/>(kontroler)
+    participant des as Stan pożądany<br/>(chart bsc-devops-apps,<br/>GHCR)
 
-    op->>api: kubectl scale deployment users --replicas=3
-    api-->>op: zmiana zastosowana (poza Git)
-    argo->>des: cykliczne odświeżenie — pobranie manifestów z chartu
-    argo->>api: odczyt stanu bieżącego klastra
-    Note over argo: porównanie: replicas 1 (chart) ≠ replicas 3 (klaster)<br/>status: OutOfSync — rozbieżność (drift)
-    argo->>api: selfHeal — automatyczna synchronizacja: przywrócenie replicas 1
-    api-->>argo: wdrożenie kroczące zakończone
+    op->>api: kubectl scale deployment<br/>users --replicas=3
+    api-->>op: zmiana zastosowana<br/>(poza Git)
+    argo->>des: cykliczne odświeżenie<br/>— pobranie manifestów<br/>z chartu
+    argo->>api: odczyt stanu<br/>bieżącego klastra
+    Note over argo: porównanie: replicas 1 (chart)<br/>≠ replicas 3 (klaster)<br/>status: OutOfSync — drift
+    argo->>api: selfHeal — automatyczna<br/>synchronizacja:<br/>przywrócenie replicas 1
+    api-->>argo: wdrożenie kroczące<br/>zakończone
     Note over argo: status: Synced / Healthy
-    Note over op,argo: prune true — zasoby spoza stanu pożądanego są usuwane tą samą drogą
+    Note over op,argo: prune true — zasoby spoza stanu pożądanego<br/>są usuwane tą samą drogą

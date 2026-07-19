@@ -1,26 +1,38 @@
 ---
-title: Pełny cykl — od commitu, przez wdrożenie, po obserwację
 config:
   theme: neo
+  fontSize: 22
+  themeVariables:
+    fontSize: 22px
+  sequence:
+    actorFontSize: 22
+    messageFontSize: 22
+    noteFontSize: 20
+    actorMargin: 24
+    boxMargin: 8
+    noteMargin: 8
+    messageMargin: 30
+    diagramMarginX: 8
+    diagramMarginY: 8
 ---
+%% Pełny cykl — od commitu, przez wdrożenie, po obserwację
 sequenceDiagram
-    autonumber
     actor Dev as Deweloper
-    participant GH as GitHub Actions
-    participant Reg as Rejestry (Docker Hub: obrazy, GHCR: charty)
-    participant Git as Git (gitops/)
+    participant GH as GitHub<br/>Actions
+    participant Reg as Rejestry<br/>Docker Hub: obrazy<br/>GHCR: charty
+    participant Git as Git<br/>(gitops/)
     participant Argo as ArgoCD
-    participant K8s as Klaster k3d
+    participant K8s as Klaster<br/>k3d
     participant Graf as Grafana
 
-    Dev->>GH: git push (zmiana w usłudze)
-    GH->>GH: JUnit, budowanie natywne, skanowanie Trivy
-    GH->>Reg: wypchnięcie obrazu i podpis Cosign (po digeście)
-    GH->>Reg: publikacja chartu Helm (tag chart-apps)
-    Dev->>Git: argocd-update.sh podnosi targetRevision
-    Git->>Argo: ponowne zastosowanie Application
+    Dev->>GH: git push (zmiana<br/>w usłudze)
+    GH->>GH: JUnit, budowanie<br/>natywne,<br/>skanowanie Trivy
+    GH->>Reg: wypchnięcie obrazu<br/>i podpis Cosign<br/>po digeście
+    GH->>Reg: publikacja<br/>chartu Helm<br/>(tag chart-apps)
+    Dev->>Git: argocd-update.sh<br/>podnosi targetRevision
+    Git->>Argo: ponowne<br/>zastosowanie<br/>Application
     Argo->>Reg: pobranie chartu w wersji targetRevision
-    Argo->>K8s: synchronizacja (wdrożenie kroczące)
-    K8s-->>Argo: Synced / Healthy
-    K8s->>Graf: telemetria (logi, ślady, metryki)
+    Argo->>K8s: synchronizacja<br/>(wdrożenie<br/>kroczące)
+    K8s-->>Argo: Synced /<br/>Healthy
+    K8s->>Graf: telemetria<br/>(logi, ślady,<br/>metryki)
     Dev->>Graf: obserwacja wdrożenia i kondycji

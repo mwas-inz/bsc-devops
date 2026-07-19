@@ -1,26 +1,42 @@
 ---
-title: Łańcuch CI z bezpieczeństwem Shift-Left (GitHub Actions)
 config:
   theme: neo
+  themeVariables:
+    fontSize: 22px
+  flowchart:
+    nodeSpacing: 30
+    rankSpacing: 40
+    padding: 4
+    diagramPadding: 8
+    wrappingWidth: 600
 ---
-flowchart LR
-    trigger["push / PR<br/>filtrowane po ścieżce usługi"]
-    checkout["Pobranie kodu"]
-    compile["Kompilacja (Gradle)"]
-    test["Testy JUnit"]
-    image["Budowa natywnego obrazu kontenera"]
-    scan{"Skanowanie Trivy<br/>HIGH lub CRITICAL?"}
-    sign["Podpis Cosign (keyless)<br/>po digeście obrazu, token OIDC"]
-    push["Wypchnięcie obrazu do rejestru"]
-    fail["Przerwanie łańcucha"]
-
-    trigger --> checkout --> compile --> test --> image --> scan
-    scan -->|brak| push --> sign
-    scan -->|wykryto| fail
+%% Proces CI z bezpieczeństwem Shift-Left (GitHub Actions)
+flowchart TB
+    subgraph r1[" "]
+        direction LR
+        trigger["push / PR<br/>filtrowane po<br/>ścieżce usługi"]
+        checkout["Pobranie kodu"]
+        compile["Kompilacja (Gradle)"]
+        test["Testy JUnit"]
+        image["Budowa natywnego<br/>obrazu kontenera"]
+        trigger --> checkout --> compile --> test --> image
+    end
+    subgraph r2[" "]
+        direction RL
+        scan{"Skanowanie Trivy:<br/>HIGH/CRITICAL?"}
+        sign["Podpis Cosign (keyless)<br/>po digeście obrazu,<br/>token OIDC"]
+        push["Wypchnięcie obrazu<br/>do rejestru"]
+        fail["Przerwanie procesu"]
+        scan -->|brak| push --> sign
+        scan -->|wykryto| fail
+    end
+    image --> scan
 
     classDef step fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
     classDef gate fill:#fff3e0,stroke:#e65100,color:#e65100;
     classDef bad fill:#ffebee,stroke:#c62828,color:#b71c1c;
+    classDef row fill:none,stroke:none;
     class checkout,compile,test,image,sign,push step;
     class scan gate;
     class fail bad;
+    class r1,r2 row;
