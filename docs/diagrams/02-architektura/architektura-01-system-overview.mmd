@@ -1,9 +1,20 @@
 ---
-title: Architektura systemu — ścieżka synchroniczna i zdarzeniowa w jednym przeglądzie
 config:
   theme: neo
+  themeVariables:
+    fontSize: 22px
+  flowchart:
+    nodeSpacing: 30
+    rankSpacing: 40
+    padding: 12
+    subGraphTitleMargin:
+      top: 6
+      bottom: 14
+    diagramPadding: 8
+    wrappingWidth: 600
 ---
-flowchart LR
+%% Architektura systemu — ścieżka synchroniczna i zdarzeniowa w jednym przeglądzie
+flowchart TB
     user["Użytkownik<br/>(przeglądarka)"]
 
     subgraph cluster["Klaster k3d — przestrzeń nazw bsc-devops"]
@@ -14,7 +25,7 @@ flowchart LR
         arch["task-archiver<br/>Quarkus (natywny)"]
         db[("PostgreSQL")]
 
-        subgraph pulsar["Apache Pulsar — broker komunikatów"]
+        subgraph pulsar["Apache Pulsar&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
             t1[/"temat: user-events"/]
             t2[/"temat: delete-tasks"/]
         end
@@ -29,15 +40,16 @@ flowchart LR
     tasks -->|JDBC| db
     arch -->|JDBC| db
 
-    users -.->|"CREATED / DELETED"| t1
+    users -.->|"CREATED /<br/>DELETED"| t1
     t1 -.-> tasks
-    tasks -.->|"usunięcie użytkownika"| t2
+    tasks -.->|"usunięcie<br/>użytkownika"| t2
     t2 -.-> arch
 
-    rm["tasks utrzymuje lokalny model odczytu użytkowników (KnownUser)<br/>zasilany zdarzeniami — walidacja bez synchronicznego wywołania users"]
-    leg["linie ciągłe: komunikacja synchroniczna (HTTP, JDBC)<br/>linie przerywane: zdarzenia asynchroniczne (Pulsar)"]
+    rm["tasks utrzymuje lokalny model odczytu<br/>użytkowników (KnownUser) zasilany<br/>zdarzeniami — walidacja bez<br/>synchronicznego wywołania users"]
+    leg["linie ciągłe: komunikacja<br/>synchroniczna (HTTP, JDBC)<br/>linie przerywane: zdarzenia<br/>asynchroniczne (Pulsar)"]
     tasks -.- rm
-    cluster ~~~ leg
+    db ~~~ rm
+    db ~~~ leg
 
     classDef svc fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
     classDef data fill:#fff3e0,stroke:#e65100,color:#e65100;

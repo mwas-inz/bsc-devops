@@ -1,41 +1,52 @@
 ---
-title: Drabina odpowiedzialności — od własnego sprzętu do usługi zarządzanej
 config:
   theme: neo
+  themeVariables:
+    fontSize: 22px
+  flowchart:
+    nodeSpacing: 24
+    rankSpacing: 32
+    padding: 10
+    subGraphTitleMargin:
+      top: 6
+      bottom: 14
+    diagramPadding: 8
+    wrappingWidth: 600
 ---
-flowchart LR
-    subgraph c1["Lokalnie: k3d (środowisko pracy)"]
-        direction TB
-        a1["Aplikacja i dane"] ~~~ b1["Runtime i węzły"]
-        b1 ~~~ p1["Płaszczyzna sterowania<br/>Kubernetes"]
-        p1 ~~~ o1["System operacyjny"] ~~~ v1["Wirtualizacja"] ~~~ h1["Sprzęt i sieć"]
-    end
-
-    subgraph c2["IaaS (np. maszyny EC2)"]
-        direction TB
-        a2["Aplikacja i dane"] ~~~ b2["Runtime i węzły"]
-        b2 ~~~ p2["Płaszczyzna sterowania<br/>Kubernetes"]
-        p2 ~~~ o2["System operacyjny"] ~~~ v2["Wirtualizacja"] ~~~ h2["Sprzęt i sieć"]
-    end
-
-    subgraph c3["PaaS: zarządzany Kubernetes (np. EKS)"]
-        direction TB
-        a3["Aplikacja i dane"] ~~~ b3["Runtime i węzły"]
-        b3 ~~~ p3["Płaszczyzna sterowania<br/>Kubernetes"]
-        p3 ~~~ o3["System operacyjny"] ~~~ v3["Wirtualizacja"] ~~~ h3["Sprzęt i sieć"]
-    end
-
-    subgraph c4["SaaS (np. zarządzana Grafana)"]
+%% Drabina odpowiedzialności — od własnego sprzętu do usługi zarządzanej
+flowchart TB
+    subgraph c4["SaaS (np. Grafana)"]
         direction TB
         a4["Dane i konfiguracja"] ~~~ plat4["Cała platforma"]
     end
 
-    subgraph leg["Legenda"]
+    subgraph c3["PaaS (np. EKS)"]
         direction TB
-        legU["zarządzane przez użytkownika"] ~~~ legP["zarządzane przez dostawcę"]
+        a3["Aplikacja i dane"] ~~~ b3["Runtime i węzły"]
+        b3 ~~~ p3["Płaszczyzna<br/>sterowania<br/>Kubernetes"]
+        p3 ~~~ o3["System operacyjny"] ~~~ v3["Wirtualizacja"] ~~~ h3["Sprzęt i sieć"]
     end
 
-    c1 ~~~ c2 ~~~ c3 ~~~ c4 ~~~ leg
+    subgraph c2["IaaS (np. EC2)"]
+        direction TB
+        a2["Aplikacja i dane"] ~~~ b2["Runtime i węzły"]
+        b2 ~~~ p2["Płaszczyzna<br/>sterowania<br/>Kubernetes"]
+        p2 ~~~ o2["System operacyjny"] ~~~ v2["Wirtualizacja"] ~~~ h2["Sprzęt i sieć"]
+    end
+
+    subgraph c1["Lokalnie: k3d"]
+        direction TB
+        a1["Aplikacja i dane"] ~~~ b1["Runtime i węzły"]
+        b1 ~~~ p1["Płaszczyzna<br/>sterowania<br/>Kubernetes"]
+        p1 ~~~ o1["System operacyjny"] ~~~ v1["Wirtualizacja"] ~~~ h1["Sprzęt i sieć"]
+    end
+
+    subgraph leg["Legenda"]
+        direction TB
+        legU["zarządzane przez<br/>użytkownika"] ~~~ legP["zarządzane przez<br/>dostawcę"]
+    end
+
+    c4 ~~~ leg
 
     classDef user fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
     classDef provider fill:#eeeeee,stroke:#9e9e9e,color:#616161;

@@ -1,38 +1,50 @@
 ---
-title: Mapa zgodności projektu z Twelve-Factor App
 config:
   theme: neo
+  themeVariables:
+    fontSize: 22px
+  flowchart:
+    nodeSpacing: 24
+    rankSpacing: 28
+    padding: 10
+    subGraphTitleMargin:
+      top: 6
+      bottom: 14
+    diagramPadding: 8
+    wrappingWidth: 600
 ---
-flowchart LR
-    subgraph g1["Kod i zależności"]
-        direction LR
-        f1["I. Kod źródłowy"] --> i1["monorepo GitHub — jedno źródło<br/>prawdy, wiele wdrożeń"]
-        f2["II. Zależności"] --> i2["build.gradle + BOM quarkus-bom, Gradle Wrapper<br/>package.json (frontend)"]
-    end
-
+%% Mapa zgodności projektu z Twelve-Factor App
+flowchart TB
     subgraph g2["Konfiguracja i usługi"]
         direction LR
-        f3["III. Konfiguracja"] --> i3["zmienne środowiskowe: ConfigMap app-config<br/>+ Secret db-secret (SealedSecret)"]
-        f4["IV. Usługi wspierające"] --> i4["PostgreSQL i Pulsar dołączane<br/>przez konfigurację, nie przez kod"]
-    end
-
-    subgraph g3["Cykl życia"]
-        direction LR
-        f5["V. Buduj, publikuj, uruchamiaj"] --> i5["CI: obraz (tag = SHA) → chart wiąże<br/>konfigurację → ArgoCD uruchamia"]
-        f6["VI. Procesy"] --> i6["bezstanowe usługi Quarkus<br/>stan wyłącznie w PostgreSQL"]
-        f7["VII. Przydzielanie portów"] --> i7["quarkus.http.port=8080<br/>Service + Traefik kierują ruch"]
-        f8["VIII. Współbieżność"] --> i8["skalowanie liczbą replik<br/>(values.yaml: replicas)"]
-        f9["IX. Jednorazowość"] --> i9["start natywny w milisekundach, sondy<br/>wdrożenie kroczące"]
+        f3["III. Konfiguracja"] --> i3["zmienne środowiskowe:<br/>ConfigMap app-config +<br/>Secret db-secret<br/>(SealedSecret)"]
+        f4["IV. Usługi<br/>wspierające"] --> i4["PostgreSQL i Pulsar<br/>dołączane przez<br/>konfigurację, nie przez kod"]
     end
 
     subgraph g4["Środowiska i eksploatacja"]
         direction LR
-        f10["X. Jednolitość środowisk"] --> i10["k3d = to samo API Kubernetes<br/>Dev Services = ten sam PostgreSQL w testach"]
-        f11["XI. Logi"] --> i11["JSON na stdout (profil prod) → OTLP → Loki<br/>MDC: traceId"]
-        f12["XII. Zarządzanie aplikacją"] --> i12["realizowane odmiennie: schemat DB aktualizowany przy starcie<br/>(schema-management: update) — świadome uproszczenie"]
+        f10["X. Jednolitość<br/>środowisk"] --> i10["k3d = to samo API<br/>Kubernetes, Dev Services =<br/>ten sam PostgreSQL w testach"]
+        f11["XI. Logi"] --> i11["JSON na stdout (profil<br/>prod) → OTLP → Loki,<br/>MDC: traceId"]
+        f12["XII. Zarządzanie<br/>aplikacją"] --> i12["realizowane odmiennie:<br/>schemat DB aktualizowany<br/>przy starcie — świadome<br/>uproszczenie"]
     end
 
-    g1 ~~~ g2 ~~~ g3 ~~~ g4
+    subgraph g1["Kod i zależności"]
+        direction LR
+        f1["I. Kod źródłowy"] --> i1["monorepo GitHub —<br/>jedno źródło prawdy,<br/>wiele wdrożeń"]
+        f2["II. Zależności"] --> i2["build.gradle + BOM<br/>quarkus-bom, Gradle<br/>Wrapper, package.json"]
+    end
+
+    subgraph g3["Cykl życia"]
+        direction LR
+        f5["V. Buduj, publikuj,<br/>uruchamiaj"] --> i5["CI: obraz (tag = SHA)<br/>→ chart wiąże konfigurację<br/>→ ArgoCD uruchamia"]
+        f6["VI. Procesy"] --> i6["bezstanowe usługi<br/>Quarkus, stan wyłącznie<br/>w PostgreSQL"]
+        f7["VII. Przydzielanie<br/>portów"] --> i7["quarkus.http.port=8080<br/>Service + Traefik<br/>kierują ruch"]
+        f8["VIII. Współbieżność"] --> i8["skalowanie liczbą replik<br/>(values.yaml: replicas)"]
+        f9["IX. Jednorazowość"] --> i9["start natywny w ms,<br/>sondy, wdrożenie kroczące"]
+    end
+
+    g1 ~~~ g3
+    g2 ~~~ g4
 
     classDef factor fill:#fafafa,stroke:#424242,color:#212121;
     classDef git fill:#ede7f6,stroke:#4527a0,color:#311b92;

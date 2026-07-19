@@ -1,9 +1,20 @@
 ---
-title: Dwuetapowy łańcuch publikacji chartu Helm
 config:
   theme: neo
+  themeVariables:
+    fontSize: 22px
+  flowchart:
+    nodeSpacing: 30
+    rankSpacing: 36
+    padding: 6
+    subGraphTitleMargin:
+      top: 6
+      bottom: 14
+    diagramPadding: 8
+    wrappingWidth: 600
 ---
-flowchart LR
+%% Dwuetapowy proces publikacji chartu Helm
+flowchart TB
     push(["push na main<br/>ścieżka: infrastructure/helm/**"])
 
     subgraph ci["ci-helm — walidacja"]
@@ -15,8 +26,8 @@ flowchart LR
     end
 
     tagev{{"zdarzenie: git tag<br/>chart-apps-*"}}
-    pat["tag wypychany tokenem PAT — zdarzenia domyślnego<br/>GITHUB_TOKEN nie wyzwalają kolejnych łańcuchów"]
-    obs["analogiczna para dla chartu observability<br/>(tagi chart-observability-*)"]
+    pat["tag wypychany tokenem PAT<br/>— zdarzenia domyślnego<br/>GITHUB_TOKEN nie wyzwalają<br/>kolejnych procesów"]
+    obs["analogiczna para dla chartu<br/>observability (tagi<br/>chart-observability-*)"]
 
     subgraph cd["cd-helm — publikacja"]
         direction TB
@@ -25,7 +36,7 @@ flowchart LR
     end
 
     ghcr[("GHCR<br/>bsc-devops-apps:&lt;wersja&gt;")]
-    argo["ArgoCD Application<br/>targetRevision 0.7.0 — ręczna aktualizacja"]
+    argo["ArgoCD Application<br/>targetRevision 0.7.0<br/>— ręczna aktualizacja"]
 
     push --> ci
     ci --> tagev

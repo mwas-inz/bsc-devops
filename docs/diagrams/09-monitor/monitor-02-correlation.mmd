@@ -1,8 +1,19 @@
 ---
-title: Korelacja telemetrii — jeden traceId, trzy filary, nawigacja w Grafanie
 config:
   theme: neo
+  themeVariables:
+    fontSize: 22px
+  flowchart:
+    nodeSpacing: 30
+    rankSpacing: 40
+    padding: 4
+    subGraphTitleMargin:
+      top: 6
+      bottom: 14
+    diagramPadding: 8
+    wrappingWidth: 600
 ---
+%% Korelacja telemetrii — jeden traceId, trzy filary, nawigacja w Grafanie
 flowchart TB
     subgraph write["Zapis — jedno żądanie, jeden identyfikator"]
         direction LR
@@ -19,11 +30,11 @@ flowchart TB
 
     subgraph read["Odczyt w Grafanie — nawigacja po identyfikatorze"]
         direction LR
-        s1["1. Explore / Loki:<br/>znaleziony błąd w logu"]
-        s2["2. Tempo: pełny ślad żądania<br/>span po spanie"]
-        s3["3a. powrót do Loki:<br/>wszystkie logi tego żądania"]
-        s4["3b. Prometheus:<br/>metryki usługi z mapy usług"]
-        s1 -->|"klik: trace_id (derivedFields)"| s2
+        s1["1. Explore / Loki:<br/>znaleziony błąd<br/>w logu"]
+        s2["2. Tempo: pełny<br/>ślad żądania<br/>span po spanie"]
+        s3["3a. powrót do Loki:<br/>wszystkie logi<br/>tego żądania"]
+        s4["3b. Prometheus:<br/>metryki usługi<br/>z mapy usług"]
+        s1 -->|"klik: trace_id<br/>(derivedFields)"| s2
         s2 -->|tracesToLogsV2| s3
         s2 -->|serviceMap| s4
     end

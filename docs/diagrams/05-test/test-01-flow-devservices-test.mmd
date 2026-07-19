@@ -1,26 +1,38 @@
 ---
-title: Test integracyjny z Dev Services — automatyczna infrastruktura testowa
 config:
   theme: neo
+  fontSize: 22
+  themeVariables:
+    fontSize: 22px
+  sequence:
+    actorFontSize: 22
+    messageFontSize: 22
+    noteFontSize: 20
+    actorMargin: 24
+    boxMargin: 8
+    noteMargin: 8
+    messageMargin: 30
+    diagramMarginX: 8
+    diagramMarginY: 8
 ---
+%% Test integracyjny z Dev Services — automatyczna infrastruktura testowa
 sequenceDiagram
-    autonumber
     participant dev as Deweloper / CI
     participant gr as Gradle
-    participant ju as JUnit 5 (@QuarkusTest)
-    participant app as Aplikacja Quarkus
-    participant ds as Dev Services (Testcontainers)
-    participant pg as PostgreSQL (kontener)
+    participant ju as JUnit 5<br/>(@QuarkusTest)
+    participant app as Aplikacja<br/>Quarkus
+    participant ds as Dev Services<br/>(Testcontainers)
+    participant pg as PostgreSQL<br/>(kontener)
 
     dev->>gr: ./gradlew test
-    gr->>ju: uruchomienie zestawu testów
-    ju->>app: start kontekstu aplikacji (@QuarkusTest)
-    app->>ds: brak adresu bazy w konfiguracji
-    ds->>pg: uruchomienie świeżego kontenera
-    ds-->>app: wstrzyknięcie adresu JDBC do konfiguracji
+    gr->>ju: uruchomienie<br/>zestawu testów
+    ju->>app: start kontekstu<br/>aplikacji<br/>(@QuarkusTest)
+    app->>ds: brak adresu bazy<br/>w konfiguracji
+    ds->>pg: uruchomienie<br/>świeżego kontenera
+    ds-->>app: wstrzyknięcie adresu<br/>JDBC do konfiguracji
     loop dla każdego testu
-        ju->>app: żądanie HTTP (RestAssured: given / when / then)
-        app->>pg: operacje na danych w transakcji
-        Note over app,pg: @TestTransaction — wycofanie (rollback) po teście
+        ju->>app: żądanie HTTP<br/>(RestAssured: given<br/>/ when / then)
+        app->>pg: operacje na danych<br/>w transakcji
+        Note over app,pg: @TestTransaction — wycofanie<br/>(rollback) po teście
     end
-    ds->>pg: zatrzymanie kontenera po zestawie testów
+    ds->>pg: zatrzymanie kontenera<br/>po zestawie testów
