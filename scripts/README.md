@@ -62,6 +62,19 @@ Pushing a new chart version to GHCR and updating `targetRevision` in
 | `observability-update.sh`   | Re-apply + hard-refresh the observability Application; optional version bump; probes the UI hostnames. |
 | `observability-rollout.sh`  | One-time Etap Monitor rollout: apps sync, Grafana admin secret, LGTM + Collector delivery.             |
 
+**Resource usage measurement (thesis, Etap Operate):**
+
+```sh
+bash scripts/local/measure-resources.sh [output-dir]
+```
+
+Takes `kubectl top pods -A` snapshots every 15 s — first with no traffic (idle), then while
+`load-test.js` runs in the `grafana/k6` container on the `k3d-bsc-devops` Docker network
+(ramp to 50 virtual users, 3 min hold). Each k6 iteration creates, lists, closes, and deletes
+a task, so the load reaches Traefik, `tasks`, PostgreSQL, Pulsar, and `task-archiver`.
+Writes `samples.csv`, `k6-summary.txt`, and a per-pod peak table `peaks.txt`.
+The test creates 10 temporary users and removes them on teardown.
+
 ### Legacy scripts
 
 These scripts deploy the application directly without ArgoCD, useful for quick

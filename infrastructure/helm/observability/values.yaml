@@ -74,13 +74,32 @@ tempo:
   fullnameOverride: tempo
   persistence:
     enabled: false
-  resources:
-    requests:
-      cpu: 50m
-      memory: 128Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
+  # Container settings live under the nested `tempo:` key of the subchart
+  # (.Values.tempo.resources). A top-level `resources:` here is silently ignored,
+  # which left the pod BestEffort with no limits (found by measure-resources.sh).
+  tempo:
+    # Sized from measurement (measure-resources.sh, 100% trace sampling, ~430 req/s):
+    # before this change ~1.3Gi under load and memory.peak 2.2Gi; with the settings
+    # below ~200Mi under load, spikes to ~800Mi on block completion, memory.peak
+    # ~970Mi. The limit leaves ~50% headroom above that peak.
+    resources:
+      requests:
+        cpu: 50m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 1536Mi
+    # The 1 GiB heap ballast is a pre-Go 1.19 GC trick; GOMEMLIMIT replaces it and
+    # makes the GC work harder before the container reaches its memory limit.
+    memBallastSizeMbs: 0
+    extraEnv:
+      - name: GOMEMLIMIT
+        value: 850MiB
+    # Cut smaller blocks sooner (defaults: 500MB / 30m) — completing a block holds
+    # it in memory, so this caps the post-load spike seen in memory.peak.
+    ingester:
+      max_block_bytes: 104857600
+      max_block_duration: 5m
 
 # ---------------------------------------------------------------------------
 # Loki API ingress — Loki has no web UI; this exposes its HTTP API at
@@ -112,15 +131,26 @@ grafana:
     ingressClassName: traefik
     hosts:
       - grafana.localhost
+  # Grafana container measured at ~167Mi idle. The chart derives GOMEMLIMIT from
+  # limits.memory, so the heap settles higher as the limit grows.
   resources:
     requests:
       cpu: 50m
-      memory: 128Mi
+      memory: 192Mi
     limits:
       cpu: 300m
-      memory: 256Mi
+      memory: 320Mi
   # Sidecar auto-imports any ConfigMap labelled grafana_dashboard (INZ-26).
+  # It had no requests of its own (~71Mi measured), so the pod as a whole used
+  # more memory than it reserved.
   sidecar:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 80Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
     dashboards:
       enabled: true
       label: grafana_dashboard
@@ -194,13 +224,25 @@ prometheus:
     persistentVolume:
       enabled: false
     retention: "24h"
+    # Server measured at ~316Mi idle (above the former 256Mi request); the limit
+    # leaves room for series growth over the 24h retention window.
     resources:
       requests:
         cpu: 100m
-        memory: 256Mi
+        memory: 384Mi
       limits:
         cpu: 500m
-        memory: 512Mi
+        memory: 768Mi
+  configmapReload:
+    prometheus:
+      # Config-reloader sidecar (~8Mi) — previously without requests/limits.
+      resources:
+        requests:
+          cpu: 5m
+          memory: 16Mi
+        limits:
+          cpu: 50m
+          memory: 32Mi
 
 # ---------------------------------------------------------------------------
 # OpenTelemetry Collector (INZ-22) — single Deployment "gateway" that receives
