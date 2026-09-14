@@ -25,5 +25,143 @@ Ten sam wzorzec zastępowania dotyczy pozostałych elementów platformy. Rysunek
     \label{fig:aws-equivalent}
 \end{figure}
 
-\subsubsection{Zarządzanie zasobami: Kubernetes}
-Kubernetes zarządza cyklem życia wszystkich komponentów, dbając o~ich samonaprawę (ang. \textit{self-healing}) oraz odpowiednie przydzielanie zasobów procesora i~pamięci. Wykorzystanie lokalnego klastra pozwala na demonstrację tych mechanizmów bez generowania kosztów infrastrukturalnych.
+\subsubsection{Środowisko uruchomieniowe}
+Cały system działa na jednej stacji roboczej. Klaster k3d składa się z~trzech węzłów (jednego węzła sterującego i~dwóch roboczych), z~których każdy jest kontenerem Dockera uruchomionym w~maszynie wirtualnej WSL~2. Maszyna ta ma do dyspozycji 32 wątki procesora i~około 31~GiB pamięci operacyjnej, czyli domyślny limit równy połowie pamięci hosta. Wszystkie trzy węzły korzystają z~tej samej puli zasobów, dlatego polecenie \texttt{kubectl describe node} raportuje dla każdego z~nich pełną pojemność maszyny wirtualnej, a~sumowanie tych wartości nie ma sensu. Tabela~\ref{tab:runtime-env} zestawia sprzęt i~wersje oprogramowania, na których wykonano wszystkie opisane w~pracy wdrożenia i~pomiary.
+
+\begin{table}[H]
+  \centering
+  \caption{Sprzęt i~wersje oprogramowania środowiska uruchomieniowego}
+  \label{tab:runtime-env}
+  \small
+  \begin{tabular}{lll}
+    \hline
+    \textbf{Warstwa} & \textbf{Komponent} & \textbf{Wersja / parametry} \\
+    \hline
+    Sprzęt         & Procesor                    & AMD Ryzen 9 7950X3D (16 rdzeni, 32 wątki) \\
+                   & Pamięć operacyjna           & 64~GB \\
+                   & Dysk                        & SSD NVMe Kingston KC3000, 2~TB \\
+    \hline
+    System hosta   & Windows 11 Pro              & 10.0.26200 \\
+                   & WSL~2                       & 2.7.14 (jądro Linux 6.18.33) \\
+                   & Docker Desktop              & 4.78.0 (Docker Engine 29.5.3) \\
+    \hline
+    Klaster        & k3d                         & 5.9.0 (1 węzeł sterujący, 2 robocze) \\
+                   & k3s (Kubernetes)            & v1.35.5+k3s1 \\
+                   & containerd                  & 2.2.3 \\
+                   & Traefik / CoreDNS           & 3.6.13 / 1.14.3 \\
+                   & metrics-server              & 0.8.1 \\
+    \hline
+    Narzędzia      & kubectl / Helm              & 1.36.4 / 4.1.4 \\
+    \hline
+    Dostarczanie   & ArgoCD                      & 3.4.3 (chart \texttt{argo-cd} 9.5.20) \\
+                   & Sealed Secrets              & 0.37.0 \\
+    \hline
+    Aplikacje      & Quarkus                     & 3.36.1 \\
+                   & Kompilacja natywna          & Mandrel (JDK~25) \\
+                   & Obrazy usług                & 1.2.0 \\
+                   & Chart \texttt{bsc-devops-apps} & 0.7.0 \\
+                   & PostgreSQL                  & 16.14 \\
+                   & Apache Pulsar               & 3.3.1 \\
+    \hline
+    Obserwowalność & Prometheus                  & 3.12.0 \\
+                   & Loki / Tempo                & 3.6.7 / 2.9.0 \\
+                   & Grafana                     & 12.3.1 \\
+                   & OTel Collector (contrib)    & 0.154.0 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\subsubsection{Stan klastra}
+Rysunek~\ref{fig:terminal-pods} pokazuje zasoby przestrzeni nazw \texttt{bsc-devops}. Każde z~sześciu wdrożeń (\texttt{Deployment}) ma jedną dostępną replikę, zarządzaną przez odpowiadający mu \texttt{ReplicaSet}. Wszystkie usługi (\texttt{Service}) są typu \texttt{ClusterIP}, czyli dostępne wyłącznie wewnątrz klastra --- ruch z~zewnątrz trafia do nich tylko przez Traefik. Listing~\ref{lst:get-pods} pokazuje pełny stan podów we wszystkich przestrzeniach nazw. Wszystkie 25 podów ma status \texttt{Running} lub \texttt{Completed}. Te drugie to jednorazowe zadania instalujące Traefik, które k3s uruchamia przy tworzeniu klastra.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{img/kubectl-get-all.png}
+    \caption{Zrzut ekranu terminala --- pody, usługi, wdrożenia i~obiekty ReplicaSet w~przestrzeni nazw \texttt{bsc-devops} (\texttt{kubectl get all}, opracowanie własne).}
+    \label{fig:terminal-pods}
+\end{figure}
+
+\begin{lstlisting}[language=bash, basicstyle=\ttfamily\fontsize{6.6}{8}\selectfont, columns=fullflexible, keepspaces=true, numbers=none, caption={Stan wszystkich podów klastra (\texttt{kubectl get pods -A}, 14.09.2026)}, label={lst:get-pods}]
+$ kubectl get pods -A
+NAMESPACE       NAME                                               READY   STATUS      RESTARTS       AGE
+argocd          argocd-application-controller-0                    1/1     Running     6 (37m ago)    96d
+argocd          argocd-applicationset-controller-d6f889496-v4rd6   1/1     Running     7 (37m ago)    96d
+argocd          argocd-redis-69bc5d748d-mpb2f                      1/1     Running     6 (37m ago)    96d
+argocd          argocd-repo-server-7d9bf4984c-ccpm6                1/1     Running     6 (37m ago)    96d
+argocd          argocd-server-5f7fb6b975-6x4qv                     1/1     Running     6 (37m ago)    96d
+bsc-devops      frontend-747ccc6478-wbnpz                          1/1     Running     15 (37m ago)   93d
+bsc-devops      postgres-55dd8bf975-wc8fz                          1/1     Running     6 (37m ago)    93d
+bsc-devops      pulsar-549fc6f644-c79m2                            1/1     Running     5 (38m ago)    93d
+bsc-devops      task-archiver-7f55c45959-lbbzk                     1/1     Running     17 (36m ago)   93d
+bsc-devops      tasks-fc5b4c57c-bt9jg                              1/1     Running     18 (37m ago)   93d
+bsc-devops      users-84894c7897-d8kl9                             1/1     Running     18 (36m ago)   93d
+kube-system     coredns-8db54c48d-cvhhb                            1/1     Running     6 (37m ago)    96d
+kube-system     helm-install-traefik-62hvq                         0/1     Completed   0              96d
+kube-system     helm-install-traefik-crd-n5vh8                     0/1     Completed   0              96d
+kube-system     local-path-provisioner-5d9d9885bc-48tmn            1/1     Running     6 (37m ago)    96d
+kube-system     metrics-server-786d997795-p6h84                    1/1     Running     7 (38m ago)    96d
+kube-system     sealed-secrets-657974dfb4-z82hq                    1/1     Running     6 (38m ago)    96d
+kube-system     svclb-traefik-286f6247-czq65                       2/2     Running     23 (37m ago)   96d
+kube-system     svclb-traefik-286f6247-ltdj6                       2/2     Running     18 (37m ago)   96d
+kube-system     svclb-traefik-286f6247-phch2                       2/2     Running     12 (38m ago)   96d
+kube-system     traefik-9bcdbbd9-k4hr9                             1/1     Running     7 (37m ago)    96d
+observability   grafana-756854c596-vptjp                           2/2     Running     9 (37m ago)    73d
+observability   loki-0                                             2/2     Running     10 (38m ago)   93d
+observability   otel-collector-77449fdf98-2rdzt                    1/1     Running     6 (37m ago)    93d
+observability   prometheus-599fddbbd6-vkqmt                        2/2     Running     11 (37m ago)   93d
+observability   tempo-0                                            1/1     Running     5 (38m ago)    93d
+\end{lstlisting}
+
+Kolumna \texttt{RESTARTS} wymaga komentarza. Klaster działa na stacji roboczej i~zatrzymuje się razem z~nią, więc każdy komponent ma na koncie kilka restartów wynikających z~wyłączenia hosta. Wyraźnie więcej restartów mają m.in.\ pody aplikacyjne (15--18). Po ponownym uruchomieniu hosta startują one równolegle ze swoimi zależnościami i~kończą działanie błędem: usługi Quarkus nie mogą połączyć się z~bazą (\texttt{Connection to postgres:5432 refused}), a~serwer nginx aplikacji \texttt{frontend} nie może rozwiązać nazwy usługi \texttt{users}, dopóki nie wystartuje CoreDNS. Kubernetes uruchamia je ponownie, aż zależności staną się dostępne. System dochodzi w~ten sposób do stanu pożądanego bez jawnie zdefiniowanej kolejności startu, co jest praktycznym przykładem samonaprawy (ang. \textit{self-healing}). W~środowisku produkcyjnym lepszym rozwiązaniem byłyby kontenery inicjujące (ang. \textit{init containers}) lub sondy \texttt{startupProbe}, które zamiast serii restartów wstrzymują start usługi do czasu gotowości zależności.
+
+\subsubsection{Zarządzanie zasobami i~ich wykorzystanie}
+Kubernetes zarządza cyklem życia wszystkich komponentów i~przydziela im zasoby procesora oraz pamięci na podstawie deklaracji w~manifestach. Wartość \texttt{requests} to gwarantowana rezerwacja, którą planista (ang. \textit{scheduler}) uwzględnia przy wyborze węzła. Wartość \texttt{limits} to górna granica: przekroczenie limitu CPU powoduje dławienie (ang. \textit{throttling}) procesu, a~przekroczenie limitu pamięci --- zakończenie kontenera (\texttt{OOMKilled}).
+
+Rzeczywiste zużycie zasobów zmierzono w~dwóch fazach. W~fazie spoczynku, bez ruchu, wykonano osiem odczytów \texttt{kubectl top pods} w~odstępach 15~s. W~fazie obciążenia narzędzie k6 generowało ruch przez Traefik: przez minutę liczba wirtualnych użytkowników rosła do 50, przez trzy minuty utrzymywała się na tym poziomie, a~następnie spadała do zera. Każda iteracja przechodzi pełną ścieżkę żądania: utworzenie zadania, pobranie listy zadań, zamknięcie zadania i~jego usunięcie, które przez temat Pulsara trafia do usługi \texttt{task-archiver}. Pomiar jest powtarzalny: skrypty \path{scripts/local/measure-resources.sh} i~\path{scripts/local/load-test.js} znajdują się w~repozytorium.
+
+Pomiar przeprowadzono dwukrotnie. Pierwszy ujawnił błędy w~konfiguracji zasobów stosu obserwowalności, opisane we wnioskach poniżej. Po ich poprawieniu (chart \path{bsc-devops-observability} w~wersji 0.2.1) test powtórzono. Tabela~\ref{tab:resource-usage} przedstawia wyniki drugiego pomiaru. Test wykonał 118\,960 żądań (średnio 432 żądania na sekundę) bez ani jednego błędu. Mediana czasu odpowiedzi wyniosła 8~ms, a~95.\ percentyl 100~ms.
+
+\begin{table}[H]
+  \centering
+  \caption{Deklarowane zasoby a~zużycie zmierzone w~spoczynku i~pod obciążeniem po poprawce konfiguracji (wartości maksymalne z~odczytów \texttt{kubectl top}, zasoby podów wraz z~kontenerami pomocniczymi; CPU w~milirdzeniach, pamięć w~MiB; wiersz „Razem” to maksimum sumy z~jednego odczytu)}
+  \label{tab:resource-usage}
+  \footnotesize
+  \begin{tabular}{lrrrr}
+    \hline
+    \textbf{Komponent} & \textbf{requests} & \textbf{limits} & \textbf{spoczynek} & \textbf{obciążenie} \\
+                       & CPU / RAM         & CPU / RAM       & CPU / RAM          & CPU / RAM \\
+    \hline
+    \texttt{tasks}                 & 50 / 64    & 500 / 256    & 14 / 51   & \textbf{502} / 82 \\
+    \texttt{users}                 & 50 / 64    & 500 / 256    & 13 / 59   & 16 / 59 \\
+    \texttt{task-archiver}         & 50 / 64    & 500 / 256    & 2 / 15    & 99 / 20 \\
+    \texttt{frontend}              & 50 / 32    & 200 / 64     & 1 / 24    & 1 / 24 \\
+    PostgreSQL                     & 100 / 256  & 500 / 512    & 4 / 39    & 285 / 102 \\
+    Apache Pulsar                  & 500 / 768  & 1000 / 2048  & 21 / 563  & 130 / 565 \\
+    Traefik                        & --- / ---  & --- / ---    & 1 / 38    & 214 / 60 \\
+    \hline
+    Prometheus                     & 105 / 400  & 550 / 800    & 12 / 241  & 10 / 242 \\
+    Loki                           & 100 / 256  & 500 / 512    & 5 / 149   & 28 / 298 \\
+    Tempo                          & 50 / 256   & 500 / 1536   & 4 / 26    & 59 / 197 \\
+    Grafana                        & 60 / 272   & 400 / 448    & 5 / 238   & 6 / 229 \\
+    OTel Collector                 & 50 / 128   & 500 / 512    & 2 / 32    & 26 / 63 \\
+    \hline
+    ArgoCD (5 podów)               & 220 / 320  & 1900 / 1280  & 16 / 232  & 42 / 222 \\
+    pozostałe \texttt{kube-system} & 200 / 140  & --- / 170    & 8 / 72    & 9 / 72 \\
+    \hline
+    \textbf{Razem}                 & 1585 / 3020 & 7550 / 8650 & 93 / 1754 & 1312 / 2181 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+Z~pomiarów wynikają następujące wnioski:
+\begin{itemize}
+    \item \textbf{Obciążenie hosta jest niewielkie.} W~spoczynku cały system zużywa około 0,09 rdzenia i~1,7~GiB pamięci. Pod obciążeniem zużycie rośnie do 1,3 rdzenia i~2,1~GiB, czyli około 4\% z~32 wątków i~7\% pamięci dostępnej dla maszyny wirtualnej WSL~2. Wymagania sprzętowe dyktuje więc pamięć, a~nie procesor.
+    \item \textbf{Deklaracje \texttt{requests} są zawyżone dla CPU.} Suma rezerwacji (1,59 rdzenia) przekracza rzeczywiste zużycie w~spoczynku ponad piętnastokrotnie. W~klastrze lokalnym nie ma to kosztu, ale w~chmurze rezerwacje decydują o~liczbie i~wielkości węzłów, a~więc o~rachunku.
+    \item \textbf{Wąskim gardłem jest limit CPU usługi \texttt{tasks}.} Pod obciążeniem usługa osiągnęła swój limit 500 milirdzeni. Liczniki cgroup kontenera potwierdzają dławienie w~2251 okresach rozliczeniowych po 100~ms, łącznie przez około 3,75 minuty z~4,5-minutowego testu. Ten sam 100-milisekundowy okres widać w~czasach odpowiedzi: 90.\ i~95.\ percentyl skupiają się przy 99--100~ms. Przepustowość ogranicza więc konfiguracja, a~nie sprzęt. Poprawę dałoby podniesienie limitu lub skalowanie poziome (HPA).
+    \item \textbf{Usługa \texttt{users} pozostaje nieobciążona.} Jej zużycie nie zmienia się pod obciążeniem, choć każde żądanie do \texttt{tasks} wymaga sprawdzenia, czy użytkownik istnieje. Usługa \texttt{tasks} utrzymuje bowiem lokalną kopię użytkowników, aktualizowaną zdarzeniami z~Pulsara, i~nie wywołuje \texttt{users} synchronicznie. To bezpośrednia korzyść z~architektury zdarzeniowej.
+    \item \textbf{Obrazy natywne Quarkus są oszczędne pamięciowo.} Trzy usługi zużywają łącznie około 125~MiB w~spoczynku, a~\texttt{tasks} pod obciążeniem nie przekracza 82~MiB. Dla porównania pojedynczy broker Pulsar, działający na JVM, zajmuje stale około 565~MiB niezależnie od ruchu.
+    \item \textbf{Pierwszy pomiar ujawnił brak limitów Tempo.} Ustawienia zasobów Tempo były w~chartcie parasolowym zapisane pod niewłaściwym kluczem, więc pod działał bez \texttt{requests} i~\texttt{limits} (klasa QoS \texttt{BestEffort}). Przy próbkowaniu 100\% śladów jego pamięć wzrosła pod obciążeniem z~87~MiB do 1262~MiB, a~licznik cgroup \texttt{memory.peak} zarejestrował 2,2~GiB podczas zamykania bloku śladów po teście. Poprawka przeniosła ustawienia pod właściwy klucz, zastąpiła domyślny 1-gigabajtowy balast pamięci zmienną \texttt{GOMEMLIMIT} i~zmniejszyła bloki śladów (100~MB lub 5~minut zamiast 500~MB i~30~minut). Po poprawce Tempo zużywa pod obciążeniem 197~MiB, a~przy zamykaniu bloków chwilowo do około 800~MiB (szczyt 970~MiB), dlatego limit ustawiono na 1,5~GiB. W~środowisku produkcyjnym należałoby dodatkowo ograniczyć próbkowanie śladów (np.\ do 10\% żądań).
+    \item \textbf{Prometheus i~Grafana zużywały więcej pamięci, niż rezerwowały.} Serwer Prometheus zajmował w~spoczynku 316~MiB przy rezerwacji 256~MiB. W~przypadku Grafany sam kontener mieścił się w~rezerwacji, ale kontener pomocniczy importujący pulpity (71~MiB) nie miał żadnej. Przy większym zagęszczeniu podów na węźle takie pody są pierwszymi kandydatami do usunięcia (ang. \textit{eviction}). Rezerwacje podniesiono do zmierzonego zużycia, a~kontenery pomocnicze otrzymały własne \texttt{requests} i~\texttt{limits}.
+\end{itemize}
+
+Pomiar pokazuje też wartość pętli informacji zwrotnej opisanej w~etapie Monitor. Dopiero dane z~działającego systemu ujawniły źle dobrany limit usługi \texttt{tasks} i~błędy konfiguracji zasobów stosu obserwowalności. Statyczna walidacja chartów w~procesie CI/CD ich nie wykazała, ponieważ Helm nie ostrzega o~kluczach, których żaden szablon nie odczytuje.

@@ -67,6 +67,8 @@ Jako systemy przechowywania i~wizualizacji danych wybrano stos \textbf{LGTM} (AD
     \item \textbf{Grafana (Visualization):} Stanowi wspólny interfejs (ang. \textit{single pane of glass}) dla wszystkich powyższych narzędzi. Pozwala na tworzenie interaktywnych pulpitów (dashboardów) i~korelację danych (np. przejście od wykresu błędu do logów konkretnego kontenera).
 \end{itemize}
 
+Litera M w~akronimie LGTM oznacza Grafana Mimir, a~w~projekcie jej miejsce zajmuje Prometheus. Nie są to jednak narzędzia konkurencyjne, lecz komplementarne. Mimir implementuje API Prometheusa (w~tym język zapytań PromQL) i~przyjmuje metryki od instancji Prometheusa protokołem \textit{remote write}, dodając skalowanie poziome, wielodostępność oraz długoterminowe przechowywanie danych. Uzasadnienie ma więc przy wielu klastrach lub długiej retencji metryk. W~jednym klastrze lokalnym pojedynczy Prometheus wystarcza, a~ewentualne dołączenie Mimira wymaga jedynie dodania sekcji \texttt{remote\_write} w~konfiguracji Prometheusa i~wskazania Mimira jako źródła danych w~Grafanie --- zapytania PromQL i~pulpity pozostają bez zmian.
+
 Przepływ danych telemetrycznych przez cały stos przedstawia rysunek~\ref{fig:observability-flow}. Warto zwrócić uwagę na dwa odmienne wzorce transportu: logi i~ślady aplikacja aktywnie wysyła protokołem OTLP do Collectora (\textit{push}), natomiast metryki są cyklicznie pobierane przez Prometheus bezpośrednio z~punktu \texttt{/q/metrics} aplikacji (\textit{pull}) --- awaria backendu telemetrii nie blokuje w~żadnym z~tych wzorców działania samej usługi.
 
 \begin{figure}[H]
@@ -74,6 +76,34 @@ Przepływ danych telemetrycznych przez cały stos przedstawia rysunek~\ref{fig:o
     \includegraphics[width=\textwidth]{img/diagrams/09-monitor/monitor-01-observability.png}
     \caption{Trzy sygnały telemetryczne i~dwa wzorce transportu --- logi i~ślady wypychane protokołem OTLP przez OTel Collector do Loki i~Tempo, metryki pobierane przez Prometheus; Grafana jako wspólny interfejs (opracowanie własne).}
     \label{fig:observability-flow}
+\end{figure}
+
+\subsubsection{Obserwacja systemu pod obciążeniem}
+Działanie stosu obserwowalności sprawdzono podczas jednego z~przebiegów testu obciążeniowego opisanego w~etapie Operate (29\,882 iteracje, 119\,548 żądań bez błędów). Rysunek~\ref{fig:loki-overview} przedstawia widok \textit{Logs Drilldown} w~Grafanie ze źródłem danych Loki. Histogramy obu usług pokazują blok ruchu odpowiadający czasowi trwania testu. Liczby wpisów zgadzają się z~wynikami narzędzia k6. Usługa \texttt{tasks} zapisuje cztery wpisy na iterację (utworzenie, pobranie listy, zamknięcie i~zlecenie usunięcia zadania), co daje 119\,528 wpisów, w~Grafanie zaokrąglonych do 120 tysięcy. Usługa \texttt{task-archiver} zapisuje jeden wpis na każde usunięte zadanie, czyli 29,9 tysiąca. Wskazuje to, że zdarzenia usunięcia przesłane przez Pulsara dotarły do konsumenta. Najnowsze wpisy obu usług pochodzą z~tej samej sekundy: zadanie o~identyfikatorze 90215 zostało zlecone do usunięcia i~usunięte o~14:53:44.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth, trim={0 41bp 0 41bp}, clip]{img/loki-overview.png}
+    \caption{Logi usług \texttt{tasks} i~\texttt{task-archiver} w~Grafanie (Loki, \textit{Logs Drilldown}) podczas testu obciążeniowego --- histogram wpisów w~czasie i~najnowsze wpisy każdej usługi (opracowanie własne).}
+    \label{fig:loki-overview}
+\end{figure}
+
+Rysunek~\ref{fig:trace-example} przedstawia ślad pojedynczego żądania zamknięcia zadania, zarejestrowany w~Tempo na początku tego samego testu, gdy liczba wirtualnych użytkowników dopiero rosła. Ślad składa się z~czterech zakresów (ang. \textit{spans}): obsługi żądania HTTP oraz trzech kolejnych zapytań SQL. Pierwsze odczytuje tabelę \texttt{known\_users}, czyli lokalną kopię użytkowników utrzymywaną przez usługę \texttt{tasks} na podstawie zdarzeń. Drugie pobiera zadanie, a~trzecie zapisuje zmianę jego statusu. Kod metody nie wywołuje zapisu jawnie: instrukcję \texttt{UPDATE} generuje Hibernate przy zatwierdzaniu transakcji, ponieważ wykrywa zmianę pól zarządzanej encji (ang. \textit{dirty checking}). Ślad ujawnia więc zachowanie warstwy ORM, którego nie widać w~kodzie. Każde zapytanie trwa około 0,3~ms, a~całe żądanie 2,79~ms. Pod pełnym obciążeniem 95.\ percentyl czasu odpowiedzi rośnie według k6 do 100~ms, co odpowiada dławieniu CPU usługi \texttt{tasks} opisanemu w~etapie Operate.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{img/trace-example.png}
+    \caption{Ślad żądania \texttt{PATCH /users/\{userId\}/tasks/\{taskId\}} w~Grafanie (Tempo) --- obsługa żądania (2,79~ms) oraz trzy kolejne zapytania SQL, w~tym \texttt{UPDATE} wygenerowany przez Hibernate przy zatwierdzaniu transakcji (opracowanie własne).}
+    \label{fig:trace-example}
+\end{figure}
+
+Propagację kontekstu między usługami najlepiej widać na operacji usunięcia (rysunek~\ref{fig:trace-structure}). Widok \textit{Structure} w~Grafanie łączy zakresy wielu śladów (w~tym przypadku 357) w~typowe drzewo wywołań. Usługa \texttt{tasks} sprawdza użytkownika i~zadanie, publikuje wiadomość do tematu \texttt{delete-tasks} i~od razu odpowiada klientowi, więc obsługa żądania HTTP kończy się po 0,85~ms. Usługa \texttt{task-archiver} odbiera wiadomość po około 4~ms od początku żądania, pobiera zadanie i~usuwa je z~bazy. Zakresy obu usług należą do jednego drzewa, ponieważ kontekst śladu jest przekazywany w~metadanych wiadomości Pulsara. Operator widzi zatem całą ścieżkę zmiany, łącznie z~częścią asynchroniczną, która kończy się już po wysłaniu odpowiedzi HTTP.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{img/trace-structure-delete.png}
+    \caption{Struktura śladu operacji \texttt{DELETE} w~Grafanie (Tempo, widok \textit{Structure}) --- zakresy usługi \texttt{tasks} (zielone) i~\texttt{task-archiver} (czerwone) połączone przez temat Pulsara \texttt{delete-tasks} w~jedno drzewo wywołań (opracowanie własne).}
+    \label{fig:trace-structure}
 \end{figure}
 
 \subsubsection{Stosowane technologie --- karty referencyjne}
